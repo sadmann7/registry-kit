@@ -1,8 +1,7 @@
 import type { Registry } from "shadcn/schema";
 
-import Link from "next/link";
-
 import { CopyButton } from "@/components/copy-button";
+import { PreviewControls } from "@/components/preview-controls";
 import { StyleClass } from "@/components/style-class";
 import { EXAMPLES, REGISTRIES } from "@/registry/__generated__/registries";
 import {
@@ -82,54 +81,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </section>
 
-      <nav
-        aria-label="Base and style"
-        className="sticky top-0 z-10 border-y border-site-hairline bg-site"
-      >
-        <div className="mx-auto flex max-w-6xl items-center gap-10 overflow-x-auto px-4 py-3.5 text-[13px] sm:px-12">
-          <div className="flex shrink-0 items-center gap-3">
-            <span className="text-xs text-site-muted">Base</span>
-            <div className="flex gap-0.5 rounded-lg border border-site-hairline bg-site-surface p-0.75">
-              {BASES.map((option) => (
-                <Link
-                  key={option.name}
-                  href={{ query: { base: option.name, style } }}
-                  scroll={false}
-                  aria-current={option.name === base || undefined}
-                  className="rounded-md px-3 py-1.5 whitespace-nowrap text-site-muted transition-colors hover:text-site-ink aria-[current]:bg-site-ink aria-[current]:font-medium aria-[current]:text-site-surface"
-                >
-                  {option.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-3">
-            <span className="text-xs text-site-muted">Style</span>
-            <div className="flex items-center gap-1">
-              {STYLES.map((option) => (
-                <Link
-                  key={option.name}
-                  href={{ query: { base, style: option.name } }}
-                  scroll={false}
-                  aria-current={option.name === style || undefined}
-                  className="group/style flex items-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-site-muted transition-colors hover:text-site-ink aria-[current]:border-site-hairline aria-[current]:bg-site-surface aria-[current]:font-medium aria-[current]:text-site-ink"
-                >
-                  <span
-                    aria-hidden
-                    className="hidden size-1.5 rounded-full bg-site-accent group-aria-[current]/style:block"
-                  />
-                  {option.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <span className="ml-auto shrink-0 font-mono text-xs text-site-muted">
+      <div className="sticky top-0 z-10 border-y border-site-hairline bg-site">
+        <div className="mx-auto flex max-w-6xl items-center gap-8 px-4 py-3 sm:px-12">
+          <PreviewControls base={base} style={style} />
+          <span className="ml-auto hidden shrink-0 font-mono text-xs text-site-muted sm:inline">
             {pluralize(registry.items.length, "item")}
           </span>
         </div>
-      </nav>
+      </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-12">
         {registry.items.map((item) => (
