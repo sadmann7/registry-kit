@@ -21,7 +21,7 @@
     ]
   },
   "sortTailwindcss": {
-    "stylesheet": "./packages/ui/src/styles/globals.css",
+    "stylesheet": "./apps/web/src/index.css",
     "functions": ["cn", "clsx", "cva", "tw"]
   },
   "ignorePatterns": [
