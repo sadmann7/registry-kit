@@ -34,7 +34,8 @@ Options:
   --no-examples         Remove the example items
   --no-install          Skip pnpm install after removing dependencies
   -y, --yes             Use the current value for anything not passed, and
-                        don't ask for confirmation
+                        don't ask for confirmation. Required outside a
+                        terminal, like in CI
   --cwd <dir>           The registry-kit checkout (default: current directory)
   -h, --help            Show this help`;
 
@@ -60,7 +61,15 @@ if (flags.help) {
   process.exit(0);
 }
 
-const interactive = !flags.yes && process.stdin.isTTY;
+// Without a terminal nobody can confirm, so deleting files needs `--yes`.
+if (!flags.yes && !process.stdin.isTTY) {
+  console.error(
+    "kit:init can't prompt without a terminal. Pass --yes, with flags for anything you want to change.",
+  );
+  process.exit(1);
+}
+
+const interactive = !flags.yes;
 
 function exitIfCancelled<T>(value: T): Exclude<T, symbol> {
   if (p.isCancel(value)) {
