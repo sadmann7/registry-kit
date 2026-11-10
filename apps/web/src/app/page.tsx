@@ -17,6 +17,8 @@ import { USAGE } from "@/registry/examples";
 
 type Item = Registry["items"][number];
 
+const LIST_FORMAT = new Intl.ListFormat("en", { type: "conjunction" });
+
 function pluralize(count: number, noun: string) {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
@@ -50,8 +52,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             Components that fit every shadcn project.
           </h1>
           <p className="max-w-120 text-base leading-normal text-site-muted">
-            Built for Radix UI, Base UI and React Aria, in all eight styles. The
-            CLI handles icons and right-to-left layout when you install.
+            Built for {LIST_FORMAT.format(BASES.map((option) => option.title))},
+            in {pluralize(STYLES.length, "style")}. The CLI handles icons and
+            right-to-left layout when you install.
           </p>
         </div>
 
@@ -123,7 +126,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           </div>
 
           <span className="ml-auto shrink-0 font-mono text-xs text-site-muted">
-            {registry.items.length} items
+            {pluralize(registry.items.length, "item")}
           </span>
         </div>
       </nav>
