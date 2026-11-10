@@ -172,10 +172,13 @@ if (sources.length > 0) {
     { cwd: path.join(ROOT, "../..") },
   ).catch(() => {});
 }
-await promisify(execFile)(
-  path.join(ROOT, "../../node_modules/.bin/oxfmt"),
-  files.map((file) => path.join(REGISTRY_PATH, file)),
-);
+// Guarded like oxlint above: oxfmt formats the whole repo without paths.
+if (files.length > 0) {
+  await promisify(execFile)(
+    path.join(ROOT, "../../node_modules/.bin/oxfmt"),
+    files.map((file) => path.join(REGISTRY_PATH, file)),
+  );
+}
 
 await writeFileIfChanged(
   LOCK_PATH,

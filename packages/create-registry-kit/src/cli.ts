@@ -228,12 +228,14 @@ const result = await applyKit(kit, options).catch((error: Error) => {
   return fail(error.message);
 });
 
-// Match the repo's formatting. Skipped if oxfmt isn't installed yet.
-await run(
-  path.join(kit.root, "node_modules/.bin/oxfmt"),
-  result.changed.filter((file) => /\.(json|ts)$/.test(file)),
-  { cwd: kit.root },
-).catch(() => {});
+// Match the repo's formatting. Skipped if oxfmt isn't installed yet, and when
+// nothing changed, since oxfmt formats the whole repo without paths.
+const formatted = result.changed.filter((file) => /\.(json|ts)$/.test(file));
+if (formatted.length > 0) {
+  await run(path.join(kit.root, "node_modules/.bin/oxfmt"), formatted, {
+    cwd: kit.root,
+  }).catch(() => {});
+}
 spinner.stop(
   `Changed ${result.changed.length} files, removed ${result.removed.length}`,
 );
