@@ -31,7 +31,7 @@ const GROUP_CLASS_NAME =
   "gap-0.5 rounded-lg border border-site-hairline bg-site-surface p-0.75";
 
 const ITEM_CLASS_NAME =
-  "h-7 rounded-md px-3 text-[13px] font-normal text-site-muted hover:bg-transparent hover:text-site-ink focus-visible:ring-site-accent/40 aria-pressed:bg-site-ink aria-pressed:font-medium aria-pressed:text-site-surface";
+  "h-7 rounded-md px-3 text-[13px] font-normal text-site-muted hover:bg-transparent hover:text-site-ink aria-pressed:bg-site-ink aria-pressed:font-medium aria-pressed:text-site-surface";
 
 const LABEL_CLASS_NAME =
   "w-13 shrink-0 font-mono text-[11px] tracking-wider text-site-muted uppercase sm:w-auto";
@@ -112,7 +112,7 @@ export function PreviewControls({ base, style }: Selection) {
         >
           <SelectTrigger
             aria-labelledby={`${id}-style`}
-            className="h-8.5 flex-1 border-site-hairline bg-site-surface text-[13px] font-medium text-site-ink focus-visible:border-site-hairline focus-visible:ring-site-accent/40 sm:w-36 sm:flex-none lg:hidden dark:bg-site-surface dark:hover:bg-site-surface"
+            className="h-8.5 flex-1 border-site-hairline bg-site-surface text-[13px] font-medium text-site-ink sm:w-36 sm:flex-none lg:hidden dark:bg-site-surface dark:hover:bg-site-surface"
           >
             <SelectValue />
           </SelectTrigger>

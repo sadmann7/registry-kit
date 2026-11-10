@@ -107,7 +107,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         {/* oxlint-disable-next-line nextjs/no-html-link-for-pages -- a static file in public/r, not a page */}
         <a
           href="/r/registry.json"
-          className="font-mono transition-colors hover:text-site-ink"
+          className="rounded-sm font-mono transition-colors outline-none hover:text-site-ink focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           /r/registry.json
         </a>
@@ -187,7 +187,7 @@ function ItemRow({
           <a
             href={`/r/${json}`}
             title={json}
-            className="hidden text-xs text-site-muted transition-colors hover:text-site-ink sm:inline"
+            className="hidden rounded-sm text-xs text-site-muted transition-colors outline-none hover:text-site-ink focus-visible:ring-3 focus-visible:ring-ring/50 sm:inline"
           >
             JSON
           </a>

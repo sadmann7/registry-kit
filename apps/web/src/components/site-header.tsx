@@ -7,7 +7,10 @@ export function SiteHeader() {
   return (
     <header className="border-b border-site-hairline">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-12">
-        <Link href="/" className="flex items-center gap-2.5 text-[15px]">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 rounded-sm text-[15px] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
           <span aria-hidden className="size-4.5 rounded-[4px] bg-site-ink" />
           <span className="font-semibold text-site-ink">{siteConfig.name}</span>
           <span className="text-site-muted">registry</span>
@@ -17,7 +20,7 @@ export function SiteHeader() {
             href={siteConfig.links.github}
             target="_blank"
             rel="noreferrer"
-            className="transition-colors hover:text-site-ink"
+            className="rounded-sm transition-colors outline-none hover:text-site-ink focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             GitHub
           </a>
