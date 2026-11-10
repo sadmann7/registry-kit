@@ -31,7 +31,7 @@ Options:
   --homepage <url>      Where the registry is served
   --bases <list>        Comma-separated bases to keep
   --styles <list>       Comma-separated styles to keep
-  --no-examples         Remove the example items
+  --no-examples         Remove every item, to start the registry empty
   --no-install          Skip pnpm install after removing dependencies
   -y, --yes             Use the current value for anything not passed, and
                         don't ask for confirmation. Required outside a
@@ -168,12 +168,14 @@ async function promptStyles() {
   );
 }
 
+// "No" removes every item, so list the ones actually there, including any
+// added since the template was copied.
 const examples =
   flags.examples ??
-  (interactive
+  (interactive && kit.items.length > 0
     ? exitIfCancelled(
         await p.confirm({
-          message: "Keep the example items (timeline, copy-button)?",
+          message: `Keep the items (${kit.items.join(", ")})? No starts the registry empty.`,
           initialValue: true,
         }),
       )

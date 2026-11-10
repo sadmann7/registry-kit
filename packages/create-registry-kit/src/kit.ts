@@ -35,6 +35,8 @@ export type Kit = {
   defaultStyle: string;
   name: string;
   homepage: string;
+  // Item names across every base. Removing the examples removes all of them.
+  items: string[];
 };
 
 export type KitOptions = {
@@ -65,14 +67,14 @@ export async function findKit(from: string): Promise<Kit> {
     STYLES: readonly Option[];
     DEFAULT_STYLE: string;
   };
-  const registry = await readJson<Registry>(
-    path.join(
-      getRegistryPath(root),
-      "bases",
-      config.BASES[0]!.name,
-      "registry.json",
+  const registries = await Promise.all(
+    config.BASES.map((base) =>
+      readJson<Registry>(
+        path.join(getRegistryPath(root), "bases", base.name, "registry.json"),
+      ),
     ),
   );
+  const registry = registries[0]!;
 
   return {
     root,
@@ -81,6 +83,11 @@ export async function findKit(from: string): Promise<Kit> {
     defaultStyle: config.DEFAULT_STYLE,
     name: registry.name,
     homepage: registry.homepage,
+    items: [
+      ...new Set(
+        registries.flatMap((base) => base.items.map((item) => item.name)),
+      ),
+    ],
   };
 }
 
