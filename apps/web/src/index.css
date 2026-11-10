@@ -28,7 +28,6 @@
   --site-ink: #111110;
   --site-muted: #6b6b66;
   --site-hairline: #e7e5e2;
-  --site-accent: #e5482d;
 }
 
 .dark {
@@ -37,7 +36,6 @@
   --site-ink: #f2f1ee;
   --site-muted: #9a9993;
   --site-hairline: #2a2927;
-  --site-accent: #f0603f;
 }
 
 @theme inline {
@@ -49,5 +47,4 @@
   --color-site-ink: var(--site-ink);
   --color-site-muted: var(--site-muted);
   --color-site-hairline: var(--site-hairline);
-  --color-site-accent: var(--site-accent);
 }

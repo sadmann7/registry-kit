@@ -58,7 +58,7 @@ export function CopyButton({
         />
         <CheckIcon
           data-hidden={!copied || undefined}
-          className={`${ICON_CLASS_NAME} text-site-accent`}
+          className={ICON_CLASS_NAME}
         />
       </span>
       {children && (

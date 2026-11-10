@@ -73,9 +73,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           <pre className="overflow-x-auto px-4 pt-4 pb-4.5 font-mono text-[12.5px] leading-normal text-site-muted">
             <span className="text-site-ink">&quot;registries&quot;</span>
             {": {\n  "}
-            <span className="text-site-accent">
-              &quot;@{registry.name}&quot;
-            </span>
+            <span className="text-site-ink">&quot;@{registry.name}&quot;</span>
             {": "}
             <span className="text-site-ink">&quot;{registryUrl}&quot;</span>
             {"\n}"}
