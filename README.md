@@ -6,7 +6,11 @@ Scaffolded with [Better-T-Stack](https://better-t-stack.dev): Next.js, Turborepo
 
 ## Getting started
 
+Click **Use this template** on GitHub to create your own repository from this one, then clone it:
+
 ```bash
+git clone https://github.com/<you>/<your-registry>
+cd <your-registry>
 pnpm install
 pnpm registry:init
 ```
