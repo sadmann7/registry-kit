@@ -1,0 +1,57 @@
+name: code-check
+
+on:
+  pull_request:
+    branches: ["*"]
+  push:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  FORCE_COLOR: 3
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+      - uses: ./.github/setup
+
+      - name: Check formatting
+        run: pnpm format:check
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+      - uses: ./.github/setup
+
+      - run: pnpm lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+      - uses: ./.github/setup
+
+      - run: pnpm typecheck
+
+  registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+      - uses: ./.github/setup
+
+      - name: Build the registry
+        run: pnpm registry:build
+
+      # Installs every item for every base and style with `shadcn add --dry-run`.
+      - name: Test installs
+        run: pnpm registry:test
