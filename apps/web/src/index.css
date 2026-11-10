@@ -1,1 +1,4 @@
-@import "@shadcn-registry-template/ui/globals.css";
+@import "@registry-kit/ui/globals.css";
+
+/* Renders the registry's raw `cn-*` source in the style set on <body>. */
+@import "./registry/__generated__/styles.css" layer(base);

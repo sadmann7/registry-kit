@@ -13,8 +13,8 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
-    "utils": "@shadcn-registry-template/ui/lib/utils",
-    "ui": "@shadcn-registry-template/ui/components",
+    "utils": "@registry-kit/ui/lib/utils",
+    "ui": "@registry-kit/ui/components",
     "lib": "@/lib",
     "hooks": "@/hooks"
   },

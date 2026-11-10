@@ -2,21 +2,29 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev --port 3001",
-    "build": "next build",
-    "check-types": "tsc --noEmit",
+    "dev": "node scripts/generate.ts && node scripts/dev.ts",
+    "build": "node scripts/build-registry.ts && next build",
     "start": "next start",
+    "check-types": "node scripts/generate.ts && next typegen && tsc --noEmit",
+    "registry:build": "node scripts/build-registry.ts",
+    "registry:sync": "node scripts/sync-shadcn.ts",
+    "registry:test": "node scripts/test-registry.ts",
     "env:generate": "varlock codegen"
   },
   "dependencies": {
-    "@shadcn-registry-template/ui": "workspace:*",
+    "@base-ui/react": "^1.9.0",
+    "@registry-kit/ui": "workspace:*",
     "@swc/helpers": "^0.5.23",
     "@varlock/nextjs-integration": "1.2.5",
     "babel-plugin-react-compiler": "^1.0.0",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.5.2",
     "lucide-react": "catalog:",
     "next": "^16.3.4",
     "next-themes": "catalog:",
+    "radix-ui": "^1.8.1",
     "react": "catalog:",
     "react-dom": "catalog:",
     "sonner": "catalog:",
@@ -24,11 +32,12 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@shadcn-registry-template/config": "workspace:*",
+    "@registry-kit/config": "workspace:*",
     "@tailwindcss/postcss": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "shadcn": "^4.23.0",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
   }

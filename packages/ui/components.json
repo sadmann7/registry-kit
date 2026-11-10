@@ -12,11 +12,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@shadcn-registry-template/ui/components",
-    "utils": "@shadcn-registry-template/ui/lib/utils",
-    "hooks": "@shadcn-registry-template/ui/hooks",
-    "lib": "@shadcn-registry-template/ui/lib",
-    "ui": "@shadcn-registry-template/ui/components"
+    "components": "@registry-kit/ui/components",
+    "utils": "@registry-kit/ui/lib/utils",
+    "hooks": "@registry-kit/ui/hooks",
+    "lib": "@registry-kit/ui/lib",
+    "ui": "@registry-kit/ui/components"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

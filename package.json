@@ -1,5 +1,5 @@
 {
-  "name": "shadcn-registry-template",
+  "name": "registry-kit",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -13,19 +13,28 @@
     "dev:web": "turbo run dev -F web --",
     "env:generate": "varlock codegen --path ./apps/web/",
     "postinstall": "varlock codegen --path ./apps/web/",
-    "check": "oxlint && oxfmt --write"
+    "check": "oxlint && oxfmt --write",
+    "registry:build": "pnpm -F web registry:build",
+    "registry:sync": "pnpm -F web registry:sync",
+    "registry:test": "pnpm -F web registry:test",
+    "lint": "oxlint",
+    "format": "oxfmt --write",
+    "format:check": "oxfmt --check"
   },
   "dependencies": {
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@shadcn-registry-template/config": "workspace:*",
+    "@registry-kit/config": "workspace:*",
     "@types/node": "catalog:",
     "oxfmt": "^0.74.0",
     "oxlint": "^1.87.0",
     "turbo": "^2.11.7",
     "typescript": "catalog:",
     "varlock": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.2.0"
   },
   "packageManager": "pnpm@12.18.0"
 }

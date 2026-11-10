@@ -1,0 +1,22 @@
+.style-maia {
+  /* MARK: Timeline */
+  .cn-timeline-item {
+    @apply pb-10;
+  }
+
+  .cn-timeline-dot {
+    @apply size-3.5 rounded-full bg-primary ring-4 ring-background;
+  }
+
+  .cn-timeline-title {
+    @apply text-base font-medium leading-none;
+  }
+
+  .cn-timeline-description {
+    @apply mt-2.5 text-muted-foreground;
+  }
+
+  .cn-timeline-time {
+    @apply mb-2 text-xs text-muted-foreground tabular-nums;
+  }
+}

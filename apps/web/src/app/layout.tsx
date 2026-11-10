@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "shadcn-registry-template",
-  description: "shadcn-registry-template",
+  title: "acme registry",
+  description: "A shadcn registry built for every base and style.",
 };
 
 export default function RootLayout({

@@ -1,86 +1,93 @@
-# shadcn-registry-template
+# registry-kit
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, and more.
+A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that ship every base (Radix UI and Base UI) and every style (Vega, Nova, Maia, Lyra, Mira, Luma, Sera and Rhea), with RTL, the way shadcn/ui's own registry does.
 
-## Features
+Scaffolded with [Better-T-Stack](https://better-t-stack.dev): Next.js, Turborepo, oxlint and oxfmt, pnpm.
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Turborepo** - Optimized monorepo build system
-- **Oxlint** - Oxlint + Oxfmt (linting & formatting)
+## How it works
 
-## Getting Started
-
-First, install the dependencies:
-
-```bash
-pnpm install
-```
-
-Then, run the development server:
-
-```bash
-pnpm run dev
-```
-
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-
-## UI Customization
-
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
-
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
-
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
-
-```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
-```
-
-Import shared components like this:
+You write each component once per base, with `cn-*` markers where its look changes between styles:
 
 ```tsx
-import { Button } from "@shadcn-registry-template/ui/components/button";
+<span className={cn("cn-timeline-dot absolute top-1 left-0", className)} />
 ```
 
-### Add app-specific blocks
+Each style gives the markers their classes in CSS:
 
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
-
-## Environment Configuration
-
-Each app owns its environment schema in `.env.schema`. Varlock generates `src/env.ts` during installation; run `pnpm run env:generate` after changing a schema. Commit schemas, and keep secrets in ignored env files or your deployment platform.
-
-Import the generated `ENV` accessor in application code. Shared database and auth packages receive configuration or initialized clients from the application. See [Varlock's monorepo guide](https://varlock.dev/guides/monorepos/).
-
-Bun's automatic env loading is disabled in `bunfig.toml`; the framework integration or server bootstrap loads Varlock. Node deployments must include Varlock and its dependencies alongside the app schema.
-
-Run standalone Node/Bun tools that use Varlock from the owning app directory so they load that app's schema and env files. `env:generate` only generates TypeScript files; it does not initialize environment values in a subsequent command.
-
-## Git Hooks and Formatting
-
-- Run checks: `pnpm run check`
-
-## Project Structure
-
-```
-shadcn-registry-template/
-├── apps/
-│   ├── web/         # Frontend application (Next.js)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
+```css
+.style-lyra {
+  .cn-timeline-dot {
+    @apply size-2 rounded-none bg-primary;
+  }
+}
 ```
 
-## Available Scripts
+`pnpm registry:build` compiles the markers for each style with shadcn's `transformStyle`, then runs `shadcn build` on the compiled copy. This writes `public/r/{base}-{style}/{name}.json`, which is the URL the CLI asks for when a project's registry is `https://acme.com/r/{style}/{name}.json`.
 
-- `pnpm run dev`: Start all applications in development mode
-- `pnpm run build`: Build all applications
-- `pnpm run dev:web`: Start only the web application
-- `pnpm run check-types`: Check TypeScript types across all apps
-- `pnpm run check`: Run Oxlint and Oxfmt
+Everything else happens in the CLI when a project installs an item, based on its `components.json`:
+
+- **RTL:** write physical classes (`left-0`, `pl-6`, `border-l`). For `rtl: true` projects, the CLI converts them to logical classes and flips translations. Add `cn-rtl-flip` to icons that should mirror.
+- **Icons:** use `IconPlaceholder` with a name for each library. The CLI swaps in the project's `iconLibrary`.
+- **Imports:** `@/registry/bases/{base}/ui/*`, `hooks/*` and `lib/*` become the project's aliases.
+
+Styles that don't define a marker fall back to the default style (`nova`), so a style file only needs the rules that differ.
+
+## Layout
+
+```
+apps/web/
+  src/registry/
+    config.ts                bases, styles, defaults, pinned shadcn/ui commit
+    bases/{radix,base}/
+      registry.json          the registry: items, dependencies, files
+      ui/ hooks/ lib/        item source, with cn-* markers
+      examples/              demos for the preview (not published)
+    styles/
+      style-{style}.css      the registry's rules per style
+      shadcn/                shadcn/ui's style files (synced)
+    shadcn.json              files synced from shadcn/ui
+  scripts/
+    build-registry.ts        compile per style, then `shadcn build`
+    test-registry.ts         `shadcn add --dry-run` for every base × style
+    sync-shadcn.ts           sync shadcn/ui primitives and styles
+    generate.ts              preview CSS and icons
+```
+
+## Adding an item
+
+1. Add the source to `bases/radix` and `bases/base`, with markers for anything style-specific.
+2. Add the item to both `registry.json` files. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`.
+3. Give every new marker a rule in `styles/style-nova.css`, and override it in other styles as needed.
+4. If you import a shadcn/ui primitive the registry didn't use before, run `pnpm registry:sync`.
+5. Add a demo to `examples/` and `src/registry/examples.ts`.
+
+`pnpm registry:build` fails when a marker has no default rule, or when an item imports another item without listing it in `registryDependencies`.
+
+## shadcn/ui primitives
+
+Items install shadcn/ui's own components (like `button`) through `registryDependencies`, so they're never published here. To preview items in every style, `pnpm registry:sync` copies the primitives the registry imports into `bases/*/ui`, and shadcn/ui's style files into `styles/shadcn`, from the commit in `SHADCN_REF`. To update them, change `SHADCN_REF` and run the sync again.
+
+## Preview
+
+The site renders the raw source and styles it with CSS, like shadcn/ui's `/create` page. `scripts/generate.ts` writes every style's rules as `.style-{style} .cn-*` in `@layer base`, so a `className` passed to a component always wins. The style class goes on the preview and on `<body>`, which covers portaled content. `pnpm dev` regenerates the rules when the registry changes.
+
+The preview renders left-to-right. Check RTL output with `pnpm registry:test`, or by installing into an `rtl: true` project.
+
+## Serving unknown styles
+
+Projects on a style this registry doesn't build, like `new-york-v4` or `default`, would get a 404. `next.config.ts` rewrites those requests to the default style, sending Base UI styles to `base-nova` and everything else to `radix-nova`.
+
+## Scripts
+
+| Command               | What it does                                            |
+| --------------------- | ------------------------------------------------------- |
+| `pnpm dev`            | Start the preview on http://localhost:3001.             |
+| `pnpm build`          | Build the registry, then the site.                      |
+| `pnpm registry:build` | Build `public/r` for every base and style.              |
+| `pnpm registry:test`  | Install every item for every base and style, in RTL.    |
+| `pnpm registry:sync`  | Sync shadcn/ui primitives and styles from `SHADCN_REF`. |
+| `pnpm check-types`    | Type-check, after generating the preview files.         |
+| `pnpm lint`           | Run oxlint.                                             |
+| `pnpm format`         | Run oxfmt.                                              |
+
+Requires Node 24.2 or later. The scripts run on Node's built-in TypeScript support.

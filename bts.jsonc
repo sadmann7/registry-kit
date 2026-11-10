@@ -10,7 +10,7 @@
   "$schema": "https://r2.better-t-stack.dev/schema.json",
   "version": "3.49.0",
   "createdAt": "2026-11-10T18:45:54.030Z",
-  "reproducibleCommand": "pnpm create better-t-stack@latest shadcn-registry-template --frontend next --backend none --runtime none --database none --orm none --api none --auth none --payments none --addons turborepo oxlint --examples none --db-setup none --web-deploy none --server-deploy none --git --package-manager pnpm --install",
+  "reproducibleCommand": "pnpm create better-t-stack@latest registry-kit --frontend next --backend none --runtime none --database none --orm none --api none --auth none --payments none --addons turborepo oxlint --examples none --db-setup none --web-deploy none --server-deploy none --git --package-manager pnpm --install",
   "database": "none",
   "orm": "none",
   "backend": "none",

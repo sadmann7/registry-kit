@@ -1,0 +1,14 @@
+.style-luma {
+  /* MARK: Timeline */
+  .cn-timeline-item {
+    @apply pb-8;
+  }
+
+  .cn-timeline-dot {
+    @apply size-3 rounded-full bg-primary ring-4 ring-primary/15;
+  }
+
+  .cn-timeline-description {
+    @apply mt-2 text-muted-foreground;
+  }
+}

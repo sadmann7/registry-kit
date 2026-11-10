@@ -1,0 +1,18 @@
+.style-rhea {
+  /* MARK: Timeline */
+  .cn-timeline {
+    @apply text-xs;
+  }
+
+  .cn-timeline-item {
+    @apply pb-4;
+  }
+
+  .cn-timeline-dot {
+    @apply size-2.5 rounded-full bg-primary ring-3 ring-primary/15;
+  }
+
+  .cn-timeline-description {
+    @apply mt-1 text-muted-foreground;
+  }
+}

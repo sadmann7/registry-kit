@@ -1,0 +1,55 @@
+"use client";
+
+import * as React from "react";
+import { cn } from "cn";
+
+import { useCopyToClipboard } from "@/registry/bases/radix/hooks/use-copy-to-clipboard";
+import { IconPlaceholder } from "@/registry/icons/icon-placeholder";
+import { Button } from "@/registry/bases/radix/ui/button";
+
+function CopyButton({
+  value,
+  className,
+  variant = "ghost",
+  size = "icon-sm",
+  onClick,
+  ...props
+}: React.ComponentProps<typeof Button> & { value: string }) {
+  const { copy, isCopied } = useCopyToClipboard();
+
+  return (
+    <Button
+      data-slot="copy-button"
+      data-copied={isCopied || undefined}
+      variant={variant}
+      size={size}
+      className={cn("cn-copy-button", className)}
+      onClick={(event) => {
+        onClick?.(event);
+        if (!event.defaultPrevented) void copy(value);
+      }}
+      {...props}
+    >
+      {isCopied ? (
+        <IconPlaceholder
+          lucide="CheckIcon"
+          tabler="IconCheck"
+          hugeicons="Tick02Icon"
+          phosphor="CheckIcon"
+          remixicon="RiCheckLine"
+        />
+      ) : (
+        <IconPlaceholder
+          lucide="CopyIcon"
+          tabler="IconCopy"
+          hugeicons="Copy01Icon"
+          phosphor="CopyIcon"
+          remixicon="RiFileCopyLine"
+        />
+      )}
+      <span className="sr-only">{isCopied ? "Copied" : "Copy"}</span>
+    </Button>
+  );
+}
+
+export { CopyButton };

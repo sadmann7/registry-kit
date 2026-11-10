@@ -1,0 +1,15 @@
+{
+  "ref": "8ab27715521cbd4f87ae6886cd989cbb678f6de7",
+  "files": [
+    "bases/base/ui/button.tsx",
+    "bases/radix/ui/button.tsx",
+    "styles/shadcn/style-luma.css",
+    "styles/shadcn/style-lyra.css",
+    "styles/shadcn/style-maia.css",
+    "styles/shadcn/style-mira.css",
+    "styles/shadcn/style-nova.css",
+    "styles/shadcn/style-rhea.css",
+    "styles/shadcn/style-sera.css",
+    "styles/shadcn/style-vega.css"
+  ]
+}

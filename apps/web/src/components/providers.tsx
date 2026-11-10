@@ -1,6 +1,6 @@
 "use client";
 
-import { Toaster } from "@shadcn-registry-template/ui/components/sonner";
+import { Toaster } from "@registry-kit/ui/components/sonner";
 
 import { ThemeProvider } from "./theme-provider";
 

@@ -1,0 +1,18 @@
+.style-lyra {
+  /* MARK: Timeline */
+  .cn-timeline {
+    @apply text-xs;
+  }
+
+  .cn-timeline-dot {
+    @apply size-2 rounded-none bg-primary ring-3 ring-background;
+  }
+
+  .cn-timeline-title {
+    @apply font-mono font-medium uppercase leading-none tracking-wide;
+  }
+
+  .cn-timeline-time {
+    @apply mb-1.5 font-mono text-xs text-muted-foreground tabular-nums;
+  }
+}

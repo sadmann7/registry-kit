@@ -1,0 +1,18 @@
+.style-vega {
+  /* MARK: Timeline */
+  .cn-timeline-item {
+    @apply pb-8;
+  }
+
+  .cn-timeline-dot {
+    @apply size-3 rounded-full border-2 border-primary bg-background ring-3 ring-background;
+  }
+
+  .cn-timeline-title {
+    @apply text-base font-semibold leading-none;
+  }
+
+  .cn-timeline-description {
+    @apply mt-2 text-muted-foreground;
+  }
+}

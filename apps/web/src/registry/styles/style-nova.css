@@ -1,0 +1,35 @@
+/*
+ * The default style. Every marker used by the registry has a rule here, and
+ * other styles fall back to it for any marker they don't define.
+ */
+.style-nova {
+  /* MARK: Copy Button */
+  .cn-copy-button {
+    @apply data-copied:text-primary;
+  }
+
+  /* MARK: Timeline */
+  .cn-timeline {
+    @apply text-sm;
+  }
+
+  .cn-timeline-item {
+    @apply pb-6;
+  }
+
+  .cn-timeline-dot {
+    @apply size-2.5 rounded-full bg-primary ring-3 ring-background;
+  }
+
+  .cn-timeline-title {
+    @apply font-medium leading-none;
+  }
+
+  .cn-timeline-description {
+    @apply mt-1.5 text-muted-foreground;
+  }
+
+  .cn-timeline-time {
+    @apply mb-1.5 text-xs text-muted-foreground tabular-nums;
+  }
+}

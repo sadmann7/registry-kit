@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@shadcn-registry-template/ui/components/button";
+import { Button } from "@registry-kit/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@shadcn-registry-template/ui/components/dropdown-menu";
+} from "@registry-kit/ui/components/dropdown-menu";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import * as React from "react";

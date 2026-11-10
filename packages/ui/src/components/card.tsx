@@ -1,4 +1,4 @@
-import { cn } from "@shadcn-registry-template/ui/lib/utils";
+import { cn } from "@registry-kit/ui/lib/utils";
 import * as React from "react";
 
 function Card({

@@ -21,8 +21,9 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@shadcn-registry-template/ui/*": ["../../packages/ui/src/*"]
-    }
+      "@registry-kit/ui/*": ["../../packages/ui/src/*"]
+    },
+    "allowImportingTsExtensions": true
   },
   "include": [
     "next-env.d.ts",
