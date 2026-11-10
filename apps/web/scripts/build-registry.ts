@@ -138,6 +138,7 @@ async function buildStyle(
       await fs.writeFile(file, content);
     }),
   );
+  await fs.mkdir(buildPath, { recursive: true });
   await fs.writeFile(
     path.join(buildPath, "registry.json"),
     JSON.stringify(registry, null, 2),
