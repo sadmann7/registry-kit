@@ -1,6 +1,6 @@
 # registry-kit
 
-A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that ship every base (Radix UI, Base UI and React Aria) and every style (Vega, Nova, Maia, Lyra, Mira, Luma, Sera and Rhea), with RTL, the way shadcn/ui's own registry does.
+A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that ship every base (Base UI, Radix UI and React Aria) and every style (Vega, Nova, Maia, Lyra, Mira, Luma, Sera and Rhea), with RTL, the way shadcn/ui's own registry does.
 
 Scaffolded with [Better-T-Stack](https://better-t-stack.dev): Next.js, Turborepo, oxlint and oxfmt, pnpm.
 
@@ -18,7 +18,7 @@ pnpm registry:init
 `registry:init` asks for your registry's name and homepage, which bases and styles to keep, and whether to keep the example items. It then removes the rest: the bases' sources, the style files, and dependencies nothing uses anymore. Every prompt has a flag, so it also runs without prompts:
 
 ```bash
-pnpm registry:init --name acme --homepage https://acme.com --bases radix,base --styles nova,lyra --no-examples --yes
+pnpm registry:init --name acme --homepage https://acme.com --bases base,radix --styles nova,lyra --no-examples --yes
 ```
 
 Nova is always built, since it's the fallback for styles the registry doesn't build. Run it on a clean working tree, so you can review the changes and undo them with git.
