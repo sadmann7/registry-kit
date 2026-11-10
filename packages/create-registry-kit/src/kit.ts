@@ -222,9 +222,15 @@ export async function applyKit(kit: Kit, options: KitOptions) {
     await write(
       registryFile,
       source
-        .replace(/"name": "[^"]*"/, `"name": "${options.name}"`)
-        .replace(/"homepage": "[^"]*"/, `"homepage": "${options.homepage}"`)
-        .replaceAll(`"@${kit.name}/`, `"@${options.name}/`),
+        .replace(
+          /"name": "(?:[^"\\]|\\.)*"/,
+          () => `"name": ${JSON.stringify(options.name)}`,
+        )
+        .replace(
+          /"homepage": "(?:[^"\\]|\\.)*"/,
+          () => `"homepage": ${JSON.stringify(options.homepage)}`,
+        )
+        .replaceAll(`"@${kit.name}/`, () => `"@${options.name}/`),
     );
   }
 
@@ -238,7 +244,10 @@ export async function applyKit(kit: Kit, options: KitOptions) {
   const site = await fs.readFile(siteFile, "utf8");
   await write(
     siteFile,
-    site.replace(/name: "[^"]*"/, `name: "${options.name}"`),
+    site.replace(
+      /name: "[^"]*"/,
+      () => `name: ${JSON.stringify(options.name)}`,
+    ),
   );
 
   const packageFile = path.join(kit.root, "apps/web/package.json");
