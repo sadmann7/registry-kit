@@ -273,8 +273,10 @@ export async function applyKit(kit: Kit, options: KitOptions) {
     writes.set(packageFile, `${JSON.stringify(pkg, null, 2)}\n`);
   }
 
-  for (const file of removals) await remove(file);
+  // Writes go first: if one fails, config.ts may still list what's left, but
+  // nothing it lists has been deleted, so the checkout still builds.
   for (const [file, content] of writes) await write(file, content);
+  for (const file of removals) await remove(file);
   if (!options.examples) {
     for (const base of options.bases)
       await removeEmptyDirs(path.join(registryPath, "bases", base));
