@@ -145,20 +145,30 @@ export async function applyKit(kit: Kit, options: KitOptions) {
     removed.add(path.relative(kit.root, file));
   }
 
+  // Read every input and work out every new file before touching anything,
+  // so a missing or malformed file stops the run with the checkout unchanged.
+  const writes = new Map<string, string>();
+  const removals: string[] = [];
+
   // config.ts: drop the bases and styles, and move the default base if it
   // went with them.
   const configFile = path.join(kit.root, CONFIG_FILE);
-  let config = await fs.readFile(configFile, "utf8");
-  config = removeOptions(config, "BASES", removeBases);
-  config = removeOptions(config, "STYLES", removeStyles);
-  config = config.replace(
-    /export const DEFAULT_BASE = "([\w-]+)";/,
-    (line, base: string) =>
+  writes.set(
+    configFile,
+    removeOptions(
+      removeOptions(
+        await fs.readFile(configFile, "utf8"),
+        "BASES",
+        removeBases,
+      ),
+      "STYLES",
+      removeStyles,
+    ).replace(/export const DEFAULT_BASE = "([\w-]+)";/, (line, base: string) =>
       options.bases.includes(base)
         ? line
         : `export const DEFAULT_BASE = "${options.bases[0]}";`,
+    ),
   );
-  await write(configFile, config);
 
   // Synced shadcn/ui files for the removed bases and styles, and every synced
   // primitive when the example items go, since nothing imports them anymore.
@@ -173,17 +183,20 @@ export async function applyKit(kit: Kit, options: KitOptions) {
         (style) => file === `styles/shadcn/style-${style.name}.css`,
       )
     );
-  for (const file of lock.files.filter((file) => !keepFile(file)))
-    await remove(path.join(registryPath, file));
-  await write(
+  removals.push(
+    ...lock.files
+      .filter((file) => !keepFile(file))
+      .map((file) => path.join(registryPath, file)),
+  );
+  writes.set(
     lockFile,
     `${JSON.stringify({ ...lock, files: lock.files.filter(keepFile) }, null, 2)}\n`,
   );
 
   for (const base of removeBases)
-    await remove(path.join(registryPath, "bases", base.name));
+    removals.push(path.join(registryPath, "bases", base.name));
   for (const style of removeStyles)
-    await remove(path.join(registryPath, "styles", `style-${style.name}.css`));
+    removals.push(path.join(registryPath, "styles", `style-${style.name}.css`));
 
   for (const base of options.bases) {
     const basePath = path.join(registryPath, "bases", base);
@@ -194,13 +207,12 @@ export async function applyKit(kit: Kit, options: KitOptions) {
     if (!options.examples) {
       for (const item of registry.items) {
         for (const file of item.files ?? [])
-          await remove(
+          removals.push(
             path.join(basePath, typeof file === "string" ? file : file.path),
           );
-        await remove(path.join(basePath, "examples", `${item.name}-demo.tsx`));
+        removals.push(path.join(basePath, "examples", `${item.name}-demo.tsx`));
       }
-      await removeEmptyDirs(basePath);
-      await write(
+      writes.set(
         registryFile,
         `${JSON.stringify(
           {
@@ -218,7 +230,7 @@ export async function applyKit(kit: Kit, options: KitOptions) {
 
     // Edit the text rather than rewriting the JSON, so the file keeps its
     // formatting. The registry's own name comes before any item's.
-    await write(
+    writes.set(
       registryFile,
       source
         .replace(
@@ -236,12 +248,12 @@ export async function applyKit(kit: Kit, options: KitOptions) {
   if (!options.examples) {
     const usageFile = path.join(registryPath, "examples.ts");
     const usage = await fs.readFile(usageFile, "utf8");
-    await write(usageFile, usage.replace(/= \{[\s\S]*\};\n$/, "= {};\n"));
+    writes.set(usageFile, usage.replace(/= \{[\s\S]*\};\n$/, "= {};\n"));
   }
 
   const siteFile = path.join(kit.root, "apps/web/src/lib/site.ts");
   const site = await fs.readFile(siteFile, "utf8");
-  await write(
+  writes.set(
     siteFile,
     site.replace(
       /name: "[^"]*"/,
@@ -258,7 +270,14 @@ export async function applyKit(kit: Kit, options: KitOptions) {
     .filter((name) => name !== undefined && name in pkg.dependencies);
   if (removePackages.length > 0) {
     for (const name of removePackages) delete pkg.dependencies[name!];
-    await write(packageFile, `${JSON.stringify(pkg, null, 2)}\n`);
+    writes.set(packageFile, `${JSON.stringify(pkg, null, 2)}\n`);
+  }
+
+  for (const file of removals) await remove(file);
+  for (const [file, content] of writes) await write(file, content);
+  if (!options.examples) {
+    for (const base of options.bases)
+      await removeEmptyDirs(path.join(registryPath, "bases", base));
   }
 
   return {
