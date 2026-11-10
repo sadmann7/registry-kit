@@ -155,18 +155,17 @@ export async function applyKit(kit: Kit, options: KitOptions) {
   const configFile = path.join(kit.root, CONFIG_FILE);
   writes.set(
     configFile,
-    removeOptions(
+    setDefaultBase(
       removeOptions(
-        await fs.readFile(configFile, "utf8"),
-        "BASES",
-        removeBases,
+        removeOptions(
+          await fs.readFile(configFile, "utf8"),
+          "BASES",
+          removeBases,
+        ),
+        "STYLES",
+        removeStyles,
       ),
-      "STYLES",
-      removeStyles,
-    ).replace(/export const DEFAULT_BASE = "([\w-]+)";/, (line, base: string) =>
-      options.bases.includes(base)
-        ? line
-        : `export const DEFAULT_BASE = "${options.bases[0]}";`,
+      options.bases,
     ),
   );
 
@@ -294,22 +293,44 @@ function getRegistryPath(root: string) {
 }
 
 // Removes `{ name: "...", ... },` entries from one of the arrays in config.ts,
-// whether the formatter kept them on one line or wrapped them.
+// whether the formatter kept them on one line or wrapped them. Throws when an
+// entry isn't found, so nothing is deleted on the strength of an edit that
+// didn't apply.
 function removeOptions(config: string, array: string, remove: Option[]) {
+  const pattern = new RegExp(
+    `(export const ${array} = \\[)([\\s\\S]*?)(\\] as const;)`,
+  );
+  if (!pattern.test(config))
+    throw new Error(`Couldn't find ${array} in ${CONFIG_FILE}.`);
+
   return config.replace(
-    new RegExp(`(export const ${array} = \\[)([\\s\\S]*?)(\\] as const;)`),
+    pattern,
     (_, start: string, body: string, end: string) =>
       start +
-      remove.reduce(
-        (result, option) =>
-          result.replace(
-            new RegExp(`\\n *\\{[^{}]*\\bname: "${option.name}",[^{}]*\\},`),
-            "",
-          ),
-        body,
-      ) +
+      remove.reduce((result, option) => {
+        const entry = new RegExp(
+          `\\n *\\{[^{}]*\\bname: "${option.name}",[^{}]*\\},`,
+        );
+        if (!entry.test(result)) {
+          throw new Error(
+            `Couldn't find the ${option.name} entry in ${array} in ${CONFIG_FILE}. Remove it by hand, then run kit:init again.`,
+          );
+        }
+        return result.replace(entry, "");
+      }, body) +
       end,
   );
+}
+
+// Moves `DEFAULT_BASE` to the first kept base if its base is being removed.
+function setDefaultBase(config: string, bases: string[]) {
+  const pattern = /export const DEFAULT_BASE = "([\w-]+)";/;
+  const base = config.match(pattern)?.[1];
+  if (base === undefined)
+    throw new Error(`Couldn't find DEFAULT_BASE in ${CONFIG_FILE}.`);
+  return bases.includes(base)
+    ? config
+    : config.replace(pattern, `export const DEFAULT_BASE = "${bases[0]}";`);
 }
 
 async function removeEmptyDirs(dir: string) {
