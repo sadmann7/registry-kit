@@ -9,6 +9,11 @@ export const BASES = [
   { name: "aria", title: "React Aria", package: "react-aria-components" },
 ] as const;
 
+// Every base shadcn/ui has, whether this registry builds it or not. Projects
+// on a base missing from `BASES` get a 404 rather than another base's
+// components, which import a different library.
+export const SHADCN_BASES = ["radix", "base", "aria"] as const;
+
 // Same names as shadcn/ui's styles, so `{style}` in a project's registry URL
 // (for example `radix-nova`) resolves to a build of this registry.
 export const STYLES = [
