@@ -63,7 +63,11 @@ async function getRegistriesModule() {
     const demos = (
       await fs
         .readdir(path.join(REGISTRY_PATH, "bases", base, "examples"))
-        .catch(() => [])
+        .catch((error: NodeJS.ErrnoException) => {
+          // A base without demos has no `examples/` folder.
+          if (error.code === "ENOENT") return [];
+          throw error;
+        })
     )
       .filter((file) => file.endsWith("-demo.tsx"))
       .sort();
