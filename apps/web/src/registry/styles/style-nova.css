@@ -8,6 +8,15 @@
     @apply data-copied:text-primary;
   }
 
+  /* MARK: Rating */
+  .cn-rating {
+    @apply gap-0.5;
+  }
+
+  .cn-rating-item {
+    @apply rounded-sm text-muted-foreground/40 transition-colors outline-none hover:text-amber-500/70 focus-visible:ring-3 focus-visible:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-active:text-amber-500 [&_svg]:size-5 data-active:[&_svg]:fill-current;
+  }
+
   /* MARK: Timeline */
   .cn-timeline {
     @apply text-sm;

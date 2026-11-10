@@ -4,6 +4,20 @@
   "homepage": "https://acme.com",
   "items": [
     {
+      "name": "rating",
+      "type": "registry:ui",
+      "title": "Rating",
+      "description": "A star rating built on a radio group.",
+      "dependencies": ["cn", "radix-ui"],
+      "registryDependencies": ["@acme/use-controllable-state"],
+      "files": [
+        {
+          "path": "ui/rating.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "copy-button",
       "type": "registry:ui",
       "title": "Copy Button",
@@ -27,6 +41,18 @@
         {
           "path": "ui/timeline.tsx",
           "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "use-controllable-state",
+      "type": "registry:hook",
+      "title": "useControllableState",
+      "description": "State a parent can control, or leave to the component.",
+      "files": [
+        {
+          "path": "hooks/use-controllable-state.ts",
+          "type": "registry:hook"
         }
       ]
     },

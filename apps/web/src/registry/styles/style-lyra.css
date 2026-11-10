@@ -1,4 +1,9 @@
 .style-lyra {
+  /* MARK: Rating */
+  .cn-rating-item {
+    @apply rounded-none text-muted-foreground/40 transition-colors outline-none hover:text-foreground/70 focus-visible:ring-1 focus-visible:ring-ring/50 has-focus-visible:ring-1 has-focus-visible:ring-ring/50 data-active:text-foreground [&_svg]:size-4 data-active:[&_svg]:fill-current;
+  }
+
   /* MARK: Timeline */
   .cn-timeline {
     @apply text-xs;
