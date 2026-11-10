@@ -1,0 +1,4 @@
+ignores:
+  - "**/AGENTS.md"
+  - ".claude/**"
+  - "plans/**"
