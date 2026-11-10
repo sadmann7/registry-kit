@@ -135,6 +135,7 @@ export async function applyKit(kit: Kit, options: KitOptions) {
   );
 
   async function write(file: string, content: string) {
+    if ((await fs.readFile(file, "utf8").catch(() => null)) === content) return;
     await fs.writeFile(file, content);
     changed.add(path.relative(kit.root, file));
   }
