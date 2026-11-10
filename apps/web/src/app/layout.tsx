@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import "../index.css";
 import Providers from "@/components/providers";
@@ -9,6 +9,14 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: `${siteConfig.name} registry`,
   description: "A shadcn registry built for every base and style.",
+};
+
+// The status bar matches the header, which uses --site from index.css.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafaf9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f0f0e" },
+  ],
 };
 
 export default function RootLayout({
