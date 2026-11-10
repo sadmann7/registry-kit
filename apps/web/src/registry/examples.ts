@@ -1,23 +1,14 @@
-import type * as React from "react";
+// Usage shown for items that have nothing to render, like hooks, for the base
+// being previewed. Items with a demo in `bases/{base}/examples/{item}-demo.tsx`
+// show the demo instead.
+export const USAGE: Record<string, (base: string) => string> = {
+  "use-copy-to-clipboard": (base) => {
+    // React Aria buttons take `onPress` instead of `onClick`.
+    const onPress = base === "aria" ? "onPress" : "onClick";
+    return `const { copy, isCopied } = useCopyToClipboard()
 
-import type { BaseName } from "@/registry/config";
-
-import BaseCopyButtonDemo from "@/registry/bases/base/examples/copy-button-demo";
-import BaseTimelineDemo from "@/registry/bases/base/examples/timeline-demo";
-import RadixCopyButtonDemo from "@/registry/bases/radix/examples/copy-button-demo";
-import RadixTimelineDemo from "@/registry/bases/radix/examples/timeline-demo";
-
-// Demos shown in the preview, by base and item name.
-export const EXAMPLES: Record<BaseName, Record<string, React.ComponentType>> = {
-  radix: { timeline: RadixTimelineDemo, "copy-button": RadixCopyButtonDemo },
-  base: { timeline: BaseTimelineDemo, "copy-button": BaseCopyButtonDemo },
-};
-
-// Usage shown for items that have nothing to render, like hooks.
-export const USAGE: Record<string, string> = {
-  "use-copy-to-clipboard": `const { copy, isCopied } = useCopyToClipboard()
-
-<Button onClick={() => copy(value)}>
+<Button ${onPress}={() => copy(value)}>
   {isCopied ? "Copied" : "Copy"}
-</Button>`,
+</Button>`;
+  },
 };

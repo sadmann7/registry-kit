@@ -1,10 +1,18 @@
 // Shared by the site and the scripts in `scripts/`, which run on Node's
 // built-in TypeScript support, so keep this file free of imports.
 
+// `package` is the library the base's components import. `pnpm kit:init`
+// removes it from the site's dependencies along with the base.
 export const BASES = [
-  { name: "radix", title: "Radix UI" },
-  { name: "base", title: "Base UI" },
+  { name: "radix", title: "Radix UI", package: "radix-ui" },
+  { name: "base", title: "Base UI", package: "@base-ui/react" },
+  { name: "aria", title: "React Aria", package: "react-aria-components" },
 ] as const;
+
+// Every base shadcn/ui has, whether this registry builds it or not. Projects
+// on a base missing from `BASES` get a 404 rather than another base's
+// components, which import a different library.
+export const SHADCN_BASES = ["radix", "base", "aria"] as const;
 
 // Same names as shadcn/ui's styles, so `{style}` in a project's registry URL
 // (for example `radix-nova`) resolves to a build of this registry.

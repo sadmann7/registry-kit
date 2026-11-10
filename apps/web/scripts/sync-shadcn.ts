@@ -157,11 +157,28 @@ await Promise.all(
     .map((file) => fs.rm(path.join(REGISTRY_PATH, file), { force: true })),
 );
 
-// Match the repo's formatting, so `pnpm check` stays clean after a sync.
-await promisify(execFile)(
-  path.join(ROOT, "../../node_modules/.bin/oxfmt"),
-  files.map((file) => path.join(REGISTRY_PATH, file)),
-);
+// Match the repo's lint fixes and formatting, so `pnpm check` stays clean
+// after a sync.
+const sources = files
+  .filter((file) => /\.tsx?$/.test(file))
+  .map((file) => path.join(REGISTRY_PATH, file));
+// Skipped with no sources, since oxlint lints the whole repo without paths.
+// Lint errors `--fix` can't repair fail `pnpm check`, not the sync, so the
+// lock file below is still written.
+if (sources.length > 0) {
+  await promisify(execFile)(
+    path.join(ROOT, "../../node_modules/.bin/oxlint"),
+    ["--fix", ...sources],
+    { cwd: path.join(ROOT, "../..") },
+  ).catch(() => {});
+}
+// Guarded like oxlint above: oxfmt formats the whole repo without paths.
+if (files.length > 0) {
+  await promisify(execFile)(
+    path.join(ROOT, "../../node_modules/.bin/oxfmt"),
+    files.map((file) => path.join(REGISTRY_PATH, file)),
+  );
+}
 
 await writeFileIfChanged(
   LOCK_PATH,

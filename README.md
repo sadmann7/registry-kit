@@ -1,8 +1,23 @@
 # registry-kit
 
-A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that ship every base (Radix UI and Base UI) and every style (Vega, Nova, Maia, Lyra, Mira, Luma, Sera and Rhea), with RTL, the way shadcn/ui's own registry does.
+A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that ship every base (Radix UI, Base UI and React Aria) and every style (Vega, Nova, Maia, Lyra, Mira, Luma, Sera and Rhea), with RTL, the way shadcn/ui's own registry does.
 
 Scaffolded with [Better-T-Stack](https://better-t-stack.dev): Next.js, Turborepo, oxlint and oxfmt, pnpm.
+
+## Getting started
+
+```bash
+pnpm install
+pnpm kit:init
+```
+
+`kit:init` asks for your registry's name and homepage, which bases and styles to keep, and whether to keep the example items. It then removes the rest: the bases' sources, the style files, and dependencies nothing uses anymore. Every prompt has a flag, so it also runs without prompts:
+
+```bash
+pnpm kit:init --name acme --homepage https://acme.com --bases radix,base --styles nova,lyra --no-examples --yes
+```
+
+Nova is always built, since it's the fallback for styles the registry doesn't build. Run it on a clean working tree, so you can review the changes and undo them with git.
 
 ## How it works
 
@@ -38,7 +53,7 @@ Styles that don't define a marker fall back to the default style (`nova`), so a 
 apps/web/
   src/registry/
     config.ts                bases, styles, defaults, pinned shadcn/ui commit
-    bases/{radix,base}/
+    bases/{radix,base,aria}/
       registry.json          the registry: items, dependencies, files
       ui/ hooks/ lib/        item source, with cn-* markers
       examples/              demos for the preview (not published)
@@ -55,11 +70,11 @@ apps/web/
 
 ## Adding an item
 
-1. Add the source to `bases/radix` and `bases/base`, with markers for anything style-specific.
-2. Add the item to both `registry.json` files. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`.
+1. Add the source to `bases/radix`, `bases/base` and `bases/aria`, with markers for anything style-specific. React Aria components take `onPress` instead of `onClick` and have no `asChild`.
+2. Add the item to every `registry.json`. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`.
 3. Give every new marker a rule in `styles/style-nova.css`, and override it in other styles as needed.
 4. If you import a shadcn/ui primitive the registry didn't use before, run `pnpm registry:sync`.
-5. Add a demo to `examples/` and `src/registry/examples.ts`.
+5. Add a demo to each base as `examples/{name}-demo.tsx`. The preview finds it by name. Items with nothing to render, like hooks, can show a snippet from `src/registry/examples.ts` instead.
 
 `pnpm registry:build` fails when a marker has no default rule, or when an item imports another item without listing it in `registryDependencies`.
 
@@ -75,12 +90,13 @@ The preview renders left-to-right. Check RTL output with `pnpm registry:test`, o
 
 ## Serving unknown styles
 
-Projects on a style this registry doesn't build, like `new-york-v4` or `default`, would get a 404. `next.config.ts` rewrites those requests to the default style, sending Base UI styles to `base-nova` and everything else to `radix-nova`.
+Projects on a style this registry doesn't build would get a 404. `next.config.ts` rewrites those requests to the default style of the same base, like `aria-lyra` to `aria-nova`. Styles without a base, like `new-york-v4` or `default`, are Radix in shadcn/ui, so they go to `radix-nova`. Projects on a base the registry doesn't build still get a 404, including those older styles when Radix isn't built, since another base's components import a different library. `SHADCN_BASES` in `config.ts` lists every shadcn/ui base.
 
 ## Scripts
 
 | Command               | What it does                                            |
 | --------------------- | ------------------------------------------------------- |
+| `pnpm kit:init`       | Choose the registry's name, bases, styles and items.    |
 | `pnpm dev`            | Start the preview on http://localhost:3001.             |
 | `pnpm build`          | Build the registry, then the site.                      |
 | `pnpm registry:build` | Build `public/r` for every base and style.              |

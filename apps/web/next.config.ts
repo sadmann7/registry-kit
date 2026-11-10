@@ -2,9 +2,13 @@ import type { NextConfig } from "next";
 
 import { varlockNextConfigPlugin } from "@varlock/nextjs-integration/plugin";
 
-import { DEFAULT_STYLE } from "./src/registry/config.ts";
+import { BASES, DEFAULT_STYLE, SHADCN_BASES } from "./src/registry/config.ts";
 
 const withVarlock = varlockNextConfigPlugin();
+
+// Typed as plain strings, so the check below still compiles when `kit:init`
+// has trimmed `BASES` to bases other than Radix.
+const BUILT_BASES: readonly string[] = BASES.map(({ name }) => name);
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
@@ -12,17 +16,23 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       // Runs only when no file in `public/r` matched, so it catches styles this
-      // registry doesn't build, like `new-york-v4` or `default`. Base UI
-      // projects get the Base UI build; everything else is Radix.
+      // registry doesn't build. Projects on a base this registry builds get
+      // that base, and other shadcn/ui bases get a 404. Styles without a base,
+      // like `new-york-v4` or `default`, are Radix in shadcn/ui, so they get
+      // the Radix build, or a 404 when this registry doesn't build Radix.
       afterFiles: [
-        {
-          source: "/r/base-:style/:name.json",
-          destination: `/r/base-${DEFAULT_STYLE}/:name.json`,
-        },
-        {
-          source: "/r/:style/:name.json",
-          destination: `/r/radix-${DEFAULT_STYLE}/:name.json`,
-        },
+        ...BASES.map(({ name }) => ({
+          source: `/r/${name}-:style/:name.json`,
+          destination: `/r/${name}-${DEFAULT_STYLE}/:name.json`,
+        })),
+        ...(BUILT_BASES.includes("radix")
+          ? [
+              {
+                source: `/r/:style((?!(?:${SHADCN_BASES.join("|")})-)[^/]+)/:name.json`,
+                destination: `/r/radix-${DEFAULT_STYLE}/:name.json`,
+              },
+            ]
+          : []),
       ],
       beforeFiles: [],
       fallback: [],

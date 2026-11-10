@@ -1,0 +1,33 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "acme",
+  "homepage": "https://acme.com",
+  "items": [
+    {
+      "name": "timeline",
+      "type": "registry:ui",
+      "title": "Timeline",
+      "description": "A vertical list of events.",
+      "dependencies": ["cn"],
+      "files": [{ "path": "ui/timeline.tsx", "type": "registry:ui" }]
+    },
+    {
+      "name": "copy-button",
+      "type": "registry:ui",
+      "title": "Copy Button",
+      "description": "A button that copies a value to the clipboard.",
+      "dependencies": ["cn"],
+      "registryDependencies": ["button", "@acme/use-copy-to-clipboard"],
+      "files": [{ "path": "ui/copy-button.tsx", "type": "registry:ui" }]
+    },
+    {
+      "name": "use-copy-to-clipboard",
+      "type": "registry:hook",
+      "title": "useCopyToClipboard",
+      "description": "Copies text to the clipboard and tracks the copied state.",
+      "files": [
+        { "path": "hooks/use-copy-to-clipboard.ts", "type": "registry:hook" }
+      ]
+    }
+  ]
+}

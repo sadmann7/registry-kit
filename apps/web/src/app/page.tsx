@@ -4,8 +4,7 @@ import Link from "next/link";
 
 import { CopyButton } from "@/components/copy-button";
 import { StyleClass } from "@/components/style-class";
-import baseRegistry from "@/registry/bases/base/registry.json";
-import radixRegistry from "@/registry/bases/radix/registry.json";
+import { EXAMPLES, REGISTRIES } from "@/registry/__generated__/registries";
 import {
   type BaseName,
   BASES,
@@ -14,14 +13,15 @@ import {
   type StyleName,
   STYLES,
 } from "@/registry/config";
-import { EXAMPLES, USAGE } from "@/registry/examples";
-
-const REGISTRIES = { radix: radixRegistry, base: baseRegistry } as Record<
-  BaseName,
-  Registry
->;
+import { USAGE } from "@/registry/examples";
 
 type Item = Registry["items"][number];
+
+const LIST_FORMAT = new Intl.ListFormat("en", { type: "conjunction" });
+
+function pluralize(count: number, noun: string) {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
 
 function pick<T extends string>(
   value: string | string[] | undefined,
@@ -45,14 +45,16 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       <section className="mx-auto grid max-w-360 items-end gap-12 px-4 pt-16 pb-14 sm:px-12 sm:pt-18 lg:grid-cols-[minmax(0,1fr)_460px]">
         <div className="flex max-w-155 flex-col gap-5">
           <p className="font-mono text-xs text-site-muted">
-            {BASES.length} bases · {STYLES.length} styles · RTL
+            {pluralize(BASES.length, "base")} ·{" "}
+            {pluralize(STYLES.length, "style")} · RTL
           </p>
           <h1 className="text-[clamp(2.5rem,5vw,3.5rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance">
             Components that fit every shadcn project.
           </h1>
           <p className="max-w-120 text-base leading-normal text-site-muted">
-            Built for Radix UI and Base UI, in all eight styles. The CLI handles
-            icons and right-to-left layout when you install.
+            Built for {LIST_FORMAT.format(BASES.map((option) => option.title))},
+            in {pluralize(STYLES.length, "style")}. The CLI handles icons and
+            right-to-left layout when you install.
           </p>
         </div>
 
@@ -124,7 +126,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           </div>
 
           <span className="ml-auto shrink-0 font-mono text-xs text-site-muted">
-            {registry.items.length} items
+            {pluralize(registry.items.length, "item")}
           </span>
         </div>
       </nav>
@@ -167,7 +169,7 @@ function ItemRow({
   namespace: string;
 }) {
   const Example = EXAMPLES[base][item.name];
-  const usage = USAGE[item.name];
+  const usage = USAGE[item.name]?.(base);
   const dependencies = [
     ...(item.dependencies ?? []),
     ...(item.registryDependencies ?? []),

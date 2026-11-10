@@ -1,23 +1,13 @@
 import type { Metadata } from "next";
 
-import { Geist, Geist_Mono } from "next/font/google";
-
 import "../index.css";
 import Providers from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { fontMono, fontSans } from "@/lib/fonts";
+import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "acme registry",
+  title: `${siteConfig.name} registry`,
   description: "A shadcn registry built for every base and style.",
 };
 
@@ -27,10 +17,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-site text-site-ink antialiased`}
-      >
+    // The font variables go on <html>, so the theme's --font-sans and
+    // --font-mono resolve on every element, including bare <code> and <pre>.
+    <html
+      lang="en"
+      className={`${fontSans.variable} ${fontMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-site text-site-ink antialiased">
         <Providers>
           <SiteHeader />
           {children}
