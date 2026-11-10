@@ -5,16 +5,23 @@
 //
 //   node scripts/build-registry.ts && node scripts/test-registry.ts
 
+import type { AddressInfo } from "node:net";
+
 import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
 import { createServer } from "node:http";
-import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 
 import { STYLES } from "../src/registry/config.ts";
-import { ROOT, forEachBase, getItemFiles, readRegistry, runWithConcurrency } from "./registry.ts";
+import {
+  forEachBase,
+  getItemFiles,
+  readRegistry,
+  ROOT,
+  runWithConcurrency,
+} from "./registry.ts";
 
 const OUTPUT_PATH = path.join(ROOT, "public");
 const SHADCN_BIN = path.join(ROOT, "node_modules/.bin/shadcn");
@@ -29,10 +36,14 @@ const run = promisify(execFile);
 const server = createServer(async (request, response) => {
   const file = path.join(
     OUTPUT_PATH,
-    path.normalize(decodeURIComponent(request.url!.split("?")[0]!)),
+    path.normalize(decodeURIComponent(request.url!.split("?")[0])),
   );
-  const content = file.startsWith(OUTPUT_PATH) ? await fs.readFile(file).catch(() => null) : null;
-  response.writeHead(content ? 200 : 404, { "content-type": "application/json" });
+  const content = file.startsWith(OUTPUT_PATH)
+    ? await fs.readFile(file).catch(() => null)
+    : null;
+  response.writeHead(content ? 200 : 404, {
+    "content-type": "application/json",
+  });
   response.end(content);
 });
 await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -48,7 +59,10 @@ async function createFixture(style: string, namespace: string) {
       path.join(dir, "package.json"),
       JSON.stringify({ name: "fixture", private: true }),
     ),
-    fs.writeFile(path.join(dir, "src/app/globals.css"), '@import "tailwindcss";\n'),
+    fs.writeFile(
+      path.join(dir, "src/app/globals.css"),
+      '@import "tailwindcss";\n',
+    ),
     fs.writeFile(
       path.join(dir, "tsconfig.json"),
       JSON.stringify({ compilerOptions: { paths: { "@/*": ["./src/*"] } } }),
@@ -104,7 +118,15 @@ try {
         try {
           const { stdout } = await run(
             SHADCN_BIN,
-            ["add", `@${registry.name}/${item.name}`, "--dry-run", "--view", target, "--cwd", cwd],
+            [
+              "add",
+              `@${registry.name}/${item.name}`,
+              "--dry-run",
+              "--view",
+              target,
+              "--cwd",
+              cwd,
+            ],
             { maxBuffer: 16 * 1024 * 1024 },
           );
           const problems = [
@@ -112,9 +134,13 @@ try {
             /\bcn-[a-z]/.test(stdout) && "unresolved cn-* marker",
             stdout.includes("@/registry/") && "unresolved @/registry import",
           ].filter(Boolean);
-          if (problems.length > 0) failures.push(`${label}: ${problems.join(", ")}\n${stdout}`);
+          if (problems.length > 0)
+            failures.push(`${label}: ${problems.join(", ")}\n${stdout}`);
         } catch (error) {
-          const { stdout = "", stderr = "" } = error as { stdout?: string; stderr?: string };
+          const { stdout = "", stderr = "" } = error as {
+            stdout?: string;
+            stderr?: string;
+          };
           failures.push(`${label}: shadcn add failed\n${stdout}${stderr}`);
         }
       }
@@ -127,7 +153,9 @@ try {
 }
 
 if (failures.length > 0) {
-  console.error(`\n${failures.length} of ${count} installs failed:\n\n${failures.join("\n\n")}`);
+  console.error(
+    `\n${failures.length} of ${count} installs failed:\n\n${failures.join("\n\n")}`,
+  );
   process.exit(1);
 }
 console.log(`All ${count} installs passed.`);

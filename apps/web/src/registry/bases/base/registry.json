@@ -25,7 +25,9 @@
       "type": "registry:hook",
       "title": "useCopyToClipboard",
       "description": "Copies text to the clipboard and tracks the copied state.",
-      "files": [{ "path": "hooks/use-copy-to-clipboard.ts", "type": "registry:hook" }]
+      "files": [
+        { "path": "hooks/use-copy-to-clipboard.ts", "type": "registry:hook" }
+      ]
     }
   ]
 }

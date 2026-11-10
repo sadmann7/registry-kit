@@ -6,31 +6,32 @@
 //
 //   node scripts/build-registry.ts
 
+import type { Registry } from "shadcn/schema";
+
 import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
 import { availableParallelism } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import type { Registry } from "shadcn/schema";
 import { transformStyle } from "shadcn/utils";
 
 import {
+  type BaseName,
   BASES,
   DEFAULT_BASE,
   DEFAULT_STYLE,
   STYLES,
-  type BaseName,
 } from "../src/registry/config.ts";
 import { generate } from "./generate.ts";
 import {
   CLI_MARKERS,
-  ROOT,
   forEachBase,
   getBasePath,
   getItemFiles,
   getMarkers,
   getStyleMaps,
   readRegistry,
+  ROOT,
   runWithConcurrency,
   type StyleMap,
 } from "./registry.ts";
@@ -55,12 +56,22 @@ async function readSources(base: BaseName, registry: Registry) {
 }
 
 // Fail on what would otherwise only show up after someone installs an item.
-function check(base: BaseName, registry: Registry, sources: Source[], defaultMap: StyleMap) {
+function check(
+  base: BaseName,
+  registry: Registry,
+  sources: Source[],
+  defaultMap: StyleMap,
+) {
   const errors: string[] = [];
-  const contents = new Map(sources.map((source) => [source.path, source.content]));
+  const contents = new Map(
+    sources.map((source) => [source.path, source.content]),
+  );
   const owners = new Map(
     registry.items.flatMap((item) =>
-      getItemFiles(item).map((file) => [file.replace(/\.tsx?$/, ""), item.name]),
+      getItemFiles(item).map((file) => [
+        file.replace(/\.tsx?$/, ""),
+        item.name,
+      ]),
     ),
   );
 
@@ -70,17 +81,27 @@ function check(base: BaseName, registry: Registry, sources: Source[], defaultMap
 
       for (const marker of getMarkers(content)) {
         if (!CLI_MARKERS.has(marker) && !defaultMap[marker]) {
-          errors.push(`${file}: ${marker} has no rule in style-${DEFAULT_STYLE}.css`);
+          errors.push(
+            `${file}: ${marker} has no rule in style-${DEFAULT_STYLE}.css`,
+          );
         }
       }
 
       const imports = content.matchAll(
-        new RegExp(`["']@/registry/bases/${base}/((?:ui|hooks|lib)/[\\w-]+)["']`, "g"),
+        new RegExp(
+          `["']@/registry/bases/${base}/((?:ui|hooks|lib)/[\\w-]+)["']`,
+          "g",
+        ),
       );
       for (const [, imported] of imports) {
-        const owner = owners.get(imported!);
-        const dependency = owner ? `@${registry.name}/${owner}` : path.basename(imported!);
-        if (owner !== item.name && !item.registryDependencies?.includes(dependency)) {
+        const owner = owners.get(imported);
+        const dependency = owner
+          ? `@${registry.name}/${owner}`
+          : path.basename(imported);
+        if (
+          owner !== item.name &&
+          !item.registryDependencies?.includes(dependency)
+        ) {
           errors.push(
             `${item.name}: imports ${imported} but doesn't list "${dependency}" in registryDependencies`,
           );
@@ -117,11 +138,21 @@ async function buildStyle(
       await fs.writeFile(file, content);
     }),
   );
-  await fs.writeFile(path.join(buildPath, "registry.json"), JSON.stringify(registry, null, 2));
+  await fs.writeFile(
+    path.join(buildPath, "registry.json"),
+    JSON.stringify(registry, null, 2),
+  );
 
   // File paths in registry.json are relative to the base, so build from the
   // compiled copy of it.
-  await run(SHADCN_BIN, ["build", "registry.json", "--cwd", buildPath, "--output", outputPath]);
+  await run(SHADCN_BIN, [
+    "build",
+    "registry.json",
+    "--cwd",
+    buildPath,
+    "--output",
+    outputPath,
+  ]);
 }
 
 const start = performance.now();
@@ -168,7 +199,12 @@ await fs.copyFile(
   path.join(OUTPUT_PATH, "registry.json"),
 );
 
-await Promise.all([fs.rm(BUILD_PATH, { recursive: true, force: true }), generate()]);
+await Promise.all([
+  fs.rm(BUILD_PATH, { recursive: true, force: true }),
+  generate(),
+]);
 
 const seconds = ((performance.now() - start) / 1000).toFixed(1);
-console.log(`Built ${BASES.length} bases × ${STYLES.length} styles in ${seconds}s.`);
+console.log(
+  `Built ${BASES.length} bases × ${STYLES.length} styles in ${seconds}s.`,
+);

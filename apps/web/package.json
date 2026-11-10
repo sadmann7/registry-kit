@@ -7,11 +7,11 @@
     "dev": "node scripts/generate.ts && node scripts/dev.ts",
     "build": "node scripts/build-registry.ts && next build",
     "start": "next start",
-    "check-types": "node scripts/generate.ts && next typegen && tsc --noEmit",
     "registry:build": "node scripts/build-registry.ts",
     "registry:sync": "node scripts/sync-shadcn.ts",
     "registry:test": "node scripts/test-registry.ts",
-    "env:generate": "varlock codegen"
+    "env:generate": "varlock codegen",
+    "typecheck": "node scripts/generate.ts && next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

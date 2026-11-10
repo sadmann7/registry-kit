@@ -7,6 +7,9 @@ allowBuilds:
 overrides:
   "@next/env": npm:@varlock/nextjs-integration@1.2.2
 catalog:
+  oxfmt: ^0.75.0
+  oxlint: ^1.90.0
+  oxlint-tsgolint: ^7.0.2005
   zod: ^4.5.4
   typescript: ^6.0.3
   "@types/node": ^26.4.1

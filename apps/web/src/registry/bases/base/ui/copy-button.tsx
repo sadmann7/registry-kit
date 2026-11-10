@@ -1,11 +1,11 @@
 "use client";
 
-import * as React from "react";
 import { cn } from "cn";
+import * as React from "react";
 
 import { useCopyToClipboard } from "@/registry/bases/base/hooks/use-copy-to-clipboard";
-import { IconPlaceholder } from "@/registry/icons/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
+import { IconPlaceholder } from "@/registry/icons/icon-placeholder";
 
 function CopyButton({
   value,

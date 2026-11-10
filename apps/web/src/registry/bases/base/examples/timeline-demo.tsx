@@ -8,8 +8,16 @@ import {
 } from "@/registry/bases/base/ui/timeline";
 
 const events = [
-  { time: "Nov 3", title: "Registry created", description: "Scaffolded with Better-T-Stack." },
-  { time: "Nov 7", title: "First item published", description: "Built for every base and style." },
+  {
+    time: "Nov 3",
+    title: "Registry created",
+    description: "Scaffolded with Better-T-Stack.",
+  },
+  {
+    time: "Nov 7",
+    title: "First item published",
+    description: "Built for every base and style.",
+  },
   {
     time: "Nov 11",
     title: "Installed in an RTL project",

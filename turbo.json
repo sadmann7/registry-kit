@@ -10,9 +10,6 @@
     "lint": {
       "dependsOn": ["^lint"]
     },
-    "check-types": {
-      "dependsOn": ["^check-types"]
-    },
     "dev": {
       "cache": false,
       "persistent": true
@@ -22,6 +19,9 @@
       "cache": false,
       "persistent": true,
       "passThroughEnv": ["*"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
     }
   },
   "globalEnv": [

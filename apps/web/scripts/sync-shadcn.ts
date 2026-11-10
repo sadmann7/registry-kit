@@ -10,15 +10,15 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { SHADCN_REF, STYLES, type BaseName } from "../src/registry/config.ts";
+import { type BaseName, SHADCN_REF, STYLES } from "../src/registry/config.ts";
 import {
-  REGISTRY_PATH,
-  ROOT,
-  STYLES_PATH,
   forEachBase,
   getBasePath,
   getItemFiles,
   readRegistry,
+  REGISTRY_PATH,
+  ROOT,
+  STYLES_PATH,
   writeFileIfChanged,
 } from "./registry.ts";
 
@@ -28,31 +28,42 @@ const LOCK_PATH = path.join(REGISTRY_PATH, "shadcn.json");
 // shadcn's sources import the placeholder from its docs app. The CLI matches
 // `IconPlaceholder` by name, so pointing it at ours changes nothing on install.
 const ICON_PLACEHOLDER_IMPORTS = [
-  ["@/app/(create)/components/icon-placeholder", "@/registry/icons/icon-placeholder"],
+  [
+    "@/app/(create)/components/icon-placeholder",
+    "@/registry/icons/icon-placeholder",
+  ],
 ];
 
 async function fetchText(url: string) {
   const response = await fetch(url);
   if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`${response.status} ${response.statusText}: ${url}`);
+  if (!response.ok)
+    throw new Error(`${response.status} ${response.statusText}: ${url}`);
   return response.text();
 }
 
 function getRegistryImports(source: string, base: BaseName) {
-  const pattern = new RegExp(`["']@/registry/bases/${base}/((?:ui|hooks|lib)/[\\w-]+)["']`, "g");
-  return [...source.matchAll(pattern)].map(([, file]) => file!);
+  const pattern = new RegExp(
+    `["']@/registry/bases/${base}/((?:ui|hooks|lib)/[\\w-]+)["']`,
+    "g",
+  );
+  return [...source.matchAll(pattern)].map(([, file]) => file);
 }
 
 async function syncBase(base: BaseName) {
   const basePath = getBasePath(base);
   const registry = await readRegistry(base);
   const owned = new Set(
-    registry.items.flatMap(getItemFiles).map((file) => file.replace(/\.tsx?$/, "")),
+    registry.items
+      .flatMap(getItemFiles)
+      .map((file) => file.replace(/\.tsx?$/, "")),
   );
 
   const queue = (
     await Promise.all(
-      [...owned].map(async (file) => getRegistryImports(await readOwned(basePath, file), base)),
+      [...owned].map(async (file) =>
+        getRegistryImports(await readOwned(basePath, file), base),
+      ),
     )
   ).flat();
   const synced = new Map<string, string>();
@@ -66,17 +77,21 @@ async function syncBase(base: BaseName) {
     let fileName = "";
     for (const extension of [".tsx", ".ts"]) {
       fileName = `${file}${extension}`;
-      source = await fetchText(`${SOURCE_URL}/registry/bases/${base}/${fileName}`);
+      source = await fetchText(
+        `${SOURCE_URL}/registry/bases/${base}/${fileName}`,
+      );
       if (source) break;
     }
     if (!source)
-      throw new Error(`shadcn/ui has no registry/bases/${base}/${file} at ${SHADCN_REF}`);
+      throw new Error(
+        `shadcn/ui has no registry/bases/${base}/${file} at ${SHADCN_REF}`,
+      );
 
     for (const [from, to] of ICON_PLACEHOLDER_IMPORTS)
       source = source.replaceAll(`"${from}"`, `"${to}"`);
 
     const unknown = [...source.matchAll(/from ["'](@\/[^"']+)["']/g)]
-      .map(([, specifier]) => specifier!)
+      .map(([, specifier]) => specifier)
       .filter(
         (specifier) =>
           !specifier.startsWith(`@/registry/bases/${base}/`) &&
@@ -113,9 +128,15 @@ async function readOwned(basePath: string, file: string) {
 async function syncStyles() {
   return Promise.all(
     STYLES.map(async ({ name }) => {
-      const css = await fetchText(`${SOURCE_URL}/registry/styles/style-${name}.css`);
-      if (!css) throw new Error(`shadcn/ui has no style-${name}.css at ${SHADCN_REF}`);
-      await writeFileIfChanged(path.join(STYLES_PATH, "shadcn", `style-${name}.css`), css);
+      const css = await fetchText(
+        `${SOURCE_URL}/registry/styles/style-${name}.css`,
+      );
+      if (!css)
+        throw new Error(`shadcn/ui has no style-${name}.css at ${SHADCN_REF}`);
+      await writeFileIfChanged(
+        path.join(STYLES_PATH, "shadcn", `style-${name}.css`),
+        css,
+      );
       return `styles/shadcn/style-${name}.css`;
     }),
   );
@@ -124,7 +145,10 @@ async function syncStyles() {
 const previous: { files?: string[] } = JSON.parse(
   await fs.readFile(LOCK_PATH, "utf8").catch(() => "{}"),
 );
-const files = [...(await forEachBase(syncBase)).flat(), ...(await syncStyles())].sort();
+const files = [
+  ...(await forEachBase(syncBase)).flat(),
+  ...(await syncStyles()),
+].sort();
 
 // Remove primitives the registry no longer imports.
 await Promise.all(
@@ -139,6 +163,11 @@ await promisify(execFile)(
   files.map((file) => path.join(REGISTRY_PATH, file)),
 );
 
-await writeFileIfChanged(LOCK_PATH, `${JSON.stringify({ ref: SHADCN_REF, files }, null, 2)}\n`);
-console.log(`Synced ${files.length} files from shadcn-ui/ui@${SHADCN_REF.slice(0, 7)}:`);
+await writeFileIfChanged(
+  LOCK_PATH,
+  `${JSON.stringify({ ref: SHADCN_REF, files }, null, 2)}\n`,
+);
+console.log(
+  `Synced ${files.length} files from shadcn-ui/ui@${SHADCN_REF.slice(0, 7)}:`,
+);
 for (const file of files) console.log(`  ${file}`);

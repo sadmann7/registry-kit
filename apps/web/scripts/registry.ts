@@ -1,14 +1,14 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { type Registry, registrySchema } from "shadcn/schema";
 import { createStyleMap } from "shadcn/utils";
-import { registrySchema, type Registry } from "shadcn/schema";
 
 import {
+  type BaseName,
   BASES,
   DEFAULT_STYLE,
-  STYLES,
-  type BaseName,
   type StyleName,
+  STYLES,
 } from "../src/registry/config.ts";
 
 export type StyleMap = Record<string, string>;
@@ -34,19 +34,27 @@ export function getBasePath(base: BaseName) {
 
 export async function readRegistry(base: BaseName): Promise<Registry> {
   const file = path.join(getBasePath(base), "registry.json");
-  const result = registrySchema.safeParse(JSON.parse(await fs.readFile(file, "utf8")));
+  const result = registrySchema.safeParse(
+    JSON.parse(await fs.readFile(file, "utf8")),
+  );
   if (!result.success) {
-    throw new Error(`Invalid ${path.relative(ROOT, file)}:\n${result.error.message}`);
+    throw new Error(
+      `Invalid ${path.relative(ROOT, file)}:\n${result.error.message}`,
+    );
   }
   return result.data;
 }
 
 export function getItemFiles(item: Registry["items"][number]) {
-  return (item.files ?? []).map((file) => (typeof file === "string" ? file : file.path));
+  return (item.files ?? []).map((file) =>
+    typeof file === "string" ? file : file.path,
+  );
 }
 
 async function readStyleMap(file: string) {
-  const css = await fs.readFile(path.join(STYLES_PATH, file), "utf8").catch(() => null);
+  const css = await fs
+    .readFile(path.join(STYLES_PATH, file), "utf8")
+    .catch(() => null);
   return css ? createStyleMap(css) : {};
 }
 

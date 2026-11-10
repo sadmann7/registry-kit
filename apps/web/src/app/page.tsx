@@ -1,20 +1,24 @@
-import Link from "next/link";
 import type { Registry } from "shadcn/schema";
+
+import Link from "next/link";
 
 import { StyleClass } from "@/components/style-class";
 import baseRegistry from "@/registry/bases/base/registry.json";
 import radixRegistry from "@/registry/bases/radix/registry.json";
 import {
+  type BaseName,
   BASES,
   DEFAULT_BASE,
   DEFAULT_STYLE,
-  STYLES,
-  type BaseName,
   type StyleName,
+  STYLES,
 } from "@/registry/config";
 import { EXAMPLES } from "@/registry/examples";
 
-const REGISTRIES = { radix: radixRegistry, base: baseRegistry } as Record<BaseName, Registry>;
+const REGISTRIES = { radix: radixRegistry, base: baseRegistry } as Record<
+  BaseName,
+  Registry
+>;
 
 function pick<T extends string>(
   value: string | string[] | undefined,
@@ -31,7 +35,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const registry = REGISTRIES[base];
 
   return (
-    <main className={`style-${style} container mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8`}>
+    <main
+      className={`style-${style} container mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8`}
+    >
       <StyleClass style={style} />
 
       <header className="flex flex-col gap-4">
@@ -56,11 +62,16 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       {registry.items.map((item) => {
         const Example = EXAMPLES[base][item.name];
         return (
-          <section key={item.name} className="flex flex-col gap-3 rounded-lg border p-4">
+          <section
+            key={item.name}
+            className="flex flex-col gap-3 rounded-lg border p-4"
+          >
             <div>
               <h2 className="font-medium">{item.title ?? item.name}</h2>
               {item.description && (
-                <p className="text-sm text-muted-foreground">{item.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {item.description}
+                </p>
               )}
             </div>
             <code className="text-xs text-muted-foreground">
@@ -90,7 +101,10 @@ function Switcher<T extends string>({
   href: (name: T) => { query: Record<string, string> };
 }) {
   return (
-    <nav aria-label={label} className="flex flex-wrap items-center gap-1.5 text-sm">
+    <nav
+      aria-label={label}
+      className="flex flex-wrap items-center gap-1.5 text-sm"
+    >
       <span className="w-12 text-muted-foreground">{label}</span>
       {options.map((option) => (
         <Link

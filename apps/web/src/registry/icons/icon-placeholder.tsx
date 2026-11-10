@@ -20,7 +20,10 @@ function IconPlaceholder({
   remixicon?: string;
 }) {
   const Icon = (
-    icons as Record<string, React.ComponentType<React.ComponentProps<"svg">> | undefined>
+    icons as Record<
+      string,
+      React.ComponentType<React.ComponentProps<"svg">> | undefined
+    >
   )[lucide];
   return Icon ? <Icon {...props} /> : null;
 }

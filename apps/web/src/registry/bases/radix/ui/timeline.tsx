@@ -1,9 +1,13 @@
-import * as React from "react";
 import { cn } from "cn";
+import * as React from "react";
 
 function Timeline({ className, ...props }: React.ComponentProps<"ol">) {
   return (
-    <ol data-slot="timeline" className={cn("cn-timeline flex flex-col", className)} {...props} />
+    <ol
+      data-slot="timeline"
+      className={cn("cn-timeline flex flex-col", className)}
+      {...props}
+    />
   );
 }
 
@@ -11,7 +15,10 @@ function TimelineItem({ className, ...props }: React.ComponentProps<"li">) {
   return (
     <li
       data-slot="timeline-item"
-      className={cn("cn-timeline-item relative border-l pl-6 last:border-transparent", className)}
+      className={cn(
+        "cn-timeline-item relative border-l pl-6 last:border-transparent",
+        className,
+      )}
       {...props}
     />
   );
@@ -22,7 +29,10 @@ function TimelineDot({ className, ...props }: React.ComponentProps<"span">) {
     <span
       data-slot="timeline-dot"
       aria-hidden="true"
-      className={cn("cn-timeline-dot absolute top-1 left-0 -translate-x-1/2", className)}
+      className={cn(
+        "cn-timeline-dot absolute top-1 left-0 -translate-x-1/2",
+        className,
+      )}
       {...props}
     />
   );
@@ -30,11 +40,18 @@ function TimelineDot({ className, ...props }: React.ComponentProps<"span">) {
 
 function TimelineTitle({ className, ...props }: React.ComponentProps<"h3">) {
   return (
-    <h3 data-slot="timeline-title" className={cn("cn-timeline-title", className)} {...props} />
+    <h3
+      data-slot="timeline-title"
+      className={cn("cn-timeline-title", className)}
+      {...props}
+    />
   );
 }
 
-function TimelineDescription({ className, ...props }: React.ComponentProps<"p">) {
+function TimelineDescription({
+  className,
+  ...props
+}: React.ComponentProps<"p">) {
   return (
     <p
       data-slot="timeline-description"
@@ -54,4 +71,11 @@ function TimelineTime({ className, ...props }: React.ComponentProps<"time">) {
   );
 }
 
-export { Timeline, TimelineDescription, TimelineDot, TimelineItem, TimelineTime, TimelineTitle };
+export {
+  Timeline,
+  TimelineDescription,
+  TimelineDot,
+  TimelineItem,
+  TimelineTime,
+  TimelineTitle,
+};

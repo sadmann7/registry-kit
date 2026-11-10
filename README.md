@@ -86,7 +86,8 @@ Projects on a style this registry doesn't build, like `new-york-v4` or `default`
 | `pnpm registry:build` | Build `public/r` for every base and style.              |
 | `pnpm registry:test`  | Install every item for every base and style, in RTL.    |
 | `pnpm registry:sync`  | Sync shadcn/ui primitives and styles from `SHADCN_REF`. |
-| `pnpm check-types`    | Type-check, after generating the preview files.         |
+| `pnpm typecheck`      | Type-check, after generating the preview files.         |
+| `pnpm check`          | Lint, check formatting and type-check.                  |
 | `pnpm lint`           | Run oxlint.                                             |
 | `pnpm format`         | Run oxfmt.                                              |
 

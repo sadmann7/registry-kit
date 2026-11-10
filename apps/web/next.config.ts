@@ -1,5 +1,6 @@
-import { varlockNextConfigPlugin } from "@varlock/nextjs-integration/plugin";
 import type { NextConfig } from "next";
+
+import { varlockNextConfigPlugin } from "@varlock/nextjs-integration/plugin";
 
 import { DEFAULT_STYLE } from "./src/registry/config.ts";
 
@@ -14,8 +15,14 @@ const nextConfig: NextConfig = {
       // registry doesn't build, like `new-york-v4` or `default`. Base UI
       // projects get the Base UI build; everything else is Radix.
       afterFiles: [
-        { source: "/r/base-:style/:name.json", destination: `/r/base-${DEFAULT_STYLE}/:name.json` },
-        { source: "/r/:style/:name.json", destination: `/r/radix-${DEFAULT_STYLE}/:name.json` },
+        {
+          source: "/r/base-:style/:name.json",
+          destination: `/r/base-${DEFAULT_STYLE}/:name.json`,
+        },
+        {
+          source: "/r/:style/:name.json",
+          destination: `/r/radix-${DEFAULT_STYLE}/:name.json`,
+        },
       ],
       beforeFiles: [],
       fallback: [],
