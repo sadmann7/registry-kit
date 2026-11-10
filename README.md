@@ -90,7 +90,7 @@ The preview renders left-to-right. Check RTL output with `pnpm registry:test`, o
 
 ## Serving unknown styles
 
-Projects on a style this registry doesn't build, like `new-york-v4` or `default`, would get a 404. `next.config.ts` rewrites those requests to the default style of the same base, like `aria-lyra` to `aria-nova`, and anything without a base to the default base. Projects on a shadcn/ui base the registry doesn't build (see `SHADCN_BASES` in `config.ts`) still get a 404, since another base's components import a different library.
+Projects on a style this registry doesn't build would get a 404. `next.config.ts` rewrites those requests to the default style of the same base, like `aria-lyra` to `aria-nova`. Styles without a base, like `new-york-v4` or `default`, are Radix in shadcn/ui, so they go to `radix-nova`. Projects on a base the registry doesn't build still get a 404, including those older styles when Radix isn't built, since another base's components import a different library. `SHADCN_BASES` in `config.ts` lists every shadcn/ui base.
 
 ## Scripts
 
