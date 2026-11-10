@@ -4,6 +4,7 @@
 export const BASES = [
   { name: "radix", title: "Radix UI" },
   { name: "base", title: "Base UI" },
+  { name: "aria", title: "React Aria" },
 ] as const;
 
 // Same names as shadcn/ui's styles, so `{style}` in a project's registry URL

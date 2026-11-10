@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { CopyButton } from "@/components/copy-button";
 import { StyleClass } from "@/components/style-class";
+import ariaRegistry from "@/registry/bases/aria/registry.json";
 import baseRegistry from "@/registry/bases/base/registry.json";
 import radixRegistry from "@/registry/bases/radix/registry.json";
 import {
@@ -16,10 +17,11 @@ import {
 } from "@/registry/config";
 import { EXAMPLES, USAGE } from "@/registry/examples";
 
-const REGISTRIES = { radix: radixRegistry, base: baseRegistry } as Record<
-  BaseName,
-  Registry
->;
+const REGISTRIES = {
+  radix: radixRegistry,
+  base: baseRegistry,
+  aria: ariaRegistry,
+} as Record<BaseName, Registry>;
 
 type Item = Registry["items"][number];
 
@@ -51,8 +53,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             Components that fit every shadcn project.
           </h1>
           <p className="max-w-120 text-base leading-normal text-site-muted">
-            Built for Radix UI and Base UI, in all eight styles. The CLI handles
-            icons and right-to-left layout when you install.
+            Built for Radix UI, Base UI and React Aria, in all eight styles. The
+            CLI handles icons and right-to-left layout when you install.
           </p>
         </div>
 

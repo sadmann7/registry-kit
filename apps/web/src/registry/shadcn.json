@@ -1,6 +1,7 @@
 {
   "ref": "8ab27715521cbd4f87ae6886cd989cbb678f6de7",
   "files": [
+    "bases/aria/ui/button.tsx",
     "bases/base/ui/button.tsx",
     "bases/radix/ui/button.tsx",
     "styles/shadcn/style-luma.css",

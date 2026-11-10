@@ -1,6 +1,6 @@
 # registry-kit
 
-A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that ship every base (Radix UI and Base UI) and every style (Vega, Nova, Maia, Lyra, Mira, Luma, Sera and Rhea), with RTL, the way shadcn/ui's own registry does.
+A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that ship every base (Radix UI, Base UI and React Aria) and every style (Vega, Nova, Maia, Lyra, Mira, Luma, Sera and Rhea), with RTL, the way shadcn/ui's own registry does.
 
 Scaffolded with [Better-T-Stack](https://better-t-stack.dev): Next.js, Turborepo, oxlint and oxfmt, pnpm.
 
@@ -38,7 +38,7 @@ Styles that don't define a marker fall back to the default style (`nova`), so a 
 apps/web/
   src/registry/
     config.ts                bases, styles, defaults, pinned shadcn/ui commit
-    bases/{radix,base}/
+    bases/{radix,base,aria}/
       registry.json          the registry: items, dependencies, files
       ui/ hooks/ lib/        item source, with cn-* markers
       examples/              demos for the preview (not published)
@@ -55,8 +55,8 @@ apps/web/
 
 ## Adding an item
 
-1. Add the source to `bases/radix` and `bases/base`, with markers for anything style-specific.
-2. Add the item to both `registry.json` files. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`.
+1. Add the source to `bases/radix`, `bases/base` and `bases/aria`, with markers for anything style-specific. React Aria components take `onPress` instead of `onClick` and have no `asChild`.
+2. Add the item to every `registry.json`. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`.
 3. Give every new marker a rule in `styles/style-nova.css`, and override it in other styles as needed.
 4. If you import a shadcn/ui primitive the registry didn't use before, run `pnpm registry:sync`.
 5. Add a demo to `examples/` and `src/registry/examples.ts`.
@@ -75,7 +75,7 @@ The preview renders left-to-right. Check RTL output with `pnpm registry:test`, o
 
 ## Serving unknown styles
 
-Projects on a style this registry doesn't build, like `new-york-v4` or `default`, would get a 404. `next.config.ts` rewrites those requests to the default style, sending Base UI styles to `base-nova` and everything else to `radix-nova`.
+Projects on a style this registry doesn't build, like `new-york-v4` or `default`, would get a 404. `next.config.ts` rewrites those requests to the default style, sending Base UI styles to `base-nova`, React Aria styles to `aria-nova`, and everything else to `radix-nova`.
 
 ## Scripts
 

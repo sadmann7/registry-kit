@@ -12,12 +12,17 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       // Runs only when no file in `public/r` matched, so it catches styles this
-      // registry doesn't build, like `new-york-v4` or `default`. Base UI
-      // projects get the Base UI build; everything else is Radix.
+      // registry doesn't build, like `new-york-v4` or `default`. Base UI and
+      // React Aria projects get their own base's build; everything else is
+      // Radix.
       afterFiles: [
         {
           source: "/r/base-:style/:name.json",
           destination: `/r/base-${DEFAULT_STYLE}/:name.json`,
+        },
+        {
+          source: "/r/aria-:style/:name.json",
+          destination: `/r/aria-${DEFAULT_STYLE}/:name.json`,
         },
         {
           source: "/r/:style/:name.json",

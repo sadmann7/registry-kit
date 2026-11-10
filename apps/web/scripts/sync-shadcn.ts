@@ -157,7 +157,16 @@ await Promise.all(
     .map((file) => fs.rm(path.join(REGISTRY_PATH, file), { force: true })),
 );
 
-// Match the repo's formatting, so `pnpm check` stays clean after a sync.
+// Match the repo's lint fixes and formatting, so `pnpm check` stays clean
+// after a sync.
+const sources = files
+  .filter((file) => /\.tsx?$/.test(file))
+  .map((file) => path.join(REGISTRY_PATH, file));
+await promisify(execFile)(
+  path.join(ROOT, "../../node_modules/.bin/oxlint"),
+  ["--fix", ...sources],
+  { cwd: path.join(ROOT, "../..") },
+);
 await promisify(execFile)(
   path.join(ROOT, "../../node_modules/.bin/oxfmt"),
   files.map((file) => path.join(REGISTRY_PATH, file)),
