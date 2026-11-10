@@ -162,11 +162,16 @@ await Promise.all(
 const sources = files
   .filter((file) => /\.tsx?$/.test(file))
   .map((file) => path.join(REGISTRY_PATH, file));
-await promisify(execFile)(
-  path.join(ROOT, "../../node_modules/.bin/oxlint"),
-  ["--fix", ...sources],
-  { cwd: path.join(ROOT, "../..") },
-);
+// Skipped with no sources, since oxlint lints the whole repo without paths.
+// Lint errors `--fix` can't repair fail `pnpm check`, not the sync, so the
+// lock file below is still written.
+if (sources.length > 0) {
+  await promisify(execFile)(
+    path.join(ROOT, "../../node_modules/.bin/oxlint"),
+    ["--fix", ...sources],
+    { cwd: path.join(ROOT, "../..") },
+  ).catch(() => {});
+}
 await promisify(execFile)(
   path.join(ROOT, "../../node_modules/.bin/oxfmt"),
   files.map((file) => path.join(REGISTRY_PATH, file)),
