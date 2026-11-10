@@ -90,6 +90,13 @@ function splitList(flag: string, value: string) {
   return list;
 }
 
+// Quotes a value for POSIX shells, so the printed command can be pasted as is.
+function quote(value: string) {
+  return /^[\w@%+=:,./-]+$/.test(value)
+    ? value
+    : `'${value.replaceAll("'", `'\\''`)}'`;
+}
+
 function fail(message: string): never {
   p.log.error(message);
   process.exit(1);
@@ -242,8 +249,8 @@ if (result.dependenciesChanged && flags.install) {
 p.note(
   [
     "pnpm kit:init",
-    `--name ${name}`,
-    `--homepage ${homepage}`,
+    `--name ${quote(name)}`,
+    `--homepage ${quote(homepage)}`,
     `--bases ${bases.join(",")}`,
     `--styles ${styles.join(",")}`,
     ...(examples ? [] : ["--no-examples"]),
