@@ -1,3 +1,4 @@
+import { formatDate } from "@/registry/bases/base/lib/format";
 import {
   Timeline,
   TimelineDescription,
@@ -9,17 +10,17 @@ import {
 
 const events = [
   {
-    time: "Nov 3",
+    date: "2026-11-03",
     title: "Registry created",
     description: "Scaffolded with Better-T-Stack.",
   },
   {
-    time: "Nov 7",
+    date: "2026-11-07",
     title: "First item published",
     description: "Built for every base and style.",
   },
   {
-    time: "Nov 11",
+    date: "2026-11-11",
     title: "Installed in an RTL project",
     description: "The CLI flipped the classes on install.",
   },
@@ -31,7 +32,9 @@ export default function TimelineDemo() {
       {events.map((event) => (
         <TimelineItem key={event.title}>
           <TimelineDot />
-          <TimelineTime>{event.time}</TimelineTime>
+          <TimelineTime dateTime={event.date}>
+            {formatDate(event.date, { month: "short", timeZone: "UTC" })}
+          </TimelineTime>
           <TimelineTitle>{event.title}</TimelineTitle>
           <TimelineDescription>{event.description}</TimelineDescription>
         </TimelineItem>
