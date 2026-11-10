@@ -1,5 +1,7 @@
 import type { Registry } from "shadcn/schema";
 
+import { Button } from "@registry-kit/ui/components/button";
+
 import { CopyButton } from "@/components/copy-button";
 import { PreviewControls } from "@/components/preview-controls";
 import { StyleClass } from "@/components/style-class";
@@ -82,17 +84,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       </section>
 
       <div className="sticky top-0 z-10 border-y border-site-hairline bg-site">
-        <div className="mx-auto flex max-w-6xl items-center gap-8 px-4 py-3 sm:px-12">
+        <div className="mx-auto flex max-w-6xl items-center px-4 py-3 sm:px-12">
           <PreviewControls base={base} style={style} />
-          <span className="ml-auto hidden shrink-0 font-mono text-xs text-site-muted sm:inline">
-            {pluralize(registry.items.length, "item")}
-          </span>
         </div>
       </div>
 
-      <div className="pb-6">
+      <div className="mx-auto flex max-w-6xl flex-col gap-14 px-4 pt-10 pb-20 sm:px-12 sm:pt-12">
         {registry.items.map((item) => (
-          <ItemRow
+          <ItemSection
             key={item.name}
             item={item}
             base={base}
@@ -102,21 +101,23 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         ))}
       </div>
 
-      <footer className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-7 text-xs text-site-muted sm:px-12">
-        <p>Built with registry-kit. Items install with the shadcn CLI.</p>
-        {/* oxlint-disable-next-line nextjs/no-html-link-for-pages -- a static file in public/r, not a page */}
-        <a
-          href="/r/registry.json"
-          className="rounded-sm font-mono transition-colors outline-none hover:text-site-ink focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          /r/registry.json
-        </a>
+      <footer className="border-t border-site-hairline">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-7 text-xs text-site-muted sm:flex-row sm:items-center sm:justify-between sm:px-12">
+          <p>Built with registry-kit. Items install with the shadcn CLI.</p>
+          {/* oxlint-disable-next-line nextjs/no-html-link-for-pages -- a static file in public/r, not a page */}
+          <a
+            href="/r/registry.json"
+            className="w-fit rounded-sm font-mono transition-colors outline-none hover:text-site-ink focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            /r/registry.json
+          </a>
+        </div>
       </footer>
     </main>
   );
 }
 
-function ItemRow({
+function ItemSection({
   item,
   base,
   style,
@@ -129,74 +130,53 @@ function ItemRow({
 }) {
   const Example = EXAMPLES[base][item.name];
   const usage = USAGE[item.name]?.(base);
-  const dependencies = [
-    ...(item.dependencies ?? []),
-    ...(item.registryDependencies ?? []),
-  ];
-  const command = `pnpm dlx shadcn@latest add @${namespace}/${item.name}`;
+  const title = item.title ?? item.name;
   const json = `${base}-${style}/${item.name}.json`;
 
   return (
-    // The rule runs full width, like the header's and the toolbar's.
-    <article
+    <section
       id={item.name}
-      className="scroll-mt-36 border-b border-site-hairline sm:scroll-mt-20"
+      aria-labelledby={`${item.name}-title`}
+      className="flex scroll-mt-36 flex-col gap-3 sm:scroll-mt-24"
     >
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 sm:px-12 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
-        <div className="flex flex-col gap-3.5">
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-[22px] font-semibold tracking-[-0.02em]">
-              {item.title ?? item.name}
-            </h2>
-            <span className="rounded border border-site-hairline px-1.75 py-0.5 font-mono text-[11px] text-site-muted">
-              {item.type.replace("registry:", "")}
-            </span>
-          </div>
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex min-w-0 flex-col gap-0.5 text-sm sm:flex-row sm:items-baseline sm:gap-2.5">
+          <h2 id={`${item.name}-title`} className="shrink-0 font-medium">
+            {title}
+          </h2>
           {item.description && (
-            <p className="text-sm leading-normal text-site-muted">
+            <p className="text-site-muted sm:truncate sm:border-l sm:border-site-hairline sm:pl-2.5">
               {item.description}
             </p>
           )}
-          {dependencies.length > 0 && (
-            <div className="flex flex-col gap-1.5 pt-2.5">
-              <span className="text-xs text-site-muted">Depends on</span>
-              <ul className="flex flex-col gap-1 font-mono text-xs">
-                {dependencies.map((dependency) => (
-                  <li key={dependency}>{dependency}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
-
-        <div className="overflow-hidden rounded-[10px] border border-site-hairline bg-site-surface">
-          {Example ? (
-            <div className="flex min-h-50 items-center justify-center bg-background p-6 text-foreground sm:p-12">
-              <Example />
-            </div>
-          ) : usage ? (
-            <pre className="overflow-x-auto px-5 py-6 font-mono text-[13px] leading-relaxed sm:px-8 sm:py-7">
-              {usage}
-            </pre>
-          ) : null}
-          <div className="flex items-start gap-3 border-t border-site-hairline bg-site py-2.5 pr-2.5 pl-4 font-mono text-[12.5px] leading-7 sm:items-center">
-            <span aria-hidden className="text-site-muted">
-              $
-            </span>
-            <code className="min-w-0 flex-1 wrap-break-word sm:truncate">
-              {command}
-            </code>
-            <a
-              href={`/r/${json}`}
-              title={json}
-              className="hidden rounded-sm text-xs text-site-muted transition-colors outline-none hover:text-site-ink focus-visible:ring-3 focus-visible:ring-ring/50 sm:inline"
-            >
-              JSON
-            </a>
-            <CopyButton value={command} label="Copy install command" />
-          </div>
+        <div className="flex items-center gap-2">
+          <CopyButton
+            value={`pnpm dlx shadcn@latest add @${namespace}/${item.name}`}
+          >
+            @{namespace}/{item.name}
+          </CopyButton>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            className="border-site-hairline bg-site-surface font-mono text-xs font-normal text-site-muted hover:bg-site hover:text-site-ink dark:border-site-hairline dark:bg-site-surface dark:hover:bg-site pointer-coarse:h-9"
+            render={<a href={`/r/${json}`} title={json} />}
+          >
+            JSON
+          </Button>
         </div>
       </div>
-    </article>
+
+      {Example ? (
+        <div className="flex min-h-72 items-center justify-center overflow-x-auto rounded-xl border bg-card p-8 text-card-foreground sm:min-h-96 sm:p-12">
+          <Example />
+        </div>
+      ) : usage ? (
+        <pre className="overflow-x-auto rounded-xl border bg-card px-5 py-5 font-mono text-[13px] leading-relaxed text-card-foreground sm:px-8 sm:py-7">
+          {usage}
+        </pre>
+      ) : null}
+    </section>
   );
 }
