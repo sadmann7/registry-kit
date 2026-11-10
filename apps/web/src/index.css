@@ -7,6 +7,21 @@
  * The site's own colors. Previews keep shadcn's theme (--background, --card…),
  * so items look the way they will in a project.
  */
+@layer base {
+  /* No gray flash on tap; controls give their own press feedback. */
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Fire clicks without waiting to see if the tap is a double-tap zoom. */
+  a,
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
 :root {
   --site: #fafaf9;
   --site-surface: #ffffff;

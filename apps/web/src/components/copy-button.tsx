@@ -30,7 +30,7 @@ export function CopyButton({
       size="icon-sm"
       aria-label={copied ? "Copied" : label}
       className={cn(
-        "border-site-hairline bg-site-surface text-site-ink hover:bg-site hover:text-site-ink dark:border-site-hairline dark:bg-site-surface dark:hover:bg-site",
+        "border-site-hairline bg-site-surface text-site-ink hover:bg-site hover:text-site-ink dark:border-site-hairline dark:bg-site-surface dark:hover:bg-site pointer-coarse:size-9",
         className,
       )}
       onClick={async () => {
