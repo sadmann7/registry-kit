@@ -17,10 +17,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} ${fontMono.variable} bg-site text-site-ink antialiased`}
-      >
+    // The font variables go on <html>, so the theme's --font-sans and
+    // --font-mono resolve on every element, including bare <code> and <pre>.
+    <html
+      lang="en"
+      className={`${fontSans.variable} ${fontMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-site text-site-ink antialiased">
         <Providers>
           <SiteHeader />
           {children}
