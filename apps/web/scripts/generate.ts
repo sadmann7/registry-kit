@@ -5,6 +5,9 @@
 //   the preview matches what the build publishes.
 // - `__generated__/icons.ts`: the lucide icons `IconPlaceholder` names, so
 //   the preview doesn't bundle all of `lucide-react`.
+// - `__generated__/registries.ts`: each base's `registry.json` and the demos
+//   in its `examples/`, so adding or removing a base or a demo needs no
+//   imports by hand.
 //
 //   node scripts/generate.ts [--watch]
 
@@ -12,7 +15,7 @@ import { watch } from "node:fs";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-import { STYLES } from "../src/registry/config.ts";
+import { BASES, STYLES } from "../src/registry/config.ts";
 import {
   GENERATED_PATH,
   getMarkers,
@@ -38,6 +41,64 @@ async function readSources(
     }),
   );
   return sources.flat();
+}
+
+function toPascalCase(name: string) {
+  return name.replace(/(?:^|-)(\w)/g, (_, char: string) => char.toUpperCase());
+}
+
+// `examples/{item}-demo.tsx` is the demo for `{item}`.
+async function getRegistriesModule() {
+  const imports: string[] = [];
+  const registries: string[] = [];
+  const examples: string[] = [];
+
+  for (const { name: base } of BASES) {
+    const registry = `${toPascalCase(base)}Registry`;
+    imports.push(
+      `import ${registry} from "@/registry/bases/${base}/registry.json";`,
+    );
+    registries.push(`  ${base}: ${registry},`);
+
+    const demos = (
+      await fs
+        .readdir(path.join(REGISTRY_PATH, "bases", base, "examples"))
+        .catch(() => [])
+    )
+      .filter((file) => file.endsWith("-demo.tsx"))
+      .sort();
+    const entries = demos.map((file) => {
+      const item = file.replace(/-demo\.tsx$/, "");
+      const demo = `${toPascalCase(base)}${toPascalCase(item)}Demo`;
+      imports.push(
+        `import ${demo} from "@/registry/bases/${base}/examples/${item}-demo";`,
+      );
+      return `    "${item}": ${demo},`;
+    });
+    examples.push(`  ${base}: {\n${entries.join("\n")}\n  },`);
+  }
+
+  return `// ${HEADER}
+
+import type * as React from "react";
+import type { Registry } from "shadcn/schema";
+
+import type { BaseName } from "@/registry/config";
+
+${imports.join("\n")}
+
+export const REGISTRIES = {
+${registries.join("\n")}
+} as Record<BaseName, Registry>;
+
+// Demos shown in the preview, by base and item name.
+export const EXAMPLES: Record<
+  BaseName,
+  Record<string, React.ComponentType>
+> = {
+${examples.join("\n")}
+};
+`;
 }
 
 export async function generate() {
@@ -75,6 +136,10 @@ export async function generate() {
       path.join(GENERATED_PATH, "icons.ts"),
       `// ${HEADER}\n\nexport {\n${icons.map((icon) => `  ${icon},`).join("\n")}\n} from "lucide-react";\n`,
     ),
+    writeFileIfChanged(
+      path.join(GENERATED_PATH, "registries.ts"),
+      await getRegistriesModule(),
+    ),
   ]);
 }
 
@@ -84,7 +149,7 @@ export function watchRegistry() {
     if (
       !file ||
       file.startsWith("__generated__") ||
-      !/\.(css|tsx?)$/.test(file)
+      !/\.(css|json|tsx?)$/.test(file)
     )
       return;
     clearTimeout(timer);

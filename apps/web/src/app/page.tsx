@@ -4,9 +4,7 @@ import Link from "next/link";
 
 import { CopyButton } from "@/components/copy-button";
 import { StyleClass } from "@/components/style-class";
-import ariaRegistry from "@/registry/bases/aria/registry.json";
-import baseRegistry from "@/registry/bases/base/registry.json";
-import radixRegistry from "@/registry/bases/radix/registry.json";
+import { EXAMPLES, REGISTRIES } from "@/registry/__generated__/registries";
 import {
   type BaseName,
   BASES,
@@ -15,13 +13,7 @@ import {
   type StyleName,
   STYLES,
 } from "@/registry/config";
-import { EXAMPLES, USAGE } from "@/registry/examples";
-
-const REGISTRIES = {
-  radix: radixRegistry,
-  base: baseRegistry,
-  aria: ariaRegistry,
-} as Record<BaseName, Registry>;
+import { USAGE } from "@/registry/examples";
 
 type Item = Registry["items"][number];
 

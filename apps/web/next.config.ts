@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 import { varlockNextConfigPlugin } from "@varlock/nextjs-integration/plugin";
 
-import { DEFAULT_STYLE } from "./src/registry/config.ts";
+import { BASES, DEFAULT_BASE, DEFAULT_STYLE } from "./src/registry/config.ts";
 
 const withVarlock = varlockNextConfigPlugin();
 
@@ -12,21 +12,17 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       // Runs only when no file in `public/r` matched, so it catches styles this
-      // registry doesn't build, like `new-york-v4` or `default`. Base UI and
-      // React Aria projects get their own base's build; everything else is
-      // Radix.
+      // registry doesn't build, like `new-york-v4` or `default`. Projects on a
+      // base this registry builds get that base; everything else gets the
+      // default base.
       afterFiles: [
-        {
-          source: "/r/base-:style/:name.json",
-          destination: `/r/base-${DEFAULT_STYLE}/:name.json`,
-        },
-        {
-          source: "/r/aria-:style/:name.json",
-          destination: `/r/aria-${DEFAULT_STYLE}/:name.json`,
-        },
+        ...BASES.map(({ name }) => ({
+          source: `/r/${name}-:style/:name.json`,
+          destination: `/r/${name}-${DEFAULT_STYLE}/:name.json`,
+        })),
         {
           source: "/r/:style/:name.json",
-          destination: `/r/radix-${DEFAULT_STYLE}/:name.json`,
+          destination: `/r/${DEFAULT_BASE}-${DEFAULT_STYLE}/:name.json`,
         },
       ],
       beforeFiles: [],

@@ -59,7 +59,7 @@ apps/web/
 2. Add the item to every `registry.json`. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`.
 3. Give every new marker a rule in `styles/style-nova.css`, and override it in other styles as needed.
 4. If you import a shadcn/ui primitive the registry didn't use before, run `pnpm registry:sync`.
-5. Add a demo to `examples/` and `src/registry/examples.ts`.
+5. Add a demo to each base as `examples/{name}-demo.tsx`. The preview finds it by name. Items with nothing to render, like hooks, can show a snippet from `src/registry/examples.ts` instead.
 
 `pnpm registry:build` fails when a marker has no default rule, or when an item imports another item without listing it in `registryDependencies`.
 
