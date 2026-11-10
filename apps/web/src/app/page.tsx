@@ -42,7 +42,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     <main className={`style-${style}`}>
       <StyleClass style={style} />
 
-      <section className="mx-auto grid max-w-360 items-end gap-12 px-4 pt-16 pb-14 sm:px-12 sm:pt-18 lg:grid-cols-[minmax(0,1fr)_460px]">
+      <section className="mx-auto grid max-w-6xl items-end gap-12 px-4 pt-16 pb-14 sm:px-12 sm:pt-18 lg:grid-cols-[minmax(0,1fr)_440px]">
         <div className="flex max-w-155 flex-col gap-5">
           <p className="font-mono text-xs text-site-muted">
             {pluralize(BASES.length, "base")} ·{" "}
@@ -86,7 +86,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         aria-label="Base and style"
         className="sticky top-0 z-10 border-y border-site-hairline bg-site"
       >
-        <div className="mx-auto flex max-w-360 items-center gap-10 overflow-x-auto px-4 py-3.5 text-[13px] sm:px-12">
+        <div className="mx-auto flex max-w-6xl items-center gap-10 overflow-x-auto px-4 py-3.5 text-[13px] sm:px-12">
           <div className="flex shrink-0 items-center gap-3">
             <span className="text-xs text-site-muted">Base</span>
             <div className="flex gap-0.5 rounded-lg border border-site-hairline bg-site-surface p-0.75">
@@ -131,7 +131,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </nav>
 
-      <div className="mx-auto max-w-360 px-4 pb-6 sm:px-12">
+      <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-12">
         {registry.items.map((item) => (
           <ItemRow
             key={item.name}
@@ -143,7 +143,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         ))}
       </div>
 
-      <footer className="mx-auto flex max-w-360 items-center justify-between gap-4 px-4 py-7 text-xs text-site-muted sm:px-12">
+      <footer className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-7 text-xs text-site-muted sm:px-12">
         <p>Built with registry-kit. Items install with the shadcn CLI.</p>
         {/* oxlint-disable-next-line nextjs/no-html-link-for-pages -- a static file in public/r, not a page */}
         <a
@@ -180,7 +180,7 @@ function ItemRow({
   return (
     <article
       id={item.name}
-      className="grid scroll-mt-20 gap-6 border-b border-site-hairline py-12 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-12"
+      className="grid scroll-mt-20 gap-6 border-b border-site-hairline py-12 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12"
     >
       <div className="flex flex-col gap-3.5">
         <div className="flex items-center gap-2.5">
@@ -199,7 +199,11 @@ function ItemRow({
         {dependencies.length > 0 && (
           <div className="flex flex-col gap-1.5 pt-2.5">
             <span className="text-xs text-site-muted">Depends on</span>
-            <span className="font-mono text-xs">{dependencies.join(", ")}</span>
+            <ul className="flex flex-col gap-1 font-mono text-xs">
+              {dependencies.map((dependency) => (
+                <li key={dependency}>{dependency}</li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
@@ -221,9 +225,10 @@ function ItemRow({
           <code className="min-w-0 flex-1 truncate">{command}</code>
           <a
             href={`/r/${json}`}
+            title={json}
             className="hidden text-xs text-site-muted transition-colors hover:text-site-ink sm:inline"
           >
-            {json}
+            JSON
           </a>
           <CopyButton value={command} label="Copy install command" />
         </div>
