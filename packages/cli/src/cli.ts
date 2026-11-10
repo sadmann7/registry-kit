@@ -3,7 +3,7 @@
 // registry-kit checkout to match. Every prompt has a flag, so it also runs
 // without prompts in scripts and CI.
 //
-//   pnpm kit:init [--name acme] [--homepage https://acme.com]
+//   pnpm registry:init [--name acme] [--homepage https://acme.com]
 //     [--bases radix,base] [--styles nova,lyra] [--no-examples] [--yes]
 
 import * as p from "@clack/prompts";
@@ -21,7 +21,7 @@ import {
   validateOptions,
 } from "./kit.ts";
 
-const HELP = `Usage: pnpm kit:init [options]
+const HELP = `Usage: pnpm registry:init [options]
 
 Trims this registry-kit to the bases, styles and items your registry needs.
 Prompts for anything not passed as a flag.
@@ -64,7 +64,7 @@ if (flags.help) {
 // Without a terminal nobody can confirm, so deleting files needs `--yes`.
 if (!flags.yes && !process.stdin.isTTY) {
   console.error(
-    "kit:init can't prompt without a terminal. Pass --yes, with flags for anything you want to change.",
+    "registry:init can't prompt without a terminal. Pass --yes, with flags for anything you want to change.",
   );
   process.exit(1);
 }
@@ -250,7 +250,7 @@ if (result.dependenciesChanged && flags.install) {
 
 p.note(
   [
-    "pnpm kit:init",
+    "pnpm registry:init",
     `--name ${quote(name)}`,
     `--homepage ${quote(homepage)}`,
     `--bases ${bases.join(",")}`,

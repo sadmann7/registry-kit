@@ -314,7 +314,7 @@ function removeOptions(config: string, array: string, remove: Option[]) {
         );
         if (!entry.test(result)) {
           throw new Error(
-            `Couldn't find the ${option.name} entry in ${array} in ${CONFIG_FILE}. Remove it by hand, then run kit:init again.`,
+            `Couldn't find the ${option.name} entry in ${array} in ${CONFIG_FILE}. Remove it by hand, then run registry:init again.`,
           );
         }
         return result.replace(entry, "");
