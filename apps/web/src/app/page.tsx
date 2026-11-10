@@ -90,7 +90,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 pb-6 sm:px-12">
+      <div className="pb-6">
         {registry.items.map((item) => (
           <ItemRow
             key={item.name}
@@ -137,61 +137,64 @@ function ItemRow({
   const json = `${base}-${style}/${item.name}.json`;
 
   return (
+    // The rule runs full width, like the header's and the toolbar's.
     <article
       id={item.name}
-      className="grid scroll-mt-20 gap-6 border-b border-site-hairline py-12 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12"
+      className="scroll-mt-36 border-b border-site-hairline sm:scroll-mt-20"
     >
-      <div className="flex flex-col gap-3.5">
-        <div className="flex items-center gap-2.5">
-          <h2 className="text-[22px] font-semibold tracking-[-0.02em]">
-            {item.title ?? item.name}
-          </h2>
-          <span className="rounded border border-site-hairline px-1.75 py-0.5 font-mono text-[11px] text-site-muted">
-            {item.type.replace("registry:", "")}
-          </span>
+      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 sm:px-12 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
+        <div className="flex flex-col gap-3.5">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-[22px] font-semibold tracking-[-0.02em]">
+              {item.title ?? item.name}
+            </h2>
+            <span className="rounded border border-site-hairline px-1.75 py-0.5 font-mono text-[11px] text-site-muted">
+              {item.type.replace("registry:", "")}
+            </span>
+          </div>
+          {item.description && (
+            <p className="text-sm leading-normal text-site-muted">
+              {item.description}
+            </p>
+          )}
+          {dependencies.length > 0 && (
+            <div className="flex flex-col gap-1.5 pt-2.5">
+              <span className="text-xs text-site-muted">Depends on</span>
+              <ul className="flex flex-col gap-1 font-mono text-xs">
+                {dependencies.map((dependency) => (
+                  <li key={dependency}>{dependency}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-        {item.description && (
-          <p className="text-sm leading-normal text-site-muted">
-            {item.description}
-          </p>
-        )}
-        {dependencies.length > 0 && (
-          <div className="flex flex-col gap-1.5 pt-2.5">
-            <span className="text-xs text-site-muted">Depends on</span>
-            <ul className="flex flex-col gap-1 font-mono text-xs">
-              {dependencies.map((dependency) => (
-                <li key={dependency}>{dependency}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
 
-      <div className="overflow-hidden rounded-[10px] border border-site-hairline bg-site-surface">
-        {Example ? (
-          <div className="flex min-h-50 items-center justify-center bg-background p-6 text-foreground sm:p-12">
-            <Example />
+        <div className="overflow-hidden rounded-[10px] border border-site-hairline bg-site-surface">
+          {Example ? (
+            <div className="flex min-h-50 items-center justify-center bg-background p-6 text-foreground sm:p-12">
+              <Example />
+            </div>
+          ) : usage ? (
+            <pre className="overflow-x-auto px-5 py-6 font-mono text-[13px] leading-relaxed sm:px-8 sm:py-7">
+              {usage}
+            </pre>
+          ) : null}
+          <div className="flex items-start gap-3 border-t border-site-hairline bg-site py-2.5 pr-2.5 pl-4 font-mono text-[12.5px] leading-7 sm:items-center">
+            <span aria-hidden className="text-site-muted">
+              $
+            </span>
+            <code className="min-w-0 flex-1 wrap-break-word sm:truncate">
+              {command}
+            </code>
+            <a
+              href={`/r/${json}`}
+              title={json}
+              className="hidden rounded-sm text-xs text-site-muted transition-colors outline-none hover:text-site-ink focus-visible:ring-3 focus-visible:ring-ring/50 sm:inline"
+            >
+              JSON
+            </a>
+            <CopyButton value={command} label="Copy install command" />
           </div>
-        ) : usage ? (
-          <pre className="overflow-x-auto px-5 py-6 font-mono text-[13px] leading-relaxed sm:px-8 sm:py-7">
-            {usage}
-          </pre>
-        ) : null}
-        <div className="flex items-start gap-3 border-t border-site-hairline bg-site py-2.5 pr-2.5 pl-4 font-mono text-[12.5px] leading-7 sm:items-center">
-          <span aria-hidden className="text-site-muted">
-            $
-          </span>
-          <code className="min-w-0 flex-1 wrap-break-word sm:truncate">
-            {command}
-          </code>
-          <a
-            href={`/r/${json}`}
-            title={json}
-            className="hidden rounded-sm text-xs text-site-muted transition-colors outline-none hover:text-site-ink focus-visible:ring-3 focus-visible:ring-ring/50 sm:inline"
-          >
-            JSON
-          </a>
-          <CopyButton value={command} label="Copy install command" />
         </div>
       </div>
     </article>
