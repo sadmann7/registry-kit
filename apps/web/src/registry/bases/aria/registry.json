@@ -4,6 +4,19 @@
   "homepage": "https://acme.com",
   "items": [
     {
+      "name": "announcement",
+      "type": "registry:ui",
+      "title": "Announcement",
+      "description": "A pill that links to what's new.",
+      "dependencies": ["cn", "react-aria-components"],
+      "files": [
+        {
+          "path": "ui/announcement.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "rating",
       "type": "registry:ui",
       "title": "Rating",

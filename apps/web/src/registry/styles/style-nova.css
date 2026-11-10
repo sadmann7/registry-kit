@@ -3,6 +3,19 @@
  * other styles fall back to it for any marker they don't define.
  */
 .style-nova {
+  /* MARK: Announcement */
+  .cn-announcement {
+    @apply gap-2 rounded-full border bg-background py-1 pr-3 pl-1 text-sm shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&:is(a)]:hover:bg-muted;
+  }
+
+  .cn-announcement-tag {
+    @apply rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground;
+  }
+
+  .cn-announcement-title {
+    @apply gap-1 font-medium [&_svg]:size-3.5 [&_svg]:text-muted-foreground;
+  }
+
   /* MARK: Copy Button */
   .cn-copy-button {
     @apply data-copied:text-primary;

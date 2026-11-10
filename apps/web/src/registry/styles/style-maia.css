@@ -1,4 +1,13 @@
 .style-maia {
+  /* MARK: Announcement */
+  .cn-announcement {
+    @apply gap-2.5 rounded-full border bg-background py-1.5 pr-4 pl-1.5 text-sm shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&:is(a)]:hover:bg-muted;
+  }
+
+  .cn-announcement-tag {
+    @apply rounded-full bg-primary px-2.5 py-0.5 text-xs font-medium text-primary-foreground;
+  }
+
   /* MARK: Rating */
   .cn-rating {
     @apply gap-1;
