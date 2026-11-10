@@ -1,10 +1,10 @@
 {
-  "name": "create-registry-kit",
+  "name": "@registry-kit/cli",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "bin": {
-    "create-registry-kit": "./src/cli.ts"
+    "registry-kit": "./src/cli.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

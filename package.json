@@ -9,10 +9,10 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "kit:init": "node packages/create-registry-kit/src/cli.ts",
     "dev:web": "turbo run dev -F web --",
     "env:generate": "varlock codegen --path ./apps/web/",
     "postinstall": "varlock codegen --path ./apps/web/",
+    "registry:init": "node packages/cli/src/cli.ts",
     "registry:build": "pnpm -F web registry:build",
     "registry:sync": "pnpm -F web registry:sync",
     "registry:test": "pnpm -F web registry:test",

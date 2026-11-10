@@ -6,7 +6,7 @@ import { BASES, DEFAULT_STYLE, SHADCN_BASES } from "./src/registry/config.ts";
 
 const withVarlock = varlockNextConfigPlugin();
 
-// Typed as plain strings, so the check below still compiles when `kit:init`
+// Typed as plain strings, so the check below still compiles when `registry:init`
 // has trimmed `BASES` to bases other than Radix.
 const BUILT_BASES: readonly string[] = BASES.map(({ name }) => name);
 
