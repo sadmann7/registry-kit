@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@registry-kit/ui/components/button";
 import { cn } from "cn";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import * as React from "react";
@@ -24,11 +25,12 @@ export function CopyButton({
   }, [copied]);
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="icon-sm"
       aria-label={copied ? "Copied" : label}
       className={cn(
-        "inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-site-hairline bg-site-surface text-site-ink transition-colors outline-none hover:bg-site focus-visible:ring-2 focus-visible:ring-site-accent/40",
+        "border-site-hairline bg-site-surface text-site-ink hover:bg-site hover:text-site-ink focus-visible:border-site-hairline focus-visible:ring-site-accent/40 dark:border-site-hairline dark:bg-site-surface dark:hover:bg-site",
         className,
       )}
       onClick={async () => {
@@ -43,6 +45,6 @@ export function CopyButton({
       ) : (
         <CopyIcon className="size-3.5" />
       )}
-    </button>
+    </Button>
   );
 }
