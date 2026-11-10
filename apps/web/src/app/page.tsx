@@ -177,11 +177,13 @@ function ItemRow({
             {usage}
           </pre>
         ) : null}
-        <div className="flex items-center gap-3 border-t border-site-hairline bg-site py-2.5 pr-2.5 pl-4 font-mono text-[12.5px]">
+        <div className="flex items-start gap-3 border-t border-site-hairline bg-site py-2.5 pr-2.5 pl-4 font-mono text-[12.5px] leading-7 sm:items-center">
           <span aria-hidden className="text-site-muted">
             $
           </span>
-          <code className="min-w-0 flex-1 truncate">{command}</code>
+          <code className="min-w-0 flex-1 wrap-break-word sm:truncate">
+            {command}
+          </code>
           <a
             href={`/r/${json}`}
             title={json}
