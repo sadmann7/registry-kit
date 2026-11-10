@@ -79,11 +79,15 @@ function exitIfCancelled<T>(value: T): Exclude<T, symbol> {
   return value as Exclude<T, symbol>;
 }
 
-function splitList(value: string) {
-  return value
+// An empty list fails rather than counting as not passed, so an unset
+// variable in a script can't quietly keep or remove everything.
+function splitList(flag: string, value: string) {
+  const list = value
     .split(",")
     .map((part) => part.trim())
     .filter(Boolean);
+  if (list.length === 0) fail(`--${flag} needs at least one value.`);
+  return list;
 }
 
 function fail(message: string): never {
@@ -122,27 +126,29 @@ const homepage = (
     : kit.homepage)
 ).replace(/\/+$/, "");
 
-const bases = flags.bases
-  ? splitList(flags.bases)
-  : interactive
-    ? exitIfCancelled(
-        await p.multiselect({
-          message: "Which bases should the registry support?",
-          options: kit.bases.map((base) => ({
-            value: base.name,
-            label: base.title,
-          })),
-          initialValues: kit.bases.map((base) => base.name),
-          required: true,
-        }),
-      )
-    : kit.bases.map((base) => base.name);
+const bases =
+  flags.bases !== undefined
+    ? splitList("bases", flags.bases)
+    : interactive
+      ? exitIfCancelled(
+          await p.multiselect({
+            message: "Which bases should the registry support?",
+            options: kit.bases.map((base) => ({
+              value: base.name,
+              label: base.title,
+            })),
+            initialValues: kit.bases.map((base) => base.name),
+            required: true,
+          }),
+        )
+      : kit.bases.map((base) => base.name);
 
-const styles = flags.styles
-  ? splitList(flags.styles)
-  : interactive
-    ? await promptStyles()
-    : kit.styles.map((style) => style.name);
+const styles =
+  flags.styles !== undefined
+    ? splitList("styles", flags.styles)
+    : interactive
+      ? await promptStyles()
+      : kit.styles.map((style) => style.name);
 if (!styles.includes(kit.defaultStyle)) {
   styles.unshift(kit.defaultStyle);
   p.log.info(
