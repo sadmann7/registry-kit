@@ -6,17 +6,9 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-// The package each base's components import, removed from the site's
-// dependencies with the base.
-const BASE_PACKAGES: Record<string, string> = {
-  radix: "radix-ui",
-  base: "@base-ui/react",
-  aria: "react-aria-components",
-};
-
 const CONFIG_FILE = "apps/web/src/registry/config.ts";
 
-type Option = { name: string; title: string };
+type Option = { name: string; title: string; package?: string };
 
 type Registry = {
   name: string;
@@ -262,7 +254,7 @@ export async function applyKit(kit: Kit, options: KitOptions) {
     packageFile,
   );
   const removePackages = removeBases
-    .map((base) => BASE_PACKAGES[base.name])
+    .map((base) => base.package)
     .filter((name) => name !== undefined && name in pkg.dependencies);
   if (removePackages.length > 0) {
     for (const name of removePackages) delete pkg.dependencies[name!];
@@ -280,21 +272,21 @@ function getRegistryPath(root: string) {
   return path.join(root, "apps/web/src/registry");
 }
 
-// Removes `{ name: "...", ... },` lines from one of the arrays in config.ts.
+// Removes `{ name: "...", ... },` entries from one of the arrays in config.ts,
+// whether the formatter kept them on one line or wrapped them.
 function removeOptions(config: string, array: string, remove: Option[]) {
   return config.replace(
     new RegExp(`(export const ${array} = \\[)([\\s\\S]*?)(\\] as const;)`),
     (_, start: string, body: string, end: string) =>
       start +
-      body
-        .split("\n")
-        .filter(
-          (line) =>
-            !remove.some((option) =>
-              line.includes(`{ name: "${option.name}",`),
-            ),
-        )
-        .join("\n") +
+      remove.reduce(
+        (result, option) =>
+          result.replace(
+            new RegExp(`\\n *\\{[^{}]*\\bname: "${option.name}",[^{}]*\\},`),
+            "",
+          ),
+        body,
+      ) +
       end,
   );
 }
