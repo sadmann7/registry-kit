@@ -4,6 +4,21 @@ A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that ship
 
 Scaffolded with [Better-T-Stack](https://better-t-stack.dev): Next.js, Turborepo, oxlint and oxfmt, pnpm.
 
+## Getting started
+
+```bash
+pnpm install
+pnpm kit:init
+```
+
+`kit:init` asks for your registry's name and homepage, which bases and styles to keep, and whether to keep the example items. It then removes the rest: the bases' sources, the style files, and dependencies nothing uses anymore. Every prompt has a flag, so it also runs without prompts:
+
+```bash
+pnpm kit:init --name acme --homepage https://acme.com --bases radix,base --styles nova,lyra --no-examples --yes
+```
+
+Nova is always built, since it's the fallback for styles the registry doesn't build. Run it on a clean working tree, so you can review the changes and undo them with git.
+
 ## How it works
 
 You write each component once per base, with `cn-*` markers where its look changes between styles:
@@ -81,6 +96,7 @@ Projects on a style this registry doesn't build, like `new-york-v4` or `default`
 
 | Command               | What it does                                            |
 | --------------------- | ------------------------------------------------------- |
+| `pnpm kit:init`       | Choose the registry's name, bases, styles and items.    |
 | `pnpm dev`            | Start the preview on http://localhost:3001.             |
 | `pnpm build`          | Build the registry, then the site.                      |
 | `pnpm registry:build` | Build `public/r` for every base and style.              |

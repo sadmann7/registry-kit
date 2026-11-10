@@ -17,6 +17,10 @@ import { USAGE } from "@/registry/examples";
 
 type Item = Registry["items"][number];
 
+function pluralize(count: number, noun: string) {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
+
 function pick<T extends string>(
   value: string | string[] | undefined,
   options: readonly { name: T }[],
@@ -39,7 +43,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       <section className="mx-auto grid max-w-360 items-end gap-12 px-4 pt-16 pb-14 sm:px-12 sm:pt-18 lg:grid-cols-[minmax(0,1fr)_460px]">
         <div className="flex max-w-155 flex-col gap-5">
           <p className="font-mono text-xs text-site-muted">
-            {BASES.length} bases · {STYLES.length} styles · RTL
+            {pluralize(BASES.length, "base")} ·{" "}
+            {pluralize(STYLES.length, "style")} · RTL
           </p>
           <h1 className="text-[clamp(2.5rem,5vw,3.5rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance">
             Components that fit every shadcn project.
