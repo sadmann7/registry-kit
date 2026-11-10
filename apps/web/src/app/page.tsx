@@ -166,7 +166,7 @@ function ItemRow({
   namespace: string;
 }) {
   const Example = EXAMPLES[base][item.name];
-  const usage = USAGE[item.name];
+  const usage = USAGE[item.name]?.(base);
   const dependencies = [
     ...(item.dependencies ?? []),
     ...(item.registryDependencies ?? []),
