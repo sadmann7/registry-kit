@@ -14,7 +14,7 @@ function Announcement({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="announcement"
       className={cn(
-        "cn-announcement inline-flex w-fit items-center",
+        "cn-announcement group/announcement inline-flex w-fit items-center",
         className,
       )}
       {...props}
@@ -30,7 +30,7 @@ function AnnouncementLink({
     <LinkPrimitive
       data-slot="announcement"
       className={cn(
-        "cn-announcement inline-flex w-fit items-center",
+        "cn-announcement group/announcement inline-flex w-fit items-center",
         className,
       )}
       {...props}

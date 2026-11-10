@@ -15,7 +15,7 @@ function Announcement({
     <Comp
       data-slot="announcement"
       className={cn(
-        "cn-announcement inline-flex w-fit items-center",
+        "cn-announcement group/announcement inline-flex w-fit items-center",
         className,
       )}
       {...props}

@@ -1,7 +1,7 @@
 .style-lyra {
   /* MARK: Announcement */
   .cn-announcement {
-    @apply gap-2 rounded-none border bg-background py-1 pr-2.5 pl-1 text-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50 [&:is(a)]:hover:bg-muted;
+    @apply gap-2 rounded-none border bg-background py-1 pr-2.5 pl-1 text-xs transition-[background-color,scale] duration-150 ease-out outline-none [&:is(a)]:active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/50 [&:is(a)]:hover:bg-muted;
   }
 
   .cn-announcement-tag {
@@ -10,7 +10,7 @@
 
   /* MARK: Rating */
   .cn-rating-item {
-    @apply rounded-none text-muted-foreground/40 transition-colors outline-none hover:text-foreground/70 focus-visible:ring-1 focus-visible:ring-ring/50 has-focus-visible:ring-1 has-focus-visible:ring-ring/50 data-active:text-foreground [&_svg]:size-4 data-active:[&_svg]:fill-current;
+    @apply rounded-none text-muted-foreground/40 transition-[color,scale] duration-150 ease-out outline-none active:scale-90 motion-reduce:active:scale-100 focus-visible:ring-1 focus-visible:ring-ring/50 has-focus-visible:ring-1 has-focus-visible:ring-ring/50 data-active:text-foreground [&_svg]:size-4 data-active:[&_svg]:fill-current;
   }
 
   /* MARK: Timeline */

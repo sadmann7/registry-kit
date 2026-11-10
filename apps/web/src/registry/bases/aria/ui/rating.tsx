@@ -17,6 +17,7 @@ function Rating({
   onChange,
   max = 5,
   className,
+  onPointerLeave,
   ...props
 }: Omit<
   RadioGroupPrimitiveProps,
@@ -33,6 +34,8 @@ function Rating({
     defaultValue,
     onValueChange: onChange,
   });
+  const [hovered, setHovered] = React.useState<number | null>(null);
+  const shown = hovered ?? value;
 
   return (
     <RadioGroupPrimitive
@@ -40,6 +43,11 @@ function Rating({
       orientation="horizontal"
       value={value > 0 ? String(value) : null}
       onChange={(next) => setValue(Number(next))}
+      data-hovering={hovered !== null || undefined}
+      onPointerLeave={(event) => {
+        onPointerLeave?.(event);
+        setHovered(null);
+      }}
       className={cn("cn-rating flex w-fit items-center", className)}
       {...props}
     >
@@ -47,12 +55,12 @@ function Rating({
         <RadioPrimitive
           key={index}
           data-slot="rating-item"
-          data-active={index < value || undefined}
+          data-active={index < shown || undefined}
           value={String(index + 1)}
+          // Previews the rating under the mouse. React Aria skips touch.
+          onHoverStart={() => setHovered(index + 1)}
           aria-label={`${index + 1} ${index === 0 ? "star" : "stars"}`}
-          className={cn(
-            "cn-rating-item inline-flex shrink-0 items-center justify-center",
-          )}
+          className="cn-rating-item inline-flex shrink-0 items-center justify-center"
         >
           <IconPlaceholder
             lucide="StarIcon"
