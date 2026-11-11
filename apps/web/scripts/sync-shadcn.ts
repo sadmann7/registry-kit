@@ -1,5 +1,5 @@
-// Copies the shadcn/ui primitives the registry imports (for example
-// `@/registry/bases/radix/ui/button`) and shadcn's style files from the commit
+// Copies the shadcn/ui primitives the registry and its demos import (for
+// example `@/registry/bases/radix/ui/button`) and shadcn's style files from the commit
 // in `SHADCN_REF`, so the preview renders them in every style. They're never
 // published: items install them through `registryDependencies`.
 //
@@ -59,12 +59,23 @@ async function syncBase(base: BaseName) {
       .map((file) => file.replace(/\.tsx?$/, "")),
   );
 
+  // Demos aren't published, but the preview renders them, so the primitives
+  // they import are synced too.
+  const demos = await fs
+    .readdir(path.join(basePath, "examples"))
+    .catch(() => [] as string[]);
   const queue = (
-    await Promise.all(
-      [...owned].map(async (file) =>
+    await Promise.all([
+      ...[...owned].map(async (file) =>
         getRegistryImports(await readOwned(basePath, file), base),
       ),
-    )
+      ...demos.map(async (demo) =>
+        getRegistryImports(
+          await fs.readFile(path.join(basePath, "examples", demo), "utf8"),
+          base,
+        ),
+      ),
+    ])
   ).flat();
   const synced = new Map<string, string>();
   const seen = new Set(owned);

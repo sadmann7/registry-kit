@@ -245,12 +245,6 @@ export async function applyKit(kit: Kit, options: KitOptions) {
     );
   }
 
-  if (!options.examples) {
-    const usageFile = path.join(registryPath, "examples.ts");
-    const usage = await fs.readFile(usageFile, "utf8");
-    writes.set(usageFile, usage.replace(/= \{[\s\S]*\};\n$/, "= {};\n"));
-  }
-
   const siteFile = path.join(kit.root, "apps/web/src/lib/site.ts");
   const site = await fs.readFile(siteFile, "utf8");
   writes.set(

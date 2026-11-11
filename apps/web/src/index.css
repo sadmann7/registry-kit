@@ -3,35 +3,23 @@
 /* Renders the registry's raw `cn-*` source in the style set on <body>. */
 @import "./registry/__generated__/styles.css" layer(base);
 
-/*
- * The site's own colors. Previews keep shadcn's theme (--background, --card…),
- * so items look the way they will in a project.
- */
-:root {
-  --site: #fafaf9;
-  --site-surface: #ffffff;
-  --site-ink: #111110;
-  --site-muted: #6b6b66;
-  --site-hairline: #e7e5e2;
-  --site-accent: #e5482d;
-}
+@layer base {
+  /* No gray flash on tap; controls give their own press feedback. */
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
 
-.dark {
-  --site: #0f0f0e;
-  --site-surface: #171716;
-  --site-ink: #f2f1ee;
-  --site-muted: #9a9993;
-  --site-hairline: #2a2927;
-  --site-accent: #f0603f;
+  /* Fire clicks without waiting to see if the tap is a double-tap zoom. */
+  a,
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+  }
 }
 
 @theme inline {
+  --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, monospace;
-  --color-site: var(--site);
-  --color-site-surface: var(--site-surface);
-  --color-site-ink: var(--site-ink);
-  --color-site-muted: var(--site-muted);
-  --color-site-hairline: var(--site-hairline);
-  --color-site-accent: var(--site-accent);
 }

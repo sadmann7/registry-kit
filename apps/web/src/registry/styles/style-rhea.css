@@ -1,4 +1,67 @@
 .style-rhea {
+  /* MARK: Empty State */
+  .cn-empty-state {
+    @apply rounded-3xl border border-dashed p-12;
+  }
+
+  .cn-empty-state-icon {
+    @apply mb-4 size-10 rounded-xl bg-muted text-foreground [&_svg:not([class*='size-'])]:size-5;
+  }
+
+  .cn-empty-state-title {
+    @apply text-lg font-medium tracking-tight;
+  }
+
+  .cn-empty-state-description {
+    @apply mt-2 text-sm/relaxed text-muted-foreground;
+  }
+
+  .cn-empty-state-actions {
+    @apply mt-6 gap-2;
+  }
+
+  /* MARK: Number Field */
+  .cn-number-field-group {
+    @apply h-8 overflow-hidden rounded-2xl border border-transparent bg-input/50 transition-[color,box-shadow] has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/30 data-disabled:opacity-50;
+  }
+
+  .cn-number-field-input {
+    @apply w-20 bg-transparent px-2.5 text-center text-sm tabular-nums outline-none;
+  }
+
+  .cn-number-field-button {
+    @apply w-8 rounded-2xl bg-transparent text-foreground transition-colors outline-none hover:bg-input disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-3.5;
+  }
+
+  .cn-number-field-addon {
+    @apply ps-3 text-sm text-muted-foreground;
+  }
+
+  .cn-number-field-stepper {
+    @apply w-7 py-0.5 pe-0.5 *:w-full *:flex-1 *:rounded-xl *:[&_svg:not([class*='size-'])]:size-3;
+  }
+
+  /* MARK: Stat Card */
+  .cn-stat-card {
+    @apply gap-2.5 rounded-[min(var(--radius-4xl),24px)] bg-card p-5 text-card-foreground shadow-sm ring-1 ring-foreground/5 dark:ring-foreground/10;
+  }
+
+  .cn-stat-card-label {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .cn-stat-card-delta {
+    @apply gap-1 rounded-2xl bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground [&_svg:not([class*='size-'])]:size-3;
+  }
+
+  .cn-stat-card-value {
+    @apply text-[1.75rem]/none font-medium tracking-tight;
+  }
+
+  .cn-stat-card-bar {
+    @apply rounded-full bg-secondary data-current:bg-primary;
+  }
+
   /* MARK: Timeline */
   .cn-timeline {
     @apply text-xs;

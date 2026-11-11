@@ -1,4 +1,67 @@
 .style-lyra {
+  /* MARK: Empty State */
+  .cn-empty-state {
+    @apply border border-dashed p-6 text-xs;
+  }
+
+  .cn-empty-state-icon {
+    @apply mb-3 size-8 rounded-none bg-muted text-foreground [&_svg:not([class*='size-'])]:size-4;
+  }
+
+  .cn-empty-state-title {
+    @apply font-mono text-sm font-medium uppercase tracking-wide;
+  }
+
+  .cn-empty-state-description {
+    @apply mt-1.5 text-xs/relaxed text-muted-foreground;
+  }
+
+  .cn-empty-state-actions {
+    @apply mt-3 gap-2;
+  }
+
+  /* MARK: Number Field */
+  .cn-number-field-group {
+    @apply h-8 divide-x divide-input overflow-hidden rounded-none border border-input transition-[color,box-shadow] has-focus-visible:border-ring has-focus-visible:ring-1 has-focus-visible:ring-ring/50 data-disabled:opacity-50 dark:bg-input/30;
+  }
+
+  .cn-number-field-input {
+    @apply w-24 bg-transparent px-2.5 text-center font-mono text-xs tabular-nums outline-none;
+  }
+
+  .cn-number-field-button {
+    @apply w-8 rounded-none bg-muted text-foreground transition-colors outline-none hover:bg-muted/70 disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-3.5;
+  }
+
+  .cn-number-field-addon {
+    @apply w-8 bg-muted font-mono text-xs text-muted-foreground;
+  }
+
+  /* MARK: Stat Card */
+  .cn-stat-card {
+    @apply gap-2 rounded-none bg-card p-4 text-xs/relaxed text-card-foreground ring-1 ring-foreground/10;
+  }
+
+  .cn-stat-card-label {
+    @apply font-mono text-xs uppercase tracking-wide text-muted-foreground;
+  }
+
+  .cn-stat-card-delta {
+    @apply gap-1 rounded-none bg-secondary px-1.5 py-0.5 font-mono text-xs text-secondary-foreground [&_svg:not([class*='size-'])]:size-3;
+  }
+
+  .cn-stat-card-value {
+    @apply font-mono text-2xl/none font-medium tracking-tight;
+  }
+
+  .cn-stat-card-caption {
+    @apply font-mono text-xs text-muted-foreground;
+  }
+
+  .cn-stat-card-bar {
+    @apply rounded-none bg-secondary data-current:bg-primary;
+  }
+
   /* MARK: Timeline */
   .cn-timeline {
     @apply text-xs;

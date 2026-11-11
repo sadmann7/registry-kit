@@ -1,14 +1,22 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import "../index.css";
 import Providers from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { fontMono, fontSans } from "@/lib/fonts";
-import { siteConfig } from "@/lib/site";
+import { siteConfig, siteTitle } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `${siteConfig.name} registry`,
-  description: "A shadcn registry built for every base and style.",
+  title: `${siteTitle} | An example registry for every base and style`,
+  description: siteConfig.description,
+};
+
+// The status bar matches the header, which uses --background.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({
@@ -24,7 +32,7 @@ export default function RootLayout({
       className={`${fontSans.variable} ${fontMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="bg-site text-site-ink antialiased">
+      <body className="bg-background text-foreground antialiased">
         <Providers>
           <SiteHeader />
           {children}
