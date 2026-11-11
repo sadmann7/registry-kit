@@ -6,6 +6,7 @@ import { ArrowUpRightIcon } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
 import { PreviewControls } from "@/components/preview-controls";
 import { StyleClass } from "@/components/style-class";
+import { pluralize } from "@/lib/utils";
 import { EXAMPLES, REGISTRIES } from "@/registry/__generated__/registries";
 import {
   type BaseName,
@@ -22,10 +23,6 @@ type Item = Registry["items"][number];
 // Matches the pen's two-layer card shadow.
 const CARD_CLASS_NAME =
   "rounded-xl border bg-card text-card-foreground shadow-[0_1px_2px_rgb(17_17_16/4%),0_8px_24px_rgb(17_17_16/5%)]";
-
-function pluralize(count: number, noun: string) {
-  return `${count} ${noun}${count === 1 ? "" : "s"}`;
-}
 
 function pick<T extends string>(
   value: string | string[] | undefined,
