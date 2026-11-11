@@ -63,7 +63,6 @@ async function getRegistriesModule() {
       await fs
         .readdir(path.join(REGISTRY_PATH, "bases", base, "examples"))
         .catch((error: NodeJS.ErrnoException) => {
-          // A base without demos has no `examples/` folder.
           if (error.code === "ENOENT") return [];
           throw error;
         })
@@ -94,7 +93,6 @@ export const REGISTRIES = {
 ${registries.join("\n")}
 } as Record<BaseName, Registry>;
 
-// Demos shown in the preview, by base and item name.
 export const EXAMPLES: Record<
   BaseName,
   Record<string, React.ComponentType>

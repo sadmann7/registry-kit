@@ -184,7 +184,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   );
 }
 
-// Title and description on one line, split by a rule; stacked on phones.
 function Heading({
   id,
   title,

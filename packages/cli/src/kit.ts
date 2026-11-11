@@ -28,7 +28,6 @@ export type Kit = {
   defaultStyle: string;
   name: string;
   homepage: string;
-  // The repository the site links to.
   github: string;
   // Item names across every base. Removing the examples removes all of them.
   items: string[];
@@ -148,8 +147,6 @@ function getUnknown(values: string[], options: Option[], label: string) {
     );
 }
 
-// Applies the options and returns the files it changed or removed, relative
-// to the root.
 export async function applyKit(kit: Kit, options: KitOptions) {
   validateOptions(kit, options);
 
@@ -180,8 +177,6 @@ export async function applyKit(kit: Kit, options: KitOptions) {
   const writes = new Map<string, string>();
   const removals: string[] = [];
 
-  // config.ts: drop the bases and styles, and move the default base if it
-  // went with them.
   const configFile = path.join(kit.root, CONFIG_FILE);
   writes.set(
     configFile,
@@ -366,7 +361,6 @@ function removeOptions(config: string, array: string, remove: Option[]) {
   );
 }
 
-// Moves `DEFAULT_BASE` to the first kept base if its base is being removed.
 function setDefaultBase(config: string, bases: string[]) {
   const pattern = /export const DEFAULT_BASE = "([\w-]+)";/;
   const base = config.match(pattern)?.[1];

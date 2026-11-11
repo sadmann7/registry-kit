@@ -163,12 +163,10 @@ await Promise.all(
     .map((file) => fs.rm(path.join(REGISTRY_PATH, file), { force: true })),
 );
 
-// Match the repo's lint fixes and formatting, so `pnpm check` stays clean
-// after a sync. Skipped with no sources, since oxlint and oxfmt run on the
-// whole repo without paths. Lint errors `--fix` can't repair fail
-// `pnpm check`, not the sync, so the lock file below is still written. The
-// style files are left out, since oxfmt ignores them and fails when every
-// path it's given is ignored.
+// Lint and format the synced sources so `pnpm check` stays clean. Without
+// paths, both tools would run on the whole repo. oxfmt ignores the style
+// files and fails when every path it's given is ignored, so they're left out.
+// Lint errors `--fix` can't repair fail `pnpm check`, not the sync.
 const sources = files
   .filter((file) => /\.tsx?$/.test(file))
   .map((file) => path.join(REGISTRY_PATH, file));
