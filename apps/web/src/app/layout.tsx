@@ -4,13 +4,11 @@ import "../index.css";
 import Providers from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { fontMono, fontSans } from "@/lib/fonts";
-import { siteConfig } from "@/lib/site";
+import { siteConfig, siteTitle } from "@/lib/site";
 
 export const metadata: Metadata = {
-  // Like "Acme | ...", from the registry's name.
-  title: `${siteConfig.name.charAt(0).toUpperCase()}${siteConfig.name.slice(1)} | An example registry for every base and style`,
-  description:
-    "Components, hooks and utilities for shadcn/ui. Each one installs in your project's base and style, with RTL support.",
+  title: `${siteTitle} | An example registry for every base and style`,
+  description: siteConfig.description,
 };
 
 // The status bar matches the header, which uses --background.

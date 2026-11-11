@@ -1,0 +1,1 @@
+acme: One registry for every shadcn project. 3 bases, 8 styles, RTL.
