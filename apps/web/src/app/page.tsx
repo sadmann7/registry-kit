@@ -6,6 +6,7 @@ import { ArrowUpRightIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
 import { PreviewControls } from "@/components/preview-controls";
+import { MAIN_CONTENT_ID } from "@/components/skip-nav";
 import { StyleClass } from "@/components/style-class";
 import { pluralize } from "@/lib/utils";
 import { EXAMPLES, REGISTRIES } from "@/registry/__generated__/registries";
@@ -44,7 +45,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const extras = registry.items.filter((item) => !examples[item.name]);
 
   return (
-    <main className={`style-${style}`}>
+    <main id={MAIN_CONTENT_ID} className={`style-${style}`}>
       <StyleClass style={style} />
 
       <section className="grid items-end gap-8 px-4 pt-10 pb-8 sm:gap-12 sm:px-12 sm:pt-18 sm:pb-14 lg:grid-cols-[minmax(0,620px)_460px] lg:justify-between lg:gap-16">
