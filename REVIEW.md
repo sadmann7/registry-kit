@@ -17,6 +17,7 @@ registry-kit is a starter for shadcn registries that build every base and style.
 - **Synced from shadcn/ui.** Files listed in `src/registry/shadcn.json` are overwritten on the next sync. Changes to them belong upstream or in the sync script.
 - **Build parity.** The preview's CSS and the published JSON come from the same style maps. A change to one path in `scripts/` without the other is a finding.
 - **Fixes.** A bug fix names the cause and fixes it, not the symptom.
+- **Comments.** A comment that restates the code, narrates steps, or explains the fix, which belongs in the PR. Lint only checks the form.
 
 ## Skip
 
