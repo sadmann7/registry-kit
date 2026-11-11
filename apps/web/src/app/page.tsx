@@ -99,7 +99,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-4 pt-10 pb-20 sm:px-12 sm:pt-14">
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 pt-10 pb-20 sm:gap-16 sm:px-12 sm:pt-14">
         {components.length > 0 && (
           <div className="flex flex-col gap-10 sm:gap-12">
             {components.map((item) => {
@@ -123,7 +123,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         {extras.length > 0 && (
           <section
             aria-labelledby="extras-title"
-            className="flex flex-col gap-3 border-t pt-10 sm:gap-3.5 sm:pt-12"
+            className="flex flex-col gap-3 sm:gap-3.5"
           >
             <Heading
               id="extras-title"
@@ -168,15 +168,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       </div>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-7 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-12">
+        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted-foreground sm:px-12 sm:py-7">
           <p>Built with registry-kit. Items install with the shadcn CLI.</p>
-          {/* oxlint-disable-next-line nextjs/no-html-link-for-pages -- a static file in public/r, not a page */}
-          <a
-            href="/r/registry.json"
-            className="w-fit rounded-sm font-mono transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            /r/registry.json
-          </a>
         </div>
       </footer>
     </main>
