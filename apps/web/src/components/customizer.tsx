@@ -8,7 +8,6 @@ import { RadioGroup } from "@base-ui/react/radio-group";
 import { Switch } from "@base-ui/react/switch";
 import {
   Home01Icon,
-  Notification01Icon,
   Search01Icon,
   Settings01Icon,
 } from "@hugeicons/core-free-icons";
@@ -16,7 +15,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   GearIcon,
   MagnifyingGlassIcon,
-  BellIcon as PhosphorBellIcon,
   HouseIcon as PhosphorHouseIcon,
 } from "@phosphor-icons/react";
 import {
@@ -27,20 +25,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@registry-kit/ui/components/select";
+import { RiHomeLine, RiSearchLine, RiSettings3Line } from "@remixicon/react";
+import { IconHome, IconSearch, IconSettings } from "@tabler/icons-react";
 import {
-  RiHomeLine,
-  RiNotification3Line,
-  RiSearchLine,
-  RiSettings3Line,
-} from "@remixicon/react";
-import {
-  IconBell,
-  IconHome,
-  IconSearch,
-  IconSettings,
-} from "@tabler/icons-react";
-import {
-  BellIcon,
   CheckIcon,
   ChevronUpIcon,
   CopyIcon,
@@ -85,7 +72,6 @@ interface Option {
   value: string;
   label: string;
   lead?: React.ReactNode;
-  trail?: string;
   disabled?: boolean;
 }
 
@@ -101,26 +87,16 @@ const BASE_LABELS: Record<string, string> = {
 // Samples in each library's own icons, so the picker shows what changes.
 const ICON_SAMPLES: Record<IconLibraryName, React.ComponentType<IconProps>[]> =
   {
-    lucide: [HouseIcon, SearchIcon, SettingsIcon, BellIcon],
-    tabler: [IconHome, IconSearch, IconSettings, IconBell],
-    hugeicons: [
-      Home01Icon,
-      Search01Icon,
-      Settings01Icon,
-      Notification01Icon,
-    ].map(
+    lucide: [HouseIcon, SearchIcon, SettingsIcon],
+    tabler: [IconHome, IconSearch, IconSettings],
+    hugeicons: [Home01Icon, Search01Icon, Settings01Icon].map(
       (icon) =>
         function Hugeicon(props: IconProps) {
           return <HugeiconsIcon icon={icon} strokeWidth={2} {...props} />;
         },
     ),
-    phosphor: [
-      PhosphorHouseIcon,
-      MagnifyingGlassIcon,
-      GearIcon,
-      PhosphorBellIcon,
-    ],
-    remixicon: [RiHomeLine, RiSearchLine, RiSettings3Line, RiNotification3Line],
+    phosphor: [PhosphorHouseIcon, MagnifyingGlassIcon, GearIcon],
+    remixicon: [RiHomeLine, RiSearchLine, RiSettings3Line],
   };
 
 function getThemeVar(name: string, key: string) {
@@ -172,12 +148,11 @@ function Corner({ radius }: { radius: number }) {
 
 const RADIUS_CORNERS = { default: 6, none: 0, small: 4, medium: 6, large: 9 };
 
-function getRadiusOptions(style: string, baseColor: string): Option[] {
+function getRadiusOptions(style: string): Option[] {
   return RADII.map((radius) => ({
     value: radius.name,
     label: radius.title,
     lead: <Corner radius={RADIUS_CORNERS[radius.name]} />,
-    trail: radius.value || getThemeVar(baseColor, "radius"),
     disabled: style === "rhea" && radius.name === "large",
   }));
 }
@@ -199,16 +174,10 @@ const FONT_OPTIONS: Option[] = FONTS.map((font) => ({
   lead: <FontGlyph font={font.name} />,
 }));
 
-function IconSamples({
-  library,
-  count = 3,
-}: {
-  library: IconLibraryName;
-  count?: number;
-}) {
+function IconSamples({ library }: { library: IconLibraryName }) {
   return (
     <span className="flex shrink-0 items-center gap-1.5">
-      {ICON_SAMPLES[library].slice(0, count).map((Icon, index) => (
+      {ICON_SAMPLES[library].map((Icon, index) => (
         <Icon key={index} className="size-3.5" />
       ))}
     </span>
@@ -432,13 +401,19 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
         </Field>
         <Field
           label="Radius"
-          hint={squareStyle ? "Square in this style" : undefined}
+          hint={
+            <span className="font-mono text-xs">
+              {RADII.find((radius) => radius.name === design.radius)?.value ||
+                getThemeVar(design.baseColor, "radius")}
+            </span>
+          }
         >
           <Picker
             label="Radius"
             value={design.radius}
-            options={getRadiusOptions(design.style, design.baseColor)}
+            options={getRadiusOptions(design.style)}
             disabled={squareStyle}
+            footer="Default uses the theme's radius. Lyra and Sera are always square."
             onValueChange={(radius) => selectDesign({ radius })}
           />
         </Field>
@@ -482,13 +457,10 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
             }))}
             renderItem={(option) => (
               <>
-                {option.label}
-                <span className="ms-auto">
-                  <IconSamples
-                    library={option.value as IconLibraryName}
-                    count={4}
-                  />
+                <span className="w-14 text-muted-foreground in-data-selected:text-foreground">
+                  <IconSamples library={option.value as IconLibraryName} />
                 </span>
+                {option.label}
               </>
             )}
             onValueChange={(iconLibrary) => selectDesign({ iconLibrary })}
@@ -507,11 +479,6 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
             }
           />
         </Field>
-        <Toggle
-          label="Translucent menus"
-          checked={translucent}
-          onCheckedChange={(checked) => setMenuColor(inverted, checked)}
-        />
         <Field label="Menu accent">
           <Segmented
             label="Menu accent"
@@ -525,6 +492,11 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
             onValueChange={(menuAccent) => selectDesign({ menuAccent })}
           />
         </Field>
+        <Toggle
+          label="Translucent menus"
+          checked={translucent}
+          onCheckedChange={(checked) => setMenuColor(inverted, checked)}
+        />
         <Toggle
           label="Pointer cursor"
           checked={design.pointer}
@@ -579,7 +551,7 @@ function Field({
   children,
 }: {
   label: string;
-  hint?: string;
+  hint?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -609,14 +581,14 @@ function Segmented({
       aria-label={label}
       value={value}
       onValueChange={(next) => onValueChange(next)}
-      className="flex gap-0.5 rounded-lg bg-muted p-0.5"
+      className="flex gap-0.5 rounded-lg border border-border bg-card p-0.75"
     >
       {options.map((option) => (
         <Radio.Root
           key={option.value}
           value={option.value}
           disabled={option.disabled}
-          className="flex h-7 flex-1 cursor-default items-center justify-center rounded-md border border-transparent text-[12.5px] text-muted-foreground outline-none select-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:h-8.5 data-checked:bg-background data-checked:font-medium data-checked:text-foreground data-checked:shadow-[0_1px_2px_rgb(0_0_0/10%)] dark:data-checked:border-input dark:data-checked:bg-input/30 dark:data-checked:shadow-none data-disabled:pointer-events-none data-disabled:opacity-50"
+          className="flex h-7 flex-1 cursor-default items-center justify-center rounded-md border border-transparent text-[12.5px] text-muted-foreground outline-none select-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:h-8.5 data-checked:border-input data-checked:bg-muted data-checked:font-medium data-checked:text-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
         >
           {option.label}
         </Radio.Root>
@@ -691,6 +663,7 @@ function Picker({
   options,
   disabled,
   renderItem,
+  footer,
   onValueChange,
 }: {
   label: string;
@@ -698,6 +671,7 @@ function Picker({
   options: Option[];
   disabled?: boolean;
   renderItem?: (option: Option) => React.ReactNode;
+  footer?: string;
   onValueChange: (value: string) => void;
 }) {
   const selected = options.find((option) => option.value === value);
@@ -720,11 +694,6 @@ function Picker({
             <>
               {selected?.lead}
               <span className="truncate">{selected?.label}</span>
-              {selected?.trail && (
-                <span className="ms-auto font-mono text-xs font-normal text-muted-foreground">
-                  {selected.trail}
-                </span>
-              )}
             </>
           )}
         </SelectValue>
@@ -749,16 +718,16 @@ function Picker({
                 <>
                   {option.lead}
                   {option.label}
-                  {option.trail && (
-                    <span className="ms-auto ps-4 font-mono text-xs font-normal text-muted-foreground">
-                      {option.trail}
-                    </span>
-                  )}
                 </>
               )}
             </SelectItem>
           ))}
         </SelectGroup>
+        {footer && (
+          <p className="-mx-1 mt-1 border-t border-border px-3 pt-2 pb-1.5 text-[11.5px] leading-[1.45] text-muted-foreground">
+            {footer}
+          </p>
+        )}
       </SelectContent>
     </Select>
   );
