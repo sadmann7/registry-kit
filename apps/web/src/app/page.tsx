@@ -47,13 +47,13 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     <main className={`style-${style}`}>
       <StyleClass style={style} />
 
-      <section className="mx-auto grid max-w-6xl items-end gap-8 px-4 pt-10 pb-8 sm:gap-12 sm:px-12 sm:pt-18 sm:pb-14 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-12">
-        <div className="flex max-w-155 flex-col gap-5">
+      <section className="grid items-end gap-8 px-4 pt-10 pb-8 sm:gap-12 sm:px-12 sm:pt-18 sm:pb-14 lg:grid-cols-[minmax(0,620px)_460px] lg:justify-between lg:gap-16">
+        <div className="flex flex-col gap-4 sm:gap-5">
           <p className="w-fit rounded-full border bg-card px-2.5 py-1 font-mono text-xs tracking-[0.02em]">
             {pluralize(BASES.length, "base")} ·{" "}
             {pluralize(STYLES.length, "style")} · RTL
           </p>
-          <h1 className="text-[clamp(2.5rem,5vw,3.5rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance">
+          <h1 className="text-[2.5rem] leading-[1.02] font-semibold tracking-[-1.2px] sm:text-6xl sm:leading-none sm:tracking-[-2.2px]">
             One registry for every shadcn project.
           </h1>
           <p className="max-w-120 text-base leading-normal text-muted-foreground">
@@ -85,7 +85,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       </section>
 
       <div className="sticky top-0 z-10 border-b border-border bg-background">
-        <div className="mx-auto flex max-w-6xl items-center px-4 py-3 sm:px-12">
+        <div className="flex items-center px-4 py-3 sm:px-12 sm:py-3.5">
           <PreviewControls base={base} style={style} dir={dir} />
           <span className="ml-auto hidden font-mono text-xs text-muted-foreground sm:block">
             {pluralize(registry.items.length, "item")}
@@ -93,7 +93,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 pt-10 pb-20 sm:gap-16 sm:px-12 sm:pt-14">
+      <div className="flex flex-col gap-12 px-4 pt-10 pb-14 sm:gap-16 sm:px-12 sm:pt-14 sm:pb-18">
         {components.length > 0 && (
           <div className="flex flex-col gap-10 sm:gap-12">
             {components.map((item) => {
@@ -124,7 +124,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               title="Hooks and utilities"
               description="Shared logic for your components."
             />
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
               {extras.map((item) => (
                 <article
                   key={item.name}
@@ -161,23 +161,21 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         )}
       </div>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted-foreground sm:px-12 sm:py-7">
-          {/* Points at the template, not at siteConfig.links, which forks
-              change to their own repo. */}
-          <p>
-            Built with{" "}
-            <a
-              href="https://github.com/sadmann7/registry-kit"
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-sm underline-offset-4 transition-colors outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              registry-kit
-            </a>
-            .
-          </p>
-        </div>
+      <footer className="border-t border-border px-4 py-6 text-center text-[13px] text-muted-foreground sm:px-12 sm:py-7">
+        {/* Points at the template's author, not at siteConfig.links, which
+            forks change to their own repo. */}
+        <p>
+          Built by{" "}
+          <a
+            href="https://github.com/sadmann7"
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-sm font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            sadman
+          </a>
+          .
+        </p>
       </footer>
     </main>
   );
@@ -274,7 +272,7 @@ function ItemSection({
     <section
       id={item.name}
       aria-labelledby={`${item.name}-title`}
-      className="flex scroll-mt-36 flex-col gap-3.5 sm:scroll-mt-24"
+      className="flex scroll-mt-36 flex-col gap-3 sm:scroll-mt-24 sm:gap-3.5"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <Heading
@@ -292,7 +290,7 @@ function ItemSection({
 
       <div
         dir={dir}
-        className={`${CARD_CLASS_NAME} flex min-h-72 items-center justify-center overflow-x-auto p-8 sm:min-h-96 sm:p-12`}
+        className={`${CARD_CLASS_NAME} flex min-h-72 items-center justify-center overflow-x-auto px-4 py-7 sm:min-h-75 sm:px-10 sm:py-8`}
       >
         {children}
       </div>

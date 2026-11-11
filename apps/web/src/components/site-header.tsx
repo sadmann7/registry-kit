@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/site";
 export function SiteHeader() {
   return (
     <header className="border-b border-border">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-12">
+      <div className="flex h-15 items-center justify-between px-4 sm:h-17 sm:px-12">
         <Link
           href="/"
           className="flex items-center gap-2.5 rounded-sm text-[15px] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
