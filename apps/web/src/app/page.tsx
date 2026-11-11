@@ -80,7 +80,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               <span className="text-foreground">&quot;registries&quot;</span>
               {": {"}
             </span>
-            {/* A URL too long for the line wraps at its slashes, indented. */}
             <span className="block ps-[4ch] -indent-[2ch]">
               <span className="text-foreground">
                 &quot;@{registry.name}&quot;
