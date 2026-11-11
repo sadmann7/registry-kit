@@ -6,7 +6,7 @@ If you have any questions, feel free to reach out to [@sadmann17](https://x.com/
 
 ## Project Structure
 
-See the [README](./README.md#layout) for how the registry, its styles and the scripts fit together.
+See [How it works](./docs/how-it-works.md) for how the registry, its styles and the scripts fit together, and [Adding items](./docs/adding-items.md) for what an item needs.
 
 ## Getting started
 
