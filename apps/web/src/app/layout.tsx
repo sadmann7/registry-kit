@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 
 import { cn } from "cn";
 
-import "../index.css";
+import "../globals.css";
 import Providers from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { SkipNav } from "@/components/skip-nav";
