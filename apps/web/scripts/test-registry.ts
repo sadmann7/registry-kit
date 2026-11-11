@@ -15,10 +15,10 @@ import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { promisify, stripVTControlCharacters } from "node:util";
+import { iconLibraries } from "shadcn/icons";
 
 import {
   BASES,
-  DEFAULT_BASE,
   DEFAULT_STYLE,
   LEGACY_STYLES,
   resolveStyle,
@@ -34,13 +34,7 @@ import {
 const OUTPUT_PATH = path.join(ROOT, "public/r");
 // Not the registry's own name, so installs can't rely on it.
 const NAMESPACE = "registry-test";
-const ICON_LIBRARIES = [
-  "lucide",
-  "tabler",
-  "hugeicons",
-  "phosphor",
-  "remixicon",
-];
+const ICON_LIBRARIES = Object.keys(iconLibraries);
 const SHADCN_BIN = path.join(ROOT, "node_modules/.bin/shadcn");
 
 const run = promisify(execFile);
@@ -144,11 +138,13 @@ try {
   ]
     .map((style) => ({ style, iconLibrary: defaultLibrary }))
     .concat(
-      // Icons resolve the same way in every build, so one is enough.
-      otherLibraries.map((iconLibrary) => ({
-        style: `${DEFAULT_BASE}-${DEFAULT_STYLE}`,
-        iconLibrary,
-      })),
+      // Each base has its own copy of the icons, but every style shares it.
+      BASES.flatMap(({ name: base }) =>
+        otherLibraries.map((iconLibrary) => ({
+          style: `${base}-${DEFAULT_STYLE}`,
+          iconLibrary,
+        })),
+      ),
     );
 
   await runWithConcurrency(cases, 4, async ({ style, iconLibrary }) => {
