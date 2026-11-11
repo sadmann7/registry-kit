@@ -30,13 +30,13 @@ A style's rules replace Nova's marker by marker, so a style without a rule for a
 
 A project's registry URL has a `{style}` placeholder, which the shadcn CLI fills from `components.json`, like `radix-lyra`. The project gets that build, and the CLI adapts it on install:
 
-| What             | In your source                                        | On install                                                   |
-| ---------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| **RTL**          | Logical classes (`start-0`, `ps-6`), `cn-rtl-flip`    | Physical classes flip for `rtl: true`                        |
-| **Icons**        | `IconPlaceholder` with a name for each library        | The project's `iconLibrary`                                  |
-| **Imports**      | `@/registry/bases/{base}/ui/*`, `hooks/*` and `lib/*` | The project's aliases                                        |
-| **Menus**        | `cn-menu-target` and `cn-menu-translucent` on popups  | Inverted or translucent for the project's `menuColor`        |
-| **Heading font** | `cn-font-heading` on titles                           | `font-heading` if the project's CSS defines `--font-heading` |
+| What             | In your source                                                     | On install                                                   |
+| ---------------- | ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| **RTL**          | Logical classes (`start-0`, `ps-6`), `cn-rtl-flip`                 | Physical classes flip for `rtl: true`                        |
+| **Icons**        | `IconPlaceholder` with a name for each library                     | The project's `iconLibrary`                                  |
+| **Imports**      | `@/registry/bases/{base}/ui/*`, `components/*`, `hooks/*`, `lib/*` | The project's aliases                                        |
+| **Menus**        | `cn-menu-target` and `cn-menu-translucent` on popups               | Inverted or translucent for the project's `menuColor`        |
+| **Heading font** | `cn-font-heading` on titles                                        | `font-heading` if the project's CSS defines `--font-heading` |
 
 The CLI also strips `"use client"` for `rsc: false`, converts to JavaScript for `tsx: false`, adds the project's Tailwind `prefix`, and inlines colors for `cssVariables: false`. `pnpm registry:test` installs with each of these options, and with each icon library.
 
@@ -85,7 +85,8 @@ apps/web/
     config.ts              bases, styles, defaults, SHADCN_REF
     bases/{base,radix,aria}/
       registry.json        items, dependencies, files
-      ui/ hooks/ lib/      item source, with cn-* markers
+      ui/ components/      item source, with cn-* markers
+      hooks/ lib/
       examples/            demos for the preview, not published
     styles/
       style-{style}.css    the registry's rules for each style

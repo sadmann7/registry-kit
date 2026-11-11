@@ -4,7 +4,7 @@ Every item has a copy in each base, a rule for each of its markers in Nova, and 
 
 ## 1. Write the source
 
-Add the item to each base, under `apps/web/src/registry/bases/{base,radix,aria}`, in `ui/`, `hooks/` or `lib/`.
+Add the item to each base, under `apps/web/src/registry/bases/{base,radix,aria}`, in `ui/`, `components/`, `hooks/` or `lib/`. Blocks that compose shadcn/ui primitives, like `login-form`, go in `components/`.
 
 Give each element a `cn-*` marker where its look changes between styles, and keep the classes that don't change inline:
 
