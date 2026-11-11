@@ -792,7 +792,10 @@ function PresetField({
         type="button"
         aria-label={copied ? "Copied" : "Copy preset code"}
         onClick={() => {
-          void navigator.clipboard.writeText(code).then(() => setCopied(true));
+          navigator.clipboard
+            .writeText(code)
+            .then(() => setCopied(true))
+            .catch(() => {});
         }}
         className="flex size-6.5 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
       >
