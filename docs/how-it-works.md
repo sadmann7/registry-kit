@@ -30,21 +30,25 @@ A style's rules replace Nova's marker by marker, so a style without a rule for a
 
 A project's registry URL has a `{style}` placeholder, which the shadcn CLI fills from `components.json`, like `radix-lyra`. The project gets that build, and the CLI adapts it on install:
 
-| What        | In your source                                         | On install                               |
-| ----------- | ------------------------------------------------------ | ---------------------------------------- |
-| **RTL**     | Logical classes (`start-0`, `ps-6`), `cn-rtl-flip`     | Physical classes flip for `rtl: true`    |
-| **Icons**   | `IconPlaceholder` with a name for each library         | The project's `iconLibrary`              |
-| **Imports** | `@/registry/bases/{base}/ui/*`, `hooks/*` and `lib/*`  | The project's aliases                    |
+| What             | In your source                                                     | On install                                                   |
+| ---------------- | ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| **RTL**          | Logical classes (`start-0`, `ps-6`), `cn-rtl-flip`                 | Physical classes flip for `rtl: true`                        |
+| **Icons**        | `IconPlaceholder` with a name for each library                     | The project's `iconLibrary`                                  |
+| **Imports**      | `@/registry/bases/{base}/ui/*`, `components/*`, `hooks/*`, `lib/*` | The project's aliases                                        |
+| **Menus**        | `cn-menu-target` and `cn-menu-translucent` on popups               | Inverted or translucent for the project's `menuColor`        |
+| **Heading font** | `cn-font-heading` on titles                                        | `font-heading` if the project's CSS defines `--font-heading` |
+
+The CLI also strips `"use client"` for `rsc: false`, converts to JavaScript for `tsx: false`, adds the project's Tailwind `prefix`, and inlines colors for `cssVariables: false`. `pnpm registry:test` installs with each of these options, and with each icon library.
 
 ## Unbuilt styles
 
 A project on a style the registry doesn't build gets a fallback instead of a 404:
 
-| Project style                              | Gets                                              |
-| ------------------------------------------ | ------------------------------------------------- |
-| A style of a built base, like `aria-lyra`  | That base's Nova, like `aria-nova`                |
-| `new-york-v4`, `new-york`, `default`       | `radix-nova`, if the registry builds Radix        |
-| A base the registry doesn't build          | 404, since its components import another library  |
+| Project style                             | Gets                                             |
+| ----------------------------------------- | ------------------------------------------------ |
+| A style of a built base, like `aria-lyra` | That base's Nova, like `aria-nova`               |
+| `new-york-v4`, `new-york`, `default`      | `radix-nova`, if the registry builds Radix       |
+| A base the registry doesn't build         | 404, since its components import another library |
 
 This covers styles shadcn/ui adds later, too. `resolveStyle` in `config.ts` picks the fallback, `next.config.ts` turns it into rewrites, and `pnpm registry:test` checks it.
 
@@ -53,10 +57,12 @@ This covers styles shadcn/ui adds later, too. `resolveStyle` in `config.ts` pick
 The site renders the raw source, not the build, and styles the markers with CSS, like shadcn/ui's `/create` page. `scripts/generate.ts` writes what it needs into `src/registry/__generated__`:
 
 - every style's rules as `.style-{name} .cn-*`, with Nova's filling the gaps
-- the icons `IconPlaceholder` names, so the site doesn't bundle every icon
+- the icons `IconPlaceholder` names in each icon library, so the site doesn't bundle whole libraries, and a name a library doesn't export fails the typecheck
 - each base's items and demos
 
 `pnpm dev` regenerates them when the registry changes.
+
+The **Customize** panel, a sidebar on wide screens and a sheet on small ones, has base, style and direction, and every option of the create page: base color, theme, chart color, radius, font, heading font, icon library, menu color, menu accent and cursor. The **Theme** section above the items shows charts and a menu in the chosen options. They use the create page's URL params, and a `?preset=` code from it opens the same design system. `src/lib/design-system.ts` turns them into the CSS variables a project would get, scoped to the previews and the popups they open. The site's own header, main and menus carry `site-chrome`, so they keep the site's theme.
 
 The direction toggle shows what logical classes do. Physical classes are only converted on install, so check those with `pnpm registry:test`.
 
@@ -64,7 +70,7 @@ The direction toggle shows what logical classes do. Physical classes are only co
 
 Items depend on shadcn/ui's own primitives, like `button`, through `registryDependencies`, so projects install them from shadcn/ui. The registry never publishes them.
 
-The preview still needs them, so `pnpm registry:sync` copies the ones the registry imports, and shadcn/ui's style files, from the commit in `SHADCN_REF`. `src/registry/shadcn.json` lists what it copied. To update them, change `SHADCN_REF` in `config.ts` and sync again.
+The preview still needs them, so `pnpm registry:sync` copies the ones the registry imports, shadcn/ui's style files and its themes, from the commit in `SHADCN_REF`. `src/registry/shadcn.json` lists what it copied. To update them, change `SHADCN_REF` in `config.ts` and sync again.
 
 ## Project structure
 
@@ -79,12 +85,15 @@ apps/web/
     config.ts              bases, styles, defaults, SHADCN_REF
     bases/{base,radix,aria}/
       registry.json        items, dependencies, files
-      ui/ hooks/ lib/      item source, with cn-* markers
+      ui/ components/      item source, with cn-* markers
+      hooks/ lib/
       examples/            demos for the preview, not published
     styles/
       style-{style}.css    the registry's rules for each style
-      shadcn/              shadcn/ui's style files, synced
+      shadcn/              shadcn/ui's style files and themes, synced
     icons/                 IconPlaceholder
+  src/lib/
+    design-system.ts       create page options, as preview CSS
 packages/
   cli/                     registry:init
   ui/                      the preview site's own components

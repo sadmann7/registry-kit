@@ -2,15 +2,21 @@
   "ref": "8ab27715521cbd4f87ae6886cd989cbb678f6de7",
   "files": [
     "bases/aria/ui/button.tsx",
+    "bases/aria/ui/card.tsx",
     "bases/aria/ui/field.tsx",
+    "bases/aria/ui/input.tsx",
     "bases/aria/ui/label.tsx",
     "bases/aria/ui/separator.tsx",
     "bases/base/ui/button.tsx",
+    "bases/base/ui/card.tsx",
     "bases/base/ui/field.tsx",
+    "bases/base/ui/input.tsx",
     "bases/base/ui/label.tsx",
     "bases/base/ui/separator.tsx",
     "bases/radix/ui/button.tsx",
+    "bases/radix/ui/card.tsx",
     "bases/radix/ui/field.tsx",
+    "bases/radix/ui/input.tsx",
     "bases/radix/ui/label.tsx",
     "bases/radix/ui/separator.tsx",
     "styles/shadcn/style-luma.css",
@@ -20,6 +26,7 @@
     "styles/shadcn/style-nova.css",
     "styles/shadcn/style-rhea.css",
     "styles/shadcn/style-sera.css",
-    "styles/shadcn/style-vega.css"
+    "styles/shadcn/style-vega.css",
+    "styles/shadcn/themes.ts"
   ]
 }

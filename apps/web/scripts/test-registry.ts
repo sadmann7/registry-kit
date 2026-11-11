@@ -1,8 +1,9 @@
 // Installs every item into an RTL project for every base and style with
 // `shadcn add --dry-run`, against the output of `build-registry.ts`, and checks
 // what the CLI would write. Also installs for styles the registry doesn't
-// build, which fall back to another build like they do when deployed. Needs
-// network access: items pull shadcn/ui's own primitives (like `button`) from
+// build, which fall back to another build like they do when deployed, and with
+// each components.json option the CLI transforms source for. Needs network
+// access: items pull shadcn/ui's own primitives (like `button`) from
 // ui.shadcn.com.
 //
 //   node scripts/build-registry.ts && node scripts/test-registry.ts
@@ -18,6 +19,7 @@ import { promisify, stripVTControlCharacters } from "node:util";
 import { iconLibraries } from "shadcn/icons";
 
 import {
+  type BaseName,
   BASES,
   DEFAULT_STYLE,
   LEGACY_STYLES,
@@ -26,6 +28,7 @@ import {
 } from "../src/registry/config.ts";
 import {
   forEachBase,
+  getBasePath,
   readRegistry,
   ROOT,
   runWithConcurrency,
@@ -50,7 +53,7 @@ const homepage = registries[0]?.registry.homepage ?? "";
 // the fallback for styles it doesn't build. URLs under the homepage point here
 // instead.
 const server = createServer(async (request, response) => {
-  const url = decodeURIComponent(request.url!.split("?")[0]!);
+  const url = decodeURIComponent(request.url!.split("?")[0]);
   const [, style = "", name = ""] = url.match(/^\/r\/([^/]+)\/(.+)$/) ?? [];
   const file = path.join(OUTPUT_PATH, path.normalize(url.replace(/^\/r/, "")));
   const content = file.startsWith(OUTPUT_PATH)
@@ -75,8 +78,55 @@ const registryUrl = `${origin}/r/{style}/{name}.json`;
 
 const fixtures = await fs.mkdtemp(path.join(os.tmpdir(), "registry-test-"));
 
-async function createFixture(style: string, iconLibrary: string) {
-  const dir = path.join(fixtures, `${style}-${iconLibrary}`);
+interface Fixture {
+  name: string;
+  style: string;
+  iconLibrary?: string;
+  // Fields that differ from an RTL Next.js project's components.json.
+  config?: Record<string, unknown>;
+  tailwind?: Record<string, unknown>;
+  aliases?: Record<string, string>;
+}
+
+// A class using a theme color the CLI inlines for `cssVariables: false`. It
+// only inlines these prefixes.
+const THEME_COLOR_CLASS =
+  /\b(?:bg|text|border|ring)-(?:(?:background|border|input|ring|destructive)|(?:card|popover|primary|secondary|muted|accent)(?:-foreground)?|foreground)\b/;
+
+const ALIASES = {
+  components: "@/components",
+  ui: "@/components/ui",
+  utils: "@/lib/utils",
+  lib: "@/lib",
+  hooks: "@/hooks",
+};
+
+const VARIANTS: Omit<Fixture, "style">[] = [
+  { name: "ltr", config: { rtl: false } },
+  ...["inverted", "default-translucent", "inverted-translucent"].map(
+    (menuColor) => ({ name: `menuColor ${menuColor}`, config: { menuColor } }),
+  ),
+  { name: "rsc false", config: { rsc: false } },
+  { name: "tsx false", config: { tsx: false } },
+  { name: "prefix", tailwind: { prefix: "tw" } },
+  {
+    name: "cssVariables false",
+    tailwind: { cssVariables: false, baseColor: "stone" },
+  },
+  {
+    name: "aliases",
+    aliases: {
+      components: "@/design",
+      ui: "@/design/ui",
+      utils: "@/design/utils",
+      lib: "@/design/lib",
+      hooks: "@/design/hooks",
+    },
+  },
+];
+
+async function createFixture(fixture: Fixture) {
+  const dir = path.join(fixtures, fixture.name.replace(/\W+/g, "-"));
   await fs.mkdir(path.join(dir, "src/app"), { recursive: true });
   await Promise.all([
     fs.writeFile(
@@ -94,24 +144,20 @@ async function createFixture(style: string, iconLibrary: string) {
     fs.writeFile(
       path.join(dir, "components.json"),
       JSON.stringify({
-        style,
+        style: fixture.style,
         rsc: true,
         tsx: true,
         rtl: true,
-        iconLibrary,
+        iconLibrary: fixture.iconLibrary ?? "lucide",
+        ...fixture.config,
         tailwind: {
           config: "",
           css: "src/app/globals.css",
           baseColor: "neutral",
           cssVariables: true,
+          ...fixture.tailwind,
         },
-        aliases: {
-          components: "@/components",
-          ui: "@/components/ui",
-          utils: "@/lib/utils",
-          lib: "@/lib",
-          hooks: "@/hooks",
-        },
+        aliases: fixture.aliases ?? ALIASES,
         registries: { [`@${NAMESPACE}`]: registryUrl },
       }),
     ),
@@ -125,7 +171,7 @@ let count = 0;
 try {
   const built: readonly string[] = STYLES.map(({ name }) => name);
   const [defaultLibrary = "lucide", ...otherLibraries] = ICON_LIBRARIES;
-  const cases = [
+  const cases: Fixture[] = [
     ...BASES.flatMap(({ name: base }) => [
       ...built.map((style) => `${base}-${style}`),
       // A style the registry doesn't build, like one shadcn/ui adds later.
@@ -136,21 +182,37 @@ try {
       1,
     ),
   ]
-    .map((style) => ({ style, iconLibrary: defaultLibrary }))
+    .map((style): Fixture => ({
+      name: style,
+      style,
+      iconLibrary: defaultLibrary,
+    }))
     .concat(
       // Each base has its own copy of the icons, but every style shares it.
       BASES.flatMap(({ name: base }) =>
         otherLibraries.map((iconLibrary) => ({
+          name: `${base}-${DEFAULT_STYLE} (${iconLibrary})`,
           style: `${base}-${DEFAULT_STYLE}`,
           iconLibrary,
         })),
       ),
+      BASES.flatMap(({ name: base }) =>
+        VARIANTS.map((variant) => ({
+          ...variant,
+          name: `${base}-${DEFAULT_STYLE} (${variant.name})`,
+          style: `${base}-${DEFAULT_STYLE}`,
+        })),
+      ),
     );
 
-  await runWithConcurrency(cases, 4, async ({ style, iconLibrary }) => {
-    const cwd = await createFixture(style, iconLibrary);
-    const name =
-      iconLibrary === defaultLibrary ? style : `${style} (${iconLibrary})`;
+  await runWithConcurrency(cases, 4, async (fixture) => {
+    const { name, style } = fixture;
+    const cwd = await createFixture(fixture);
+    const javascript = fixture.config?.tsx === false;
+    const aliases = Object.values(fixture.aliases ?? ALIASES);
+    const otherAliases = Object.values(ALIASES).filter(
+      (alias) => !aliases.includes(alias),
+    );
     const base = resolveStyle(style)?.split("-")[0];
     const registry = registries.find((entry) => entry.base === base)?.registry;
     if (!registry) {
@@ -158,7 +220,18 @@ try {
       return;
     }
 
+    // shadcn/ui has no primitives for the made-up `{base}-unbuilt` style, so
+    // items that depend on one, like `button`, can't install there. A style
+    // shadcn/ui adds later has them.
+    const fakeStyle = style.endsWith("-unbuilt");
     for (const item of registry.items) {
+      if (
+        fakeStyle &&
+        item.registryDependencies?.some(
+          (dependency) => !/^(?:@|https?:)/.test(dependency),
+        )
+      )
+        continue;
       const label = `${name} @${NAMESPACE}/${item.name}`;
       const add = (...args: string[]) =>
         run(
@@ -183,11 +256,12 @@ try {
 
         for (const file of item.files ?? []) {
           const source = typeof file === "string" ? file : file.path;
-          const name = path.basename(
+          // Without the extension, which the CLI changes for JavaScript.
+          const { name } = path.parse(
             typeof file !== "string" && file.target ? file.target : source,
           );
           const target = installed.find(
-            (installedFile) => path.basename(installedFile) === name,
+            (installedFile) => path.parse(installedFile).name === name,
           );
           count++;
           if (target === undefined) {
@@ -196,10 +270,43 @@ try {
           }
 
           const content = await add("--view", target);
+          const raw = await fs.readFile(
+            path.join(getBasePath(base as BaseName), source),
+            "utf8",
+          );
+          const rtl = fixture.config?.rtl !== false;
+          const menuColor =
+            typeof fixture.config?.menuColor === "string"
+              ? fixture.config.menuColor
+              : "default";
           const problems = [
             /\bcn-[a-z]/.test(content) && "unresolved cn-* marker",
             content.includes("@/registry/") && "unresolved @/registry import",
             content.includes("IconPlaceholder") && "unresolved IconPlaceholder",
+            javascript && /\.tsx?$/.test(target) && "TypeScript file",
+            fixture.config?.rsc === false &&
+              /^["']use client["']/m.test(content) &&
+              '"use client" without RSC',
+            typeof fixture.tailwind?.prefix === "string" &&
+              content.includes("className") &&
+              !content.includes(`${fixture.tailwind.prefix}:`) &&
+              "classes without the Tailwind prefix",
+            otherAliases.some((alias) => content.includes(`"${alias}/`)) &&
+              "import outside the project's aliases",
+            fixture.tailwind?.cssVariables === false &&
+              THEME_COLOR_CLASS.test(content) &&
+              "theme color not inlined",
+            raw.includes("cn-rtl-flip") &&
+              rtl !== content.includes("rtl:rotate-180") &&
+              (rtl ? "cn-rtl-flip not flipped" : "rtl: variant without RTL"),
+            raw.includes("cn-menu-target") &&
+              menuColor.startsWith("inverted") &&
+              !/(?<![\w:-])dark(?![\w:-])/.test(content) &&
+              "inverted menu without dark",
+            raw.includes("cn-menu-translucent") &&
+              menuColor.endsWith("-translucent") &&
+              !content.includes("backdrop-blur") &&
+              "translucent menu without its classes",
           ].filter(Boolean);
           if (problems.length > 0)
             failures.push(

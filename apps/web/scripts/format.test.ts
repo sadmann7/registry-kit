@@ -10,7 +10,19 @@ import { BASES } from "../src/registry/config.ts";
 // West of UTC, where a date-only string read as UTC lands on the day before.
 process.env.TZ = "America/Los_Angeles";
 
-type Format = typeof import("../src/registry/bases/base/lib/format.ts");
+interface Format {
+  formatDate: (
+    date: Date | string | number,
+    options?: Intl.DateTimeFormatOptions,
+    locale?: string,
+  ) => string;
+  formatBytes: (bytes: number, decimals?: number) => string;
+  formatCompactNumber: (
+    value: number,
+    options?: Intl.NumberFormatOptions,
+    locale?: string,
+  ) => string;
+}
 
 for (const { name: base } of BASES) {
   const file = path.resolve(

@@ -16,10 +16,17 @@
   [role="button"] {
     touch-action: manipulation;
   }
+
+  /* Renders the marker like the shadcn CLI does on install, for a project
+     with a heading font. */
+  .cn-font-heading {
+    @apply font-heading;
+  }
 }
 
 @theme inline {
   --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, monospace;
+  --font-heading: var(--font-heading);
 }

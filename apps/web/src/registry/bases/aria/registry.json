@@ -4,6 +4,20 @@
   "homepage": "https://registry-kit.vercel.app",
   "items": [
     {
+      "name": "login-form",
+      "type": "registry:block",
+      "title": "Login Form",
+      "description": "A sign-in card with a provider button and email fields.",
+      "dependencies": ["cn"],
+      "registryDependencies": ["button", "card", "field", "input"],
+      "files": [
+        {
+          "path": "components/login-form.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "stat-card",
       "type": "registry:ui",
       "title": "Stat Card",

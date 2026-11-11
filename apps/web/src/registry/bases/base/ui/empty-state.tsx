@@ -32,7 +32,7 @@ function EmptyStateTitle({ className, ...props }: React.ComponentProps<"h3">) {
   return (
     <h3
       data-slot="empty-state-title"
-      className={cn("cn-empty-state-title", className)}
+      className={cn("cn-empty-state-title cn-font-heading", className)}
       {...props}
     />
   );

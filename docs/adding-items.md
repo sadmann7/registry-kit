@@ -4,7 +4,7 @@ Every item has a copy in each base, a rule for each of its markers in Nova, and 
 
 ## 1. Write the source
 
-Add the item to each base, under `apps/web/src/registry/bases/{base,radix,aria}`, in `ui/`, `hooks/` or `lib/`.
+Add the item to each base, under `apps/web/src/registry/bases/{base,radix,aria}`, in `ui/`, `components/`, `hooks/` or `lib/`. Blocks that compose shadcn/ui primitives, like `login-form`, go in `components/`.
 
 Give each element a `cn-*` marker where its look changes between styles, and keep the classes that don't change inline:
 
@@ -16,6 +16,7 @@ Write markers as plain strings in `className`, a `cn()` argument, or a `cva()` b
 
 - Use logical classes, like `start-0` and `ps-6`, so the item works in RTL. Add `cn-rtl-flip` to anything that should mirror, like an arrow icon.
 - Use `IconPlaceholder` with a name for every icon library, not an icon import.
+- Add `cn-font-heading` to titles, so they take the project's heading font, and `cn-menu-target cn-menu-translucent` to menu popups, so they follow its menu color.
 - Import other files with `@/registry/bases/{base}/...`, like `@/registry/bases/radix/ui/button`.
 - React Aria components take `onPress` instead of `onClick` and have no `asChild`.
 
@@ -92,4 +93,4 @@ pnpm registry:test
 - the bases differ in `name`, `homepage` or items
 - `homepage` isn't an origin, like `https://acme.com`
 
-`registry:test` installs every item into an RTL project for every base and style, and for every icon library, with `shadcn add --dry-run`. It catches what only shows up on install, like an icon left without a name for the project's library. It needs network access, since items pull shadcn/ui's primitives from ui.shadcn.com.
+`registry:test` installs every item into an RTL project for every base and style, for every icon library, and with each `components.json` option the CLI changes source for, like `tsx: false`, `menuColor` and custom aliases, with `shadcn add --dry-run`. It catches what only shows up on install, like an icon left without a name for the project's library. It needs network access, since items pull shadcn/ui's primitives from ui.shadcn.com.

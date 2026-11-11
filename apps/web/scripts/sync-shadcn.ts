@@ -1,7 +1,8 @@
 // Copies the shadcn/ui primitives the registry and its demos import (for
-// example `@/registry/bases/radix/ui/button`) and shadcn's style files from
-// the commit in `SHADCN_REF`, so the preview renders them in every style.
-// They're never published: items install them through `registryDependencies`.
+// example `@/registry/bases/radix/ui/button`), shadcn's style files and its
+// themes from the commit in `SHADCN_REF`, so the preview renders them in every
+// style and theme. They're never published: items install them through
+// `registryDependencies`.
 //
 //   node scripts/sync-shadcn.ts
 
@@ -148,12 +149,20 @@ async function syncStyles() {
   );
 }
 
+async function syncThemes() {
+  const source = await fetchText(`${SOURCE_URL}/registry/themes.ts`);
+  if (!source) throw new Error(`shadcn/ui has no themes.ts at ${SHADCN_REF}`);
+  await writeFileIfChanged(path.join(STYLES_PATH, "shadcn/themes.ts"), source);
+  return "styles/shadcn/themes.ts";
+}
+
 const previous: { files?: string[] } = JSON.parse(
   await fs.readFile(LOCK_PATH, "utf8").catch(() => "{}"),
 );
 const files = [
   ...(await forEachBase(syncBase)).flat(),
   ...(await syncStyles()),
+  await syncThemes(),
 ].sort();
 
 // Remove primitives the registry no longer imports.
