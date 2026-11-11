@@ -171,4 +171,8 @@ if (failures.length > 0) {
   );
   process.exit(1);
 }
-console.log(`All ${count} installs passed.`);
+console.log(
+  count === 0
+    ? "The registry has no items, so there was nothing to install."
+    : `All ${count} installs passed.`,
+);

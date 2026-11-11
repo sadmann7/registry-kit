@@ -15,10 +15,10 @@ pnpm install
 pnpm registry:init
 ```
 
-`registry:init` asks for your registry's name and homepage, which bases and styles to keep, and whether to keep the example items. It then removes the rest: the bases' sources, the style files, and dependencies nothing uses anymore. Every prompt has a flag, so it also runs without prompts:
+`registry:init` asks for your registry's name, homepage and GitHub repository, which bases and styles to keep, and whether to keep the example items. It then removes the rest: the bases' sources, the style files, and dependencies nothing uses anymore. Every prompt has a flag, so it also runs without prompts:
 
 ```bash
-pnpm registry:init --name acme --homepage https://acme.com --bases base,radix --styles nova,lyra --no-examples --yes
+pnpm registry:init --name acme --homepage https://acme.com --github https://github.com/acme/ui --bases base,radix --styles nova,lyra --no-examples --yes
 ```
 
 Nova is always built, since it's the fallback for styles the registry doesn't build. Run it on a clean working tree, so you can review the changes and undo them with git.
