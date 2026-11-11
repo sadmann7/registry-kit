@@ -183,11 +183,13 @@ if (sources.length > 0) {
     { cwd: path.join(ROOT, "../..") },
   ).catch(() => {});
 }
-// Guarded like oxlint above: oxfmt formats the whole repo without paths.
-if (files.length > 0) {
+// Guarded like oxlint above: oxfmt formats the whole repo without paths. The
+// style files are left out, since oxfmt ignores them and fails when every
+// path it's given is ignored.
+if (sources.length > 0) {
   await promisify(execFile)(
     path.join(ROOT, "../../node_modules/.bin/oxfmt"),
-    files.map((file) => path.join(REGISTRY_PATH, file)),
+    sources,
   );
 }
 
