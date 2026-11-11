@@ -62,7 +62,7 @@ The site renders the raw source, not the build, and styles the markers with CSS,
 
 `pnpm dev` regenerates them when the registry changes.
 
-Besides base, style and direction, **Customize** has every option of the create page: base color, theme, chart color, radius, font, heading font, icon library, menu color, menu accent and cursor. They use the create page's URL params, and a `?preset=` code from it opens the same design system. `src/lib/design-system.ts` turns them into the CSS variables a project would get, scoped to the previews and the popups they open. The site's own header, main and menus carry `site-chrome`, so they keep the site's theme.
+The **Customize** panel, a sidebar on wide screens and a sheet on small ones, has base, style and direction, and every option of the create page: base color, theme, chart color, radius, font, heading font, icon library, menu color, menu accent and cursor. The **Theme** section above the items shows charts and a menu in the chosen options. They use the create page's URL params, and a `?preset=` code from it opens the same design system. `src/lib/design-system.ts` turns them into the CSS variables a project would get, scoped to the previews and the popups they open. The site's own header, main and menus carry `site-chrome`, so they keep the site's theme.
 
 The direction toggle shows what logical classes do. Physical classes are only converted on install, so check those with `pnpm registry:test`.
 

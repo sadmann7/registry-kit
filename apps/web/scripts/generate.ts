@@ -4,8 +4,9 @@
 //   with the default style filled in for markers a style doesn't define, so
 //   the preview matches what the build publishes.
 // - `__generated__/icons.ts`: the icons `IconPlaceholder` names in each icon
-//   library, so the preview doesn't bundle whole libraries, and a name the
-//   library doesn't export fails the typecheck.
+//   library, in the registry and the site's own components, so the preview
+//   doesn't bundle whole libraries, and a name the library doesn't export
+//   fails the typecheck.
 // - `__generated__/registries.ts`: each base's `registry.json` and the demos
 //   in its `examples/`, so adding or removing a base or a demo needs no
 //   imports by hand.
@@ -22,6 +23,7 @@ import {
   getMarkers,
   getStyleMaps,
   REGISTRY_PATH,
+  ROOT,
   writeFileIfChanged,
 } from "./registry.ts";
 
@@ -133,8 +135,9 @@ ${entries.join("\n")}
 }
 
 export async function generate() {
-  const [sources, styleMaps] = await Promise.all([
+  const [sources, siteSources, styleMaps] = await Promise.all([
     readSources(),
+    readSources(path.join(ROOT, "src/components")),
     getStyleMaps({ withShadcn: true }),
   ]);
   const markers = new Set(sources.flatMap((source) => [...getMarkers(source)]));
@@ -154,7 +157,7 @@ export async function generate() {
     ...library,
     icons: [
       ...new Set(
-        sources.flatMap((source) =>
+        [...sources, ...siteSources].flatMap((source) =>
           [
             ...source.matchAll(new RegExp(`\\b${library.name}="(\\w+)"`, "g")),
           ].map(([, icon]) => icon),
@@ -181,19 +184,21 @@ export async function generate() {
 
 export function watchRegistry() {
   let timer: ReturnType<typeof setTimeout> | undefined;
-  watch(REGISTRY_PATH, { recursive: true }, (_event, file) => {
-    if (
-      !file ||
-      file.startsWith("__generated__") ||
-      !/\.(css|json|tsx?)$/.test(file)
-    )
-      return;
-    clearTimeout(timer);
-    timer = setTimeout(
-      () => generate().catch((error: unknown) => console.error(error)),
-      50,
-    );
-  });
+  for (const dir of [REGISTRY_PATH, path.join(ROOT, "src/components")]) {
+    watch(dir, { recursive: true }, (_event, file) => {
+      if (
+        !file ||
+        file.startsWith("__generated__") ||
+        !/\.(css|json|tsx?)$/.test(file)
+      )
+        return;
+      clearTimeout(timer);
+      timer = setTimeout(
+        () => generate().catch((error: unknown) => console.error(error)),
+        50,
+      );
+    });
+  }
 }
 
 if (import.meta.main) {

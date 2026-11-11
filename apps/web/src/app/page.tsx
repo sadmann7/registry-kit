@@ -5,12 +5,13 @@ import { cn } from "cn";
 import { ArrowUpRightIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
-import { PreviewControls } from "@/components/preview-controls";
+import { CustomizerPanel, CustomizerSheet } from "@/components/customizer";
 import { PreviewMenuColor } from "@/components/preview-menu-color";
 import { MAIN_CONTENT_ID } from "@/components/skip-nav";
 import { StyleClass } from "@/components/style-class";
+import { ThemeShowcase } from "@/components/theme-showcase";
 import { getDesignSystemCss, parseDesignSystem } from "@/lib/design-system";
-import { pluralize } from "@/lib/utils";
+import { CARD_CLASS_NAME, pluralize } from "@/lib/utils";
 import { EXAMPLES, REGISTRIES } from "@/registry/__generated__/registries";
 import {
   type BaseName,
@@ -23,9 +24,6 @@ import {
 import { IconLibraryProvider } from "@/registry/icons/icon-placeholder";
 
 type Item = Registry["items"][number];
-
-const CARD_CLASS_NAME =
-  "rounded-xl border bg-card text-card-foreground shadow-[0_1px_2px_rgb(17_17_16/4%),0_8px_24px_rgb(17_17_16/5%)]";
 
 function pick<T extends string>(
   value: string | string[] | undefined,
@@ -106,87 +104,105 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </section>
 
-      <div className="sticky top-0 z-10 border-b border-border bg-background">
-        <div className="flex items-center px-4 py-3 sm:px-12 sm:py-3.5">
-          <PreviewControls base={base} dir={dir} design={design} />
-          <span className="ml-auto hidden font-mono text-xs text-muted-foreground sm:block">
-            {pluralize(registry.items.length, "item")}
-          </span>
+      <div className="border-t border-border lg:flex">
+        <aside
+          aria-label="Customize the preview"
+          className="hidden w-78 shrink-0 lg:block"
+        >
+          <div className="sticky top-0 max-h-svh overflow-y-auto overscroll-contain ps-12 pe-6 pt-7 pb-8">
+            <CustomizerPanel base={base} dir={dir} design={design} />
+          </div>
+        </aside>
+
+        <div className="sticky top-0 z-10 border-b border-border bg-background px-4 py-3 sm:px-12 lg:hidden">
+          <CustomizerSheet base={base} dir={dir} design={design} />
         </div>
-      </div>
 
-      <IconLibraryProvider iconLibrary={design.iconLibrary}>
-        <div className="flex flex-col gap-12 px-4 pt-10 pb-14 sm:gap-16 sm:px-12 sm:pt-14 sm:pb-18">
-          {components.length > 0 && (
-            <div className="flex flex-col gap-10 sm:gap-12">
-              {components.map((item) => {
-                const Example = examples[item.name];
-                return (
-                  <ItemSection
-                    key={item.name}
-                    item={item}
-                    base={base}
-                    style={style}
-                    namespace={registry.name}
-                    dir={dir}
-                  >
-                    <Example />
-                  </ItemSection>
-                );
-              })}
-            </div>
-          )}
-
-          {extras.length > 0 && (
+        <IconLibraryProvider iconLibrary={design.iconLibrary}>
+          <div className="flex min-w-0 flex-1 flex-col gap-12 px-4 pt-8 pb-14 sm:gap-16 sm:px-12 sm:pt-10 sm:pb-18 lg:border-s lg:border-border">
             <section
-              aria-labelledby="extras-title"
+              aria-labelledby="theme-title"
               className="flex flex-col gap-3 sm:gap-3.5"
             >
               <Heading
-                id="extras-title"
-                title="Hooks and utilities"
-                description="Shared logic for your components."
+                id="theme-title"
+                title="Theme"
+                description="Charts, menus and controls in your theme. Change any option to see it here."
               />
-              <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {extras.map((item) => (
-                  <article
-                    key={item.name}
-                    id={item.name}
-                    aria-labelledby={`${item.name}-title`}
-                    className={cn(
-                      CARD_CLASS_NAME,
-                      "flex scroll-mt-36 flex-col justify-between gap-4 p-5 sm:scroll-mt-24",
-                    )}
-                  >
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2.5">
-                        <h3
-                          id={`${item.name}-title`}
-                          className="truncate font-mono text-sm"
-                        >
-                          {item.title ?? item.name}
-                        </h3>
-                        <TypeTag item={item} />
-                      </div>
-                      {item.description && (
-                        <p className="text-sm leading-[1.45] text-muted-foreground">
-                          {item.description}
-                        </p>
-                      )}
-                    </div>
-                    <ItemLinks
+              <ThemeShowcase design={design} dir={dir} />
+            </section>
+
+            {components.length > 0 && (
+              <div className="flex flex-col gap-10 sm:gap-12">
+                {components.map((item) => {
+                  const Example = examples[item.name];
+                  return (
+                    <ItemSection
+                      key={item.name}
                       item={item}
                       base={base}
                       style={style}
                       namespace={registry.name}
-                    />
-                  </article>
-                ))}
+                      dir={dir}
+                    >
+                      <Example />
+                    </ItemSection>
+                  );
+                })}
               </div>
-            </section>
-          )}
-        </div>
-      </IconLibraryProvider>
+            )}
+
+            {extras.length > 0 && (
+              <section
+                aria-labelledby="extras-title"
+                className="flex flex-col gap-3 sm:gap-3.5"
+              >
+                <Heading
+                  id="extras-title"
+                  title="Hooks and utilities"
+                  description="Shared logic for your components."
+                />
+                <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {extras.map((item) => (
+                    <article
+                      key={item.name}
+                      id={item.name}
+                      aria-labelledby={`${item.name}-title`}
+                      className={cn(
+                        CARD_CLASS_NAME,
+                        "flex scroll-mt-36 flex-col justify-between gap-4 p-5 sm:scroll-mt-24",
+                      )}
+                    >
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2.5">
+                          <h3
+                            id={`${item.name}-title`}
+                            className="truncate font-mono text-sm"
+                          >
+                            {item.title ?? item.name}
+                          </h3>
+                          <TypeTag item={item} />
+                        </div>
+                        {item.description && (
+                          <p className="text-sm leading-[1.45] text-muted-foreground">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                      <ItemLinks
+                        item={item}
+                        base={base}
+                        style={style}
+                        namespace={registry.name}
+                      />
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        </IconLibraryProvider>
+      </div>
 
       <footer className="border-t border-border px-4 py-5 text-center text-[13px] text-muted-foreground sm:px-12 sm:py-6">
         {/* Points at the template's author, not at siteConfig.links, which
