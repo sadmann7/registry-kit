@@ -2,16 +2,11 @@
 // Asks which bases, styles and items a registry wants, then trims the
 // registry-kit checkout to match. Every prompt has a flag, so it also runs
 // without prompts in scripts and CI.
-//
-//   pnpm registry:init [--name acme] [--homepage https://acme.com]
-//     [--github https://github.com/acme/ui] [--bases radix,base]
-//     [--styles nova,lyra] [--no-examples] [--yes]
 
 import * as p from "@clack/prompts";
 import { execFile } from "node:child_process";
 import path from "node:path";
-import { promisify } from "node:util";
-import { parseArgs } from "node:util";
+import { parseArgs, promisify } from "node:util";
 
 import {
   applyKit,

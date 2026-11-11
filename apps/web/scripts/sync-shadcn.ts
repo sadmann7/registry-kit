@@ -1,7 +1,7 @@
 // Copies the shadcn/ui primitives the registry and its demos import (for
-// example `@/registry/bases/radix/ui/button`) and shadcn's style files from the commit
-// in `SHADCN_REF`, so the preview renders them in every style. They're never
-// published: items install them through `registryDependencies`.
+// example `@/registry/bases/radix/ui/button`) and shadcn's style files from
+// the commit in `SHADCN_REF`, so the preview renders them in every style.
+// They're never published: items install them through `registryDependencies`.
 //
 //   node scripts/sync-shadcn.ts
 
@@ -25,6 +25,8 @@ import {
 
 const SOURCE_URL = `https://raw.githubusercontent.com/shadcn-ui/ui/${SHADCN_REF}/apps/v4`;
 const LOCK_PATH = path.join(REGISTRY_PATH, "shadcn.json");
+
+const run = promisify(execFile);
 
 // shadcn's sources import the placeholder from its docs app. The CLI matches
 // `IconPlaceholder` by name, so pointing it at ours changes nothing on install.
@@ -161,29 +163,20 @@ await Promise.all(
     .map((file) => fs.rm(path.join(REGISTRY_PATH, file), { force: true })),
 );
 
-// Match the repo's lint fixes and formatting, so `pnpm check` stays clean
-// after a sync.
+// Lint and format the synced sources so `pnpm check` stays clean. Without
+// paths, both tools would run on the whole repo. oxfmt ignores the style
+// files and fails when every path it's given is ignored, so they're left out.
+// Lint errors `--fix` can't repair fail `pnpm check`, not the sync.
 const sources = files
   .filter((file) => /\.tsx?$/.test(file))
   .map((file) => path.join(REGISTRY_PATH, file));
-// Skipped with no sources, since oxlint lints the whole repo without paths.
-// Lint errors `--fix` can't repair fail `pnpm check`, not the sync, so the
-// lock file below is still written.
 if (sources.length > 0) {
-  await promisify(execFile)(
+  await run(
     path.join(ROOT, "../../node_modules/.bin/oxlint"),
     ["--fix", ...sources],
     { cwd: path.join(ROOT, "../..") },
   ).catch(() => {});
-}
-// Guarded like oxlint above: oxfmt formats the whole repo without paths. The
-// style files are left out, since oxfmt ignores them and fails when every
-// path it's given is ignored.
-if (sources.length > 0) {
-  await promisify(execFile)(
-    path.join(ROOT, "../../node_modules/.bin/oxfmt"),
-    sources,
-  );
+  await run(path.join(ROOT, "../../node_modules/.bin/oxfmt"), sources);
 }
 
 await writeFileIfChanged(

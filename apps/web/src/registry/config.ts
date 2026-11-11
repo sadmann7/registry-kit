@@ -41,9 +41,8 @@ export const SHADCN_REF = "8ab27715521cbd4f87ae6886cd989cbb678f6de7";
 // The build a project on `style` (its `style` in components.json, like
 // `radix-lyra`) installs from, or null when there's none. A style this
 // registry doesn't build, including ones shadcn/ui adds later, falls back to
-// the default style of the same base.
-// A base it doesn't build has no fallback, since another base's components
-// import a different library.
+// the default style of the same base. A base it doesn't build has no
+// fallback, since another base's components import a different library.
 export function resolveStyle(style: string) {
   const bases: readonly string[] = BASES.map((base) => base.name);
   const styles: readonly string[] = STYLES.map((style) => style.name);

@@ -135,7 +135,6 @@ try {
 
   await runWithConcurrency(cases, 4, async (style) => {
     const cwd = await createFixture(style);
-    // The base of the build the style gets.
     const base = resolveStyle(style)?.split("-")[0];
     const registry = registries.find((entry) => entry.base === base)?.registry;
     if (!registry) {

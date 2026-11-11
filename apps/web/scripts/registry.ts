@@ -51,7 +51,6 @@ export function getItemFiles(item: Registry["items"][number]) {
   );
 }
 
-// Null when the file doesn't exist.
 async function readStyleMap(file: string) {
   const css = await fs
     .readFile(path.join(STYLES_PATH, file), "utf8")

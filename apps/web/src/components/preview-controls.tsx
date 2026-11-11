@@ -79,7 +79,6 @@ export function PreviewControls({ base, style, dir }: Selection) {
   );
 }
 
-// A select with its label inside the trigger, like `BASE  Base UI`.
 function PreviewSelect<T extends string>({
   label,
   items,

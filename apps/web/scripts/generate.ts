@@ -11,8 +11,7 @@
 //
 //   node scripts/generate.ts [--watch]
 
-import { watch } from "node:fs";
-import { promises as fs } from "node:fs";
+import { promises as fs, watch } from "node:fs";
 import path from "node:path";
 
 import { BASES, STYLES } from "../src/registry/config.ts";
@@ -64,7 +63,6 @@ async function getRegistriesModule() {
       await fs
         .readdir(path.join(REGISTRY_PATH, "bases", base, "examples"))
         .catch((error: NodeJS.ErrnoException) => {
-          // A base without demos has no `examples/` folder.
           if (error.code === "ENOENT") return [];
           throw error;
         })
@@ -95,7 +93,6 @@ export const REGISTRIES = {
 ${registries.join("\n")}
 } as Record<BaseName, Registry>;
 
-// Demos shown in the preview, by base and item name.
 export const EXAMPLES: Record<
   BaseName,
   Record<string, React.ComponentType>
