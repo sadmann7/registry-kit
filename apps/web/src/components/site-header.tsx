@@ -39,7 +39,7 @@ export function SiteHeader() {
               />
             }
           >
-            <GitHubIcon />
+            <GitHubIcon className="size-3.5" />
           </Button>
           <ModeToggle />
         </nav>
