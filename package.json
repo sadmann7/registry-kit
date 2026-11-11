@@ -21,6 +21,7 @@
     "format:check": "oxfmt --check",
     "lint:fix": "oxlint --fix .",
     "typecheck": "turbo typecheck",
+    "test": "turbo test",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck"
   },
   "dependencies": {

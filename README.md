@@ -129,6 +129,7 @@ Projects on a style this registry doesn't build would get a 404. `next.config.ts
 | `pnpm registry:test`  | Install every item for every base and style, in RTL.    |
 | `pnpm registry:sync`  | Sync shadcn/ui primitives and styles from `SHADCN_REF`. |
 | `pnpm typecheck`      | Type-check, after generating the preview files.         |
+| `pnpm test`           | Test `registry:init` on a copy of the registry.         |
 | `pnpm check`          | Lint, check formatting and type-check.                  |
 | `pnpm lint`           | Run oxlint.                                             |
 | `pnpm format`         | Run oxfmt.                                              |
