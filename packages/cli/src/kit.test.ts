@@ -126,12 +126,14 @@ test("removes the bases and styles that aren't kept", async () => {
 
 test("keeps a removed base's package when the site imports it", async () => {
   const keep = kit.bases.at(-1)!;
-  const remove = kit.bases.find(
+  const remove = kit.bases.filter(
     (base) => base.name !== keep.name && base.package,
-  )!;
+  );
   await fs.writeFile(
-    path.join(root, "apps/web/src/lib/uses-removed-base.ts"),
-    `export * from "${remove.package}/anything";\n`,
+    path.join(root, "apps/web/src/lib/uses-removed-bases.ts"),
+    remove
+      .map((base) => `export * from "${base.package}/anything";\n`)
+      .join(""),
   );
 
   await applyKit(kit, getOptions({ bases: [keep.name] }));
@@ -139,7 +141,7 @@ test("keeps a removed base's package when the site imports it", async () => {
   const pkg = await readJson<{ dependencies: Record<string, string> }>(
     "apps/web/package.json",
   );
-  assert.ok(remove.package! in pkg.dependencies);
+  for (const base of remove) assert.ok(base.package! in pkg.dependencies);
 });
 
 test("renames the registry, its dependencies and the site", async () => {
