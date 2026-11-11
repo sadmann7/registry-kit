@@ -28,7 +28,7 @@ Nova is always built, since it's the fallback for styles the registry doesn't bu
 You write each component once per base, with `cn-*` markers where its look changes between styles:
 
 ```tsx
-<span className={cn("cn-timeline-dot absolute top-1 left-0", className)} />
+<span className={cn("cn-timeline-dot absolute start-0 top-1", className)} />
 ```
 
 Each style gives the markers their classes in CSS:
@@ -45,11 +45,31 @@ Each style gives the markers their classes in CSS:
 
 Everything else happens in the CLI when a project installs an item, based on its `components.json`:
 
-- **RTL:** write physical classes (`left-0`, `pl-6`, `border-l`). For `rtl: true` projects, the CLI converts them to logical classes and flips translations. Add `cn-rtl-flip` to icons that should mirror.
+- **RTL:** prefer logical classes (`start-0`, `ps-6`, `border-s`), so the preview's direction toggle shows the RTL layout. Physical classes (`left-0`, `pl-6`) still work: for `rtl: true` projects, the CLI converts them and flips translations, but the preview can't. Add `cn-rtl-flip` to icons that should mirror.
 - **Icons:** use `IconPlaceholder` with a name for each library. The CLI swaps in the project's `iconLibrary`.
 - **Imports:** `@/registry/bases/{base}/ui/*`, `hooks/*` and `lib/*` become the project's aliases.
 
 Styles that don't define a marker fall back to the default style (`nova`), so a style file only needs the rules that differ.
+
+## Installing items
+
+The registry isn't listed in shadcn's registry directory, so a project adds it to its `components.json` once:
+
+```json
+{
+  "registries": {
+    "@acme": "https://acme.com/r/{style}/{name}.json"
+  }
+}
+```
+
+Then items install by name:
+
+```bash
+pnpm dlx shadcn@latest add @acme/stat-card
+```
+
+The CLI fills `{style}` from the project's own `style`, like `base-nova`, so each project gets the build for its base and style. The demo site shows the same snippet. Use your registry's name and homepage in place of `acme`; `registry:init` sets both.
 
 ## Layout
 
@@ -90,7 +110,7 @@ Items install shadcn/ui's own components (like `button`) through `registryDepend
 
 The site renders the raw source and styles it with CSS, like shadcn/ui's `/create` page. `scripts/generate.ts` writes every style's rules as `.style-{style} .cn-*` in `@layer base`, so a `className` passed to a component always wins. The style class goes on the preview and on `<body>`, which covers portaled content. `pnpm dev` regenerates the rules when the registry changes.
 
-The preview renders left-to-right. Check RTL output with `pnpm registry:test`, or by installing into an `rtl: true` project.
+The direction toggle renders previews right-to-left, which shows what logical classes do. The CLI's conversion of physical classes only happens on install, so check that with `pnpm registry:test`, or by installing into an `rtl: true` project.
 
 ## Serving unknown styles
 
