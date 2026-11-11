@@ -18,7 +18,11 @@ export function PreviewMenuColor({ menuColor }: { menuColor: MenuColor }) {
       for (const element of document.querySelectorAll<HTMLElement>(
         ".cn-menu-target, .cn-menu-translucent, [data-menu-translucent]",
       )) {
-        if (element.closest(".site-chrome")) continue;
+        if (
+          element.closest(".site-chrome") &&
+          !element.closest("[data-preview]")
+        )
+          continue;
         if (element.classList.contains("cn-menu-target")) {
           element.classList.toggle("dark", inverted);
         }

@@ -3,7 +3,6 @@ import { cn } from "cn";
 import type { DesignSystem } from "@/lib/design-system";
 import type { Direction } from "@/registry/config";
 
-import { CARD_CLASS_NAME } from "@/lib/utils";
 import { IconPlaceholder } from "@/registry/icons/icon-placeholder";
 
 const VISITORS = [
@@ -23,9 +22,11 @@ const BROWSERS = [
   { name: "Other", share: 9 },
 ];
 
-// The translucent classes the shadcn CLI writes for `menuColor` on install.
-const TRANSLUCENT_CLASSES =
-  "bg-popover/70 backdrop-blur-2xl backdrop-saturate-150";
+// shadcn/ui's card, button and dropdown menu, written with their `cn-*`
+// markers, so every style restyles them like it does the items. Importing a
+// base's primitives would break once `registry:init` removes that base.
+const BUTTON_CLASS_NAME =
+  "cn-button cn-button-size-default inline-flex shrink-0 items-center justify-center whitespace-nowrap select-none";
 
 export function ThemeShowcase({
   design,
@@ -53,16 +54,18 @@ export function ThemeShowcase({
         className="lg:col-span-2 xl:col-span-1"
       >
         <Menu menuColor={design.menuColor} />
-        <div className="mt-auto flex gap-2">
+        <div className="mt-auto flex gap-2 pt-4">
           <button
             type="button"
-            className="h-8 rounded-md bg-primary px-3 text-[13px] font-medium text-primary-foreground"
+            data-slot="button"
+            className={cn(BUTTON_CLASS_NAME, "cn-button-variant-default")}
           >
             Save
           </button>
           <button
             type="button"
-            className="h-8 rounded-md border bg-background px-3 text-[13px] font-medium"
+            data-slot="button"
+            className={cn(BUTTON_CLASS_NAME, "cn-button-variant-outline")}
           >
             Cancel
           </button>
@@ -89,17 +92,27 @@ function ShowcaseCard({
     <div
       dir={dir}
       data-preview
-      className={cn(
-        CARD_CLASS_NAME,
-        "flex min-h-79 flex-col gap-4 p-5",
-        className,
-      )}
+      data-slot="card"
+      data-size="default"
+      className={cn("cn-card group/card flex min-h-79 flex-col", className)}
     >
-      <div className="flex flex-col gap-0.75">
-        <h3 className="cn-font-heading text-sm font-semibold">{title}</h3>
-        <p className="text-[12.5px] text-muted-foreground">{description}</p>
+      <div
+        data-slot="card-header"
+        className="cn-card-header group/card-header grid auto-rows-min items-start"
+      >
+        <h3 data-slot="card-title" className="cn-card-title cn-font-heading">
+          {title}
+        </h3>
+        <p data-slot="card-description" className="cn-card-description">
+          {description}
+        </p>
       </div>
-      {children}
+      <div
+        data-slot="card-content"
+        className="cn-card-content flex flex-1 flex-col"
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -215,7 +228,7 @@ function DonutChart() {
 }
 
 const ICON_CLASS_NAME =
-  "size-3.5 text-muted-foreground in-data-highlighted:text-accent-foreground";
+  "text-muted-foreground in-data-highlighted:text-inherit";
 
 const MENU_ITEMS = [
   {
@@ -262,19 +275,27 @@ const MENU_ITEMS = [
   },
 ];
 
-// A menu drawn open, so the menu options show without opening one. The
-// highlighted item uses the accent, which the menu accent option changes.
+// A menu drawn open, so the menu options show without opening one. Its
+// `cn-menu-*` markers are resolved here the way the CLI resolves them on
+// install, so it renders right before `PreviewMenuColor` runs. A real item is
+// highlighted on focus, which a drawn one can't be.
 function Menu({ menuColor }: { menuColor: DesignSystem["menuColor"] }) {
+  const translucent = menuColor.endsWith("-translucent");
+
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex h-8 w-fit items-center gap-2 rounded-md border bg-background px-2.5 text-[13px] font-medium">
+      <button
+        type="button"
+        data-slot="button"
+        className={cn(BUTTON_CLASS_NAME, "cn-button-variant-outline w-fit")}
+      >
         <IconPlaceholder
           lucide="FolderIcon"
           tabler="IconFolder"
           hugeicons="Folder01Icon"
           phosphor="FolderIcon"
           remixicon="RiFolderLine"
-          className="size-3.5"
+          data-icon="inline-start"
         />
         Acme Inc.
         <IconPlaceholder
@@ -283,38 +304,56 @@ function Menu({ menuColor }: { menuColor: DesignSystem["menuColor"] }) {
           hugeicons="ArrowDown01Icon"
           phosphor="CaretDownIcon"
           remixicon="RiArrowDownSLine"
-          className="size-3.5 text-muted-foreground"
+          data-icon="inline-end"
+          className="text-muted-foreground"
         />
-      </div>
+      </button>
       <div
+        data-slot="dropdown-menu-content"
         className={cn(
-          "flex w-55 flex-col gap-px rounded-lg border bg-popover p-1 text-popover-foreground shadow-[0_6px_18px_rgb(0_0_0/12%)]",
+          "cn-dropdown-menu-content w-56",
           menuColor.startsWith("inverted") && "dark",
-          menuColor.endsWith("-translucent") && TRANSLUCENT_CLASSES,
+          translucent && "cn-menu-translucent",
         )}
       >
         {MENU_ITEMS.map((item) => (
           <div
             key={item.label}
+            data-slot="dropdown-menu-item"
+            data-variant="default"
             data-highlighted={item.label === "Settings" || undefined}
-            className="flex h-7.5 items-center gap-2 rounded-sm px-2 text-[13px] data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+            className={cn(
+              "cn-dropdown-menu-item group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none",
+              translucent
+                ? "data-highlighted:bg-foreground/10"
+                : "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+            )}
           >
             {item.icon}
             {item.label}
-            <span className="ms-auto text-[11.5px] text-muted-foreground">
+            <span
+              data-slot="dropdown-menu-shortcut"
+              className="cn-dropdown-menu-shortcut"
+            >
               {item.shortcut}
             </span>
           </div>
         ))}
-        <div className="-mx-1 my-1 h-px bg-border" />
-        <div className="flex h-7.5 items-center gap-2 rounded-sm px-2 text-[13px] text-destructive">
+        <div
+          data-slot="dropdown-menu-separator"
+          className="cn-dropdown-menu-separator"
+        />
+        <div
+          data-slot="dropdown-menu-item"
+          data-variant="destructive"
+          className="cn-dropdown-menu-item group/dropdown-menu-item relative flex cursor-default items-center outline-hidden select-none"
+        >
           <IconPlaceholder
             lucide="LogOutIcon"
             tabler="IconLogout"
             hugeicons="Logout01Icon"
             phosphor="SignOutIcon"
             remixicon="RiLogoutBoxLine"
-            className="size-3.5"
           />
           Log out
         </div>
