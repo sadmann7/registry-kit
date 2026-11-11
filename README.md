@@ -53,15 +53,13 @@ Styles that don't define a marker fall back to the default style (`nova`), so a 
 
 ## Installing items
 
-The registry isn't listed in shadcn's registry directory, so a project adds it to its `components.json` once:
+The registry isn't listed in shadcn's registry directory, so a project adds it once:
 
-```json
-{
-  "registries": {
-    "@acme": "https://acme.com/r/{style}/{name}.json"
-  }
-}
+```bash
+pnpm dlx shadcn@latest registry add "@acme=https://acme.com/r/{style}/{name}.json"
 ```
+
+It adds the URL under `registries` in the project's `components.json`, which also works by hand.
 
 Then items install by name:
 
@@ -69,7 +67,7 @@ Then items install by name:
 pnpm dlx shadcn@latest add @acme/stat-card
 ```
 
-The CLI fills `{style}` from the project's own `style`, like `base-nova`, so each project gets the build for its base and style. The demo site shows the same snippet. Use your registry's name and homepage in place of `acme`; `registry:init` sets both.
+The CLI fills `{style}` from the project's own `style`, like `base-nova`, so each project gets the build for its base and style. The demo site shows the `components.json` entry. Use your registry's name and homepage in place of `acme`; `registry:init` sets both.
 
 ## Layout
 
@@ -121,7 +119,7 @@ Projects on a style this registry doesn't build would get a 404. `next.config.ts
 | Command               | What it does                                            |
 | --------------------- | ------------------------------------------------------- |
 | `pnpm registry:init`  | Choose the registry's name, bases, styles and items.    |
-| `pnpm dev`            | Start the preview on http://localhost:3001.             |
+| `pnpm dev`            | Start the preview on http://localhost:3002.             |
 | `pnpm build`          | Build the registry, then the site.                      |
 | `pnpm registry:build` | Build `public/r` for every base and style.              |
 | `pnpm registry:test`  | Install every item for every base and style, in RTL.    |
