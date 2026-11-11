@@ -36,7 +36,6 @@ export default function TimelineDemo() {
             {formatDate(event.date, {
               month: "short",
               year: undefined,
-              timeZone: "UTC",
             })}
           </TimelineTime>
           <TimelineTitle>{event.title}</TimelineTitle>

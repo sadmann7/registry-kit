@@ -10,6 +10,7 @@
     "registry:build": "node scripts/build-registry.ts",
     "registry:sync": "node scripts/sync-shadcn.ts",
     "registry:test": "node scripts/test-registry.ts",
+    "test": "node --test scripts/*.test.ts",
     "env:generate": "varlock codegen",
     "typecheck": "node scripts/generate.ts && next typegen && tsc --noEmit"
   },
