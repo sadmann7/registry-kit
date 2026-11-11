@@ -263,7 +263,14 @@ function ItemLinks({
         size="sm"
         nativeButton={false}
         className="gap-1.5 border-border bg-card font-mono text-xs font-normal text-foreground hover:bg-muted hover:text-foreground dark:border-border dark:bg-card dark:hover:bg-muted pointer-coarse:h-9"
-        render={<a href={`/r/${json}`} title={json} />}
+        render={
+          <a
+            href={`/r/${json}`}
+            target="_blank"
+            rel="noreferrer"
+            title={json}
+          />
+        }
       >
         JSON
         <ArrowUpRightIcon className="text-muted-foreground" />
