@@ -101,8 +101,6 @@ const ALIASES = {
   hooks: "@/hooks",
 };
 
-// Each base's default style with the components.json options the CLI changes
-// installed source for, besides `iconLibrary`.
 const VARIANTS: Omit<Fixture, "style">[] = [
   { name: "ltr", config: { rtl: false } },
   ...["inverted", "default-translucent", "inverted-translucent"].map(

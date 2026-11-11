@@ -20,7 +20,6 @@ export const BASE_COLORS = THEMES.filter((theme) =>
   (PRESET_BASE_COLORS as readonly string[]).includes(theme.name),
 );
 
-// The fonts `preview-fonts.ts` loads, as `--font-{name}`.
 export const FONTS = [
   { name: "geist", title: "Geist" },
   { name: "inter", title: "Inter" },
@@ -72,7 +71,6 @@ export const MENU_ACCENTS = [
   { name: "bold", title: "Bold" },
 ] as const;
 
-// shadcn/ui's radius scale, as `--radius-{size}` multiples of `--radius`.
 const RADIUS_SCALE = {
   sm: 0.6,
   md: 0.8,
@@ -188,7 +186,6 @@ export function getPresetCode(design: DesignSystem) {
   return encodePreset(design as Partial<PresetConfig>);
 }
 
-// The params that differ from the defaults, so URLs stay short.
 export function getDesignSystemParams(design: DesignSystem) {
   return Object.fromEntries(
     Object.entries(design)
@@ -216,8 +213,6 @@ function toDeclarations(vars: Record<string, string>) {
     .join("\n");
 }
 
-// The CSS variables shadcn/ui's create page writes to a project's CSS, scoped
-// to the preview.
 export function getDesignSystemCss(design: DesignSystem) {
   const base = getThemeVars(design.baseColor);
   const theme = getThemeVars(design.theme);

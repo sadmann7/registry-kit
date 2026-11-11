@@ -169,7 +169,6 @@ function LegendKey({
   );
 }
 
-// Where each slice starts, as a percentage of the ring.
 const BROWSER_STARTS = BROWSERS.map((_, index) =>
   BROWSERS.slice(0, index).reduce((sum, browser) => sum + browser.share, 0),
 );
@@ -275,10 +274,8 @@ const MENU_ITEMS = [
   },
 ];
 
-// A menu drawn open, so the menu options show without opening one. Its
-// `cn-menu-*` markers are resolved here the way the CLI resolves them on
-// install, so it renders right before `PreviewMenuColor` runs. A real item is
-// highlighted on focus, which a drawn one can't be.
+// Resolves the `cn-menu-*` markers like the CLI does on install, so the first
+// render is already right.
 function Menu({ menuColor }: { menuColor: DesignSystem["menuColor"] }) {
   const translucent = menuColor.endsWith("-translucent");
 

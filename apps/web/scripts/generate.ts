@@ -140,8 +140,6 @@ export async function generate() {
     readSources(path.join(ROOT, "src/components")),
     getStyleMaps({ withShadcn: true }),
   ]);
-  // The site's components use some of shadcn/ui's markers too, like the
-  // theme showcase's card and menu.
   const markers = new Set(
     [...sources, ...siteSources].flatMap((source) => [...getMarkers(source)]),
   );

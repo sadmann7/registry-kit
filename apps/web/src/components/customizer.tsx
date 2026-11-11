@@ -84,7 +84,6 @@ const BASE_LABELS: Record<string, string> = {
   aria: "Aria",
 };
 
-// Samples in each library's own icons, so the picker shows what changes.
 const ICON_SAMPLES: Record<IconLibraryName, React.ComponentType<IconProps>[]> =
   {
     lucide: [HouseIcon, SearchIcon, SettingsIcon],
@@ -733,8 +732,6 @@ function Picker({
   );
 }
 
-// Shows the preset code shadcn/ui's create page would give these options,
-// and opens one pasted from there.
 function PresetField({
   design,
   onPreset,
