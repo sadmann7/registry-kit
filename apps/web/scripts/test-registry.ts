@@ -19,6 +19,7 @@ import { promisify, stripVTControlCharacters } from "node:util";
 import { iconLibraries } from "shadcn/icons";
 
 import {
+  type BaseName,
   BASES,
   DEFAULT_STYLE,
   LEGACY_STYLES,
@@ -27,6 +28,7 @@ import {
 } from "../src/registry/config.ts";
 import {
   forEachBase,
+  getBasePath,
   readRegistry,
   ROOT,
   runWithConcurrency,
@@ -51,7 +53,7 @@ const homepage = registries[0]?.registry.homepage ?? "";
 // the fallback for styles it doesn't build. URLs under the homepage point here
 // instead.
 const server = createServer(async (request, response) => {
-  const url = decodeURIComponent(request.url!.split("?")[0]!);
+  const url = decodeURIComponent(request.url!.split("?")[0]);
   const [, style = "", name = ""] = url.match(/^\/r\/([^/]+)\/(.+)$/) ?? [];
   const file = path.join(OUTPUT_PATH, path.normalize(url.replace(/^\/r/, "")));
   const content = file.startsWith(OUTPUT_PATH)
@@ -85,6 +87,11 @@ interface Fixture {
   tailwind?: Record<string, unknown>;
   aliases?: Record<string, string>;
 }
+
+// A class using a theme color the CLI inlines for `cssVariables: false`. It
+// only inlines these prefixes.
+const THEME_COLOR_CLASS =
+  /\b(?:bg|text|border|ring)-(?:(?:background|border|input|ring|destructive)|(?:card|popover|primary|secondary|muted|accent)(?:-foreground)?|foreground)\b/;
 
 const ALIASES = {
   components: "@/components",
@@ -265,6 +272,15 @@ try {
           }
 
           const content = await add("--view", target);
+          const raw = await fs.readFile(
+            path.join(getBasePath(base as BaseName), source),
+            "utf8",
+          );
+          const rtl = fixture.config?.rtl !== false;
+          const menuColor =
+            typeof fixture.config?.menuColor === "string"
+              ? fixture.config.menuColor
+              : "default";
           const problems = [
             /\bcn-[a-z]/.test(content) && "unresolved cn-* marker",
             content.includes("@/registry/") && "unresolved @/registry import",
@@ -279,6 +295,20 @@ try {
               "classes without the Tailwind prefix",
             otherAliases.some((alias) => content.includes(`"${alias}/`)) &&
               "import outside the project's aliases",
+            fixture.tailwind?.cssVariables === false &&
+              THEME_COLOR_CLASS.test(content) &&
+              "theme color not inlined",
+            raw.includes("cn-rtl-flip") &&
+              rtl !== content.includes("rtl:rotate-180") &&
+              (rtl ? "cn-rtl-flip not flipped" : "rtl: variant without RTL"),
+            raw.includes("cn-menu-target") &&
+              menuColor.startsWith("inverted") &&
+              !/(?<![\w:-])dark(?![\w:-])/.test(content) &&
+              "inverted menu without dark",
+            raw.includes("cn-menu-translucent") &&
+              menuColor.endsWith("-translucent") &&
+              !content.includes("backdrop-blur") &&
+              "translucent menu without its classes",
           ].filter(Boolean);
           if (problems.length > 0)
             failures.push(
