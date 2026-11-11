@@ -107,6 +107,11 @@ export function getMarkers(source: string) {
   return new Set(source.match(/\bcn-[\w-]+/g) ?? []);
 }
 
+// Markers still in a compiled source that the CLI won't resolve on install.
+export function getUncompiledMarkers(compiled: string) {
+  return [...getMarkers(compiled)].filter((marker) => !CLI_MARKERS.has(marker));
+}
+
 export async function forEachBase<T>(callback: (base: BaseName) => Promise<T>) {
   return Promise.all(BASES.map(({ name }) => callback(name)));
 }
