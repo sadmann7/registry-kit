@@ -1,7 +1,9 @@
 // Installs every item into an RTL project for every base and style with
 // `shadcn add --dry-run`, against the output of `build-registry.ts`, and checks
-// what the CLI would write. Needs network access: items pull shadcn/ui's own
-// primitives (like `button`) from ui.shadcn.com.
+// what the CLI would write. Also installs for styles the registry doesn't
+// build, which fall back to another build like they do when deployed. Needs
+// network access: items pull shadcn/ui's own primitives (like `button`) from
+// ui.shadcn.com.
 //
 //   node scripts/build-registry.ts && node scripts/test-registry.ts
 
@@ -14,7 +16,13 @@ import os from "node:os";
 import path from "node:path";
 import { promisify, stripVTControlCharacters } from "node:util";
 
-import { STYLES } from "../src/registry/config.ts";
+import {
+  BASES,
+  LEGACY_STYLES,
+  resolveStyle,
+  SHADCN_STYLES,
+  STYLES,
+} from "../src/registry/config.ts";
 import {
   forEachBase,
   readRegistry,
@@ -22,30 +30,50 @@ import {
   runWithConcurrency,
 } from "./registry.ts";
 
-const OUTPUT_PATH = path.join(ROOT, "public");
+const OUTPUT_PATH = path.join(ROOT, "public/r");
+// Not the registry's own name, so installs can't rely on it.
+const NAMESPACE = "registry-test";
 const SHADCN_BIN = path.join(ROOT, "node_modules/.bin/shadcn");
 
 const run = promisify(execFile);
 
+const registries = await forEachBase(async (base) => ({
+  base,
+  registry: await readRegistry(base),
+}));
+// The build checks that every base has the same homepage.
+const homepage = registries[0]?.registry.homepage ?? "";
+
+// Serves `public/r` like the deployed site: a build's own files first, then
+// the fallback for styles it doesn't build. URLs under the homepage point here
+// instead.
 const server = createServer(async (request, response) => {
-  const file = path.join(
-    OUTPUT_PATH,
-    path.normalize(decodeURIComponent(request.url!.split("?")[0])),
-  );
+  const url = decodeURIComponent(request.url!.split("?")[0]!);
+  const [, style = "", name = ""] = url.match(/^\/r\/([^/]+)\/(.+)$/) ?? [];
+  const file = path.join(OUTPUT_PATH, path.normalize(url.replace(/^\/r/, "")));
   const content = file.startsWith(OUTPUT_PATH)
-    ? await fs.readFile(file).catch(() => null)
+    ? await fs
+        .readFile(file, "utf8")
+        .catch(() => {
+          const build = resolveStyle(style);
+          return build && build !== style
+            ? fs.readFile(path.join(OUTPUT_PATH, build, name), "utf8")
+            : null;
+        })
+        .catch(() => null)
     : null;
-  response.writeHead(content ? 200 : 404, {
+  response.writeHead(content === null ? 404 : 200, {
     "content-type": "application/json",
   });
-  response.end(content);
+  response.end(content?.replaceAll(`"${homepage}/r/`, `"${origin}/r/`));
 });
 await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-const registryUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}/r/{style}/{name}.json`;
+const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+const registryUrl = `${origin}/r/{style}/{name}.json`;
 
 const fixtures = await fs.mkdtemp(path.join(os.tmpdir(), "registry-test-"));
 
-async function createFixture(style: string, namespace: string) {
+async function createFixture(style: string) {
   const dir = path.join(fixtures, style);
   await fs.mkdir(path.join(dir, "src/app"), { recursive: true });
   await Promise.all([
@@ -82,7 +110,7 @@ async function createFixture(style: string, namespace: string) {
           lib: "@/lib",
           hooks: "@/hooks",
         },
-        registries: { [`@${namespace}`]: registryUrl },
+        registries: { [`@${NAMESPACE}`]: registryUrl },
       }),
     ),
   ]);
@@ -93,24 +121,35 @@ const failures: string[] = [];
 let count = 0;
 
 try {
-  const cases = (
-    await forEachBase(async (base) => {
-      const registry = await readRegistry(base);
-      return STYLES.map(({ name }) => ({ style: `${base}-${name}`, registry }));
-    })
-  ).flat();
+  const built: readonly string[] = STYLES.map(({ name }) => name);
+  const cases = [
+    ...BASES.flatMap(({ name: base }) => [
+      ...built.map((style) => `${base}-${style}`),
+      // One style the registry doesn't build, if there is one.
+      ...SHADCN_STYLES.filter((style) => !built.includes(style))
+        .slice(0, 1)
+        .map((style) => `${base}-${style}`),
+    ]),
+    ...LEGACY_STYLES.filter((style) => resolveStyle(style) !== null).slice(
+      0,
+      1,
+    ),
+  ];
 
-  await runWithConcurrency(cases, 4, async ({ style, registry }) => {
-    const cwd = await createFixture(style, registry.name);
+  await runWithConcurrency(cases, 4, async (style) => {
+    const cwd = await createFixture(style);
+    // The base of the build the style gets.
+    const base = resolveStyle(style)?.split("-")[0];
+    const registry = registries.find((entry) => entry.base === base)?.registry;
 
-    for (const item of registry.items) {
-      const label = `${style} @${registry.name}/${item.name}`;
+    for (const item of registry?.items ?? []) {
+      const label = `${style} @${NAMESPACE}/${item.name}`;
       const add = (...args: string[]) =>
         run(
           SHADCN_BIN,
           [
             "add",
-            `@${registry.name}/${item.name}`,
+            `@${NAMESPACE}/${item.name}`,
             "--dry-run",
             "--cwd",
             cwd,

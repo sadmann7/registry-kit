@@ -99,7 +99,27 @@ function checkBase(
     ),
   );
 
+  // Dependencies on the registry's own items become URLs under it.
+  if (!/^https?:\/\/[^/]+$/.test(registry.homepage)) {
+    errors.push(
+      `homepage must be the origin the registry is served from, like https://acme.com, not "${registry.homepage}"`,
+    );
+  }
+  const names = new Set(registry.items.map((item) => item.name));
+
   for (const item of registry.items) {
+    for (const dependency of item.registryDependencies ?? []) {
+      const prefix = `@${registry.name}/`;
+      if (
+        dependency.startsWith(prefix) &&
+        !names.has(dependency.slice(prefix.length))
+      ) {
+        errors.push(
+          `${item.name}: depends on ${dependency}, which isn't an item`,
+        );
+      }
+    }
+
     // Listed with or without a version, like `zod` or `zod@^4`.
     const dependencies = new Set(
       (item.dependencies ?? []).map((dependency) =>
@@ -205,6 +225,28 @@ async function readSynced(base: BaseName) {
   );
 }
 
+// Points dependencies on the registry's own items, like `@acme/format`, at
+// their URL in the same build. Projects then install them whatever namespace
+// they gave the registry, or with none when they add an item by URL.
+function withItemUrls(registry: Registry, build: string): Registry {
+  const prefix = `@${registry.name}/`;
+  return {
+    ...registry,
+    items: registry.items.map((item) =>
+      item.registryDependencies
+        ? {
+            ...item,
+            registryDependencies: item.registryDependencies.map((dependency) =>
+              dependency.startsWith(prefix)
+                ? `${registry.homepage}/r/${build}/${dependency.slice(prefix.length)}.json`
+                : dependency,
+            ),
+          }
+        : item,
+    ),
+  };
+}
+
 async function buildStyle(
   base: BaseName,
   style: string,
@@ -229,7 +271,7 @@ async function buildStyle(
   await fs.mkdir(buildPath, { recursive: true });
   await fs.writeFile(
     path.join(buildPath, "registry.json"),
-    JSON.stringify(registry, null, 2),
+    JSON.stringify(withItemUrls(registry, name), null, 2),
   );
 
   // File paths in registry.json are relative to the base, so build from the

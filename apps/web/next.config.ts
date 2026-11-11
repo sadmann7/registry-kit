@@ -2,38 +2,38 @@ import type { NextConfig } from "next";
 
 import { varlockNextConfigPlugin } from "@varlock/nextjs-integration/plugin";
 
-import { BASES, DEFAULT_STYLE, SHADCN_BASES } from "./src/registry/config.ts";
+import {
+  LEGACY_STYLES,
+  resolveStyle,
+  SHADCN_BASES,
+  SHADCN_STYLES,
+} from "./src/registry/config.ts";
 
 const withVarlock = varlockNextConfigPlugin();
 
-// Typed as plain strings, so the check below still compiles when `registry:init`
-// has trimmed `BASES` to bases other than Radix.
-const BUILT_BASES: readonly string[] = BASES.map(({ name }) => name);
+// Every style a shadcn/ui project can have, and the build it gets when this
+// registry doesn't build that style. `registry:test` serves the build with
+// `resolveStyle` too, so it checks these.
+const FALLBACKS = [
+  ...SHADCN_BASES.flatMap((base) =>
+    SHADCN_STYLES.map((style) => `${base}-${style}`),
+  ),
+  ...LEGACY_STYLES,
+].flatMap((style) => {
+  const build = resolveStyle(style);
+  return build && build !== style ? [{ style, build }] : [];
+});
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
   reactCompiler: true,
   async rewrites() {
     return {
-      // Runs only when no file in `public/r` matched, so it catches styles this
-      // registry doesn't build. Projects on a base this registry builds get
-      // that base, and other shadcn/ui bases get a 404. Styles without a base,
-      // like `new-york-v4` or `default`, are Radix in shadcn/ui, so they get
-      // the Radix build, or a 404 when this registry doesn't build Radix.
-      afterFiles: [
-        ...BASES.map(({ name }) => ({
-          source: `/r/${name}-:style/:name.json`,
-          destination: `/r/${name}-${DEFAULT_STYLE}/:name.json`,
-        })),
-        ...(BUILT_BASES.includes("radix")
-          ? [
-              {
-                source: `/r/:style((?!(?:${SHADCN_BASES.join("|")})-)[^/]+)/:name.json`,
-                destination: `/r/radix-${DEFAULT_STYLE}/:name.json`,
-              },
-            ]
-          : []),
-      ],
+      // Runs only when no file in `public/r` matched.
+      afterFiles: FALLBACKS.map(({ style, build }) => ({
+        source: `/r/${style}/:name.json`,
+        destination: `/r/${build}/:name.json`,
+      })),
       beforeFiles: [],
       fallback: [],
     };

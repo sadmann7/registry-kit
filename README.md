@@ -93,7 +93,7 @@ apps/web/
 ## Adding an item
 
 1. Add the source to `bases/radix`, `bases/base` and `bases/aria`, with markers for anything style-specific. React Aria components take `onPress` instead of `onClick` and have no `asChild`.
-2. Add the item to every `registry.json`. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`.
+2. Add the item to every `registry.json`. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`. The build turns your own items into their URL in the same build, like `https://acme.com/r/radix-nova/use-copy-to-clipboard.json`, so they install whatever namespace a project gives the registry. That's why `homepage` must be the origin the registry is served from.
 3. Give every new marker a rule in `styles/style-nova.css`, and override it in other styles as needed.
 4. If you import a shadcn/ui primitive the registry didn't use before, run `pnpm registry:sync`.
 5. Add a demo to each base as `examples/{name}-demo.tsx`. The preview finds it by name. Items without a demo, like hooks, show as cards under "Hooks and utilities".
@@ -116,7 +116,9 @@ The direction toggle renders previews right-to-left, which shows what logical cl
 
 ## Serving unknown styles
 
-Projects on a style this registry doesn't build would get a 404. `next.config.ts` rewrites those requests to the default style of the same base, like `aria-lyra` to `aria-nova`. Styles without a base, like `new-york-v4` or `default`, are Radix in shadcn/ui, so they go to `radix-nova`. Projects on a base the registry doesn't build still get a 404, including those older styles when Radix isn't built, since another base's components import a different library. `SHADCN_BASES` in `config.ts` lists every shadcn/ui base.
+Projects on a style this registry doesn't build would get a 404. `resolveStyle` in `config.ts` picks the build they get instead: the default style of the same base, like `aria-lyra` to `aria-nova`. shadcn/ui's older styles without a base (`new-york-v4`, `new-york` and `default`) are Radix, so they go to `radix-nova`. Projects on a base the registry doesn't build still get a 404, including those older styles when Radix isn't built, since another base's components import a different library.
+
+`next.config.ts` turns `resolveStyle` into rewrites for every shadcn/ui style (`SHADCN_BASES`, `SHADCN_STYLES` and `LEGACY_STYLES`), and `pnpm registry:test` serves the build with it, so the test covers the fallbacks too. Other style names get a 404.
 
 ## Scripts
 
