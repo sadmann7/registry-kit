@@ -5,6 +5,7 @@ import { cn } from "cn";
 import "../index.css";
 import Providers from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
+import { SkipNav } from "@/components/skip-nav";
 import { fontMono, fontSans } from "@/lib/fonts";
 import { siteConfig, siteTitle } from "@/lib/site";
 import { REGISTRIES } from "@/registry/__generated__/registries";
@@ -41,6 +42,7 @@ export default function RootLayout({
     >
       <body className="bg-background text-foreground antialiased">
         <Providers>
+          <SkipNav />
           <SiteHeader />
           {children}
         </Providers>
