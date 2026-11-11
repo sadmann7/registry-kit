@@ -4,7 +4,8 @@
 // without prompts in scripts and CI.
 //
 //   pnpm registry:init [--name acme] [--homepage https://acme.com]
-//     [--bases radix,base] [--styles nova,lyra] [--no-examples] [--yes]
+//     [--github https://github.com/acme/ui] [--bases radix,base]
+//     [--styles nova,lyra] [--no-examples] [--yes]
 
 import * as p from "@clack/prompts";
 import { execFile } from "node:child_process";
@@ -16,7 +17,9 @@ import {
   applyKit,
   findKit,
   type KitOptions,
+  validateGitHub,
   validateHomepage,
+  validateOwnHomepage,
   validateName,
   validateOptions,
 } from "./kit.ts";
@@ -29,6 +32,8 @@ Prompts for anything not passed as a flag.
 Options:
   --name <name>         Registry namespace, as in @name/item
   --homepage <url>      Where the registry is served
+  --github <url>        The repository the site links to (default: the
+                        origin remote, if it's on GitHub)
   --bases <list>        Comma-separated bases to keep
   --styles <list>       Comma-separated styles to keep
   --no-examples         Remove every item, to start the registry empty
@@ -46,6 +51,7 @@ const { values: flags } = parseArgs({
   options: {
     name: { type: "string" },
     homepage: { type: "string" },
+    github: { type: "string" },
     bases: { type: "string" },
     styles: { type: "string" },
     examples: { type: "boolean" },
@@ -126,11 +132,41 @@ const homepage = (
     ? exitIfCancelled(
         await p.text({
           message: "Where will the registry be served?",
-          initialValue: kit.homepage,
-          validate: (value) => validateHomepage(value ?? ""),
+          initialValue: name === kit.name ? kit.homepage : undefined,
+          placeholder: "https://acme.com",
+          validate: (value) =>
+            validateHomepage(value ?? "") ??
+            validateOwnHomepage(kit, name, value ?? ""),
         }),
       )
     : kit.homepage)
+).replace(/\/+$/, "");
+
+// A checkout made from the GitHub template has its own repository as origin.
+const origin = await run("git", ["remote", "get-url", "origin"], {
+  cwd: kit.root,
+})
+  .then(({ stdout }) =>
+    stdout
+      .trim()
+      .match(
+        /^(?:https:\/\/|git@)github\.com[/:]([\w.-]+\/[\w.-]+?)(?:\.git)?$/,
+      ),
+  )
+  .then((match) => (match ? `https://github.com/${match[1]}` : undefined))
+  .catch(() => undefined);
+
+const github = (
+  flags.github ??
+  (interactive
+    ? exitIfCancelled(
+        await p.text({
+          message: "Which GitHub repository should the site link to?",
+          initialValue: origin ?? kit.github,
+          validate: (value) => validateGitHub(value ?? ""),
+        }),
+      )
+    : (origin ?? kit.github))
 ).replace(/\/+$/, "");
 
 const bases =
@@ -194,7 +230,14 @@ const examples =
       )
     : true);
 
-const options: KitOptions = { name, homepage, bases, styles, examples };
+const options: KitOptions = {
+  name,
+  homepage,
+  github,
+  bases,
+  styles,
+  examples,
+};
 
 try {
   validateOptions(kit, options);
@@ -253,6 +296,7 @@ p.note(
     "pnpm registry:init",
     `--name ${quote(name)}`,
     `--homepage ${quote(homepage)}`,
+    `--github ${quote(github)}`,
     `--bases ${bases.join(",")}`,
     `--styles ${styles.join(",")}`,
     ...(examples ? [] : ["--no-examples"]),

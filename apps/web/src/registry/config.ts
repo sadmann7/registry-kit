@@ -9,10 +9,8 @@ export const BASES = [
   { name: "aria", title: "React Aria", package: "react-aria-components" },
 ] as const;
 
-// Every base shadcn/ui has, whether this registry builds it or not. Projects
-// on a base missing from `BASES` get a 404 rather than another base's
-// components, which import a different library.
-export const SHADCN_BASES = ["base", "radix", "aria"] as const;
+// shadcn/ui's styles from before bases, which are Radix.
+export const LEGACY_STYLES = ["new-york-v4", "new-york", "default"] as const;
 
 // Same names as shadcn/ui's styles, so `{style}` in a project's registry URL
 // (for example `radix-nova`) resolves to a build of this registry.
@@ -39,6 +37,26 @@ export const DIRECTIONS = ["ltr", "rtl"] as const;
 // The shadcn/ui commit the primitives in `bases/*/ui` and the styles in
 // `styles/shadcn` are synced from. Bump it and run `pnpm registry:sync`.
 export const SHADCN_REF = "8ab27715521cbd4f87ae6886cd989cbb678f6de7";
+
+// The build a project on `style` (its `style` in components.json, like
+// `radix-lyra`) installs from, or null when there's none. A style this
+// registry doesn't build, including ones shadcn/ui adds later, falls back to
+// the default style of the same base.
+// A base it doesn't build has no fallback, since another base's components
+// import a different library.
+export function resolveStyle(style: string) {
+  const bases: readonly string[] = BASES.map((base) => base.name);
+  const styles: readonly string[] = STYLES.map((style) => style.name);
+  const legacy: readonly string[] = LEGACY_STYLES;
+  const [base, ...rest] = style.split("-");
+  const name = rest.join("-");
+
+  if (legacy.includes(style)) {
+    return bases.includes("radix") ? `radix-${DEFAULT_STYLE}` : null;
+  }
+  if (!base || !bases.includes(base) || !name) return null;
+  return styles.includes(name) ? style : `${base}-${DEFAULT_STYLE}`;
+}
 
 export type BaseName = (typeof BASES)[number]["name"];
 export type StyleName = (typeof STYLES)[number]["name"];

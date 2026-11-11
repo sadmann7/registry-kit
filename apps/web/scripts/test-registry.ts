@@ -1,7 +1,9 @@
 // Installs every item into an RTL project for every base and style with
 // `shadcn add --dry-run`, against the output of `build-registry.ts`, and checks
-// what the CLI would write. Needs network access: items pull shadcn/ui's own
-// primitives (like `button`) from ui.shadcn.com.
+// what the CLI would write. Also installs for styles the registry doesn't
+// build, which fall back to another build like they do when deployed. Needs
+// network access: items pull shadcn/ui's own primitives (like `button`) from
+// ui.shadcn.com.
 //
 //   node scripts/build-registry.ts && node scripts/test-registry.ts
 
@@ -12,46 +14,65 @@ import { promises as fs } from "node:fs";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { promisify } from "node:util";
+import { promisify, stripVTControlCharacters } from "node:util";
 
-import { STYLES } from "../src/registry/config.ts";
+import {
+  BASES,
+  LEGACY_STYLES,
+  resolveStyle,
+  STYLES,
+} from "../src/registry/config.ts";
 import {
   forEachBase,
-  getItemFiles,
   readRegistry,
   ROOT,
   runWithConcurrency,
 } from "./registry.ts";
 
-const OUTPUT_PATH = path.join(ROOT, "public");
+const OUTPUT_PATH = path.join(ROOT, "public/r");
+// Not the registry's own name, so installs can't rely on it.
+const NAMESPACE = "registry-test";
 const SHADCN_BIN = path.join(ROOT, "node_modules/.bin/shadcn");
-const TARGETS: Record<string, string> = {
-  "registry:ui": "src/components/ui",
-  "registry:hook": "src/hooks",
-  "registry:lib": "src/lib",
-};
 
 const run = promisify(execFile);
 
+const registries = await forEachBase(async (base) => ({
+  base,
+  registry: await readRegistry(base),
+}));
+// The build checks that every base has the same homepage.
+const homepage = registries[0]?.registry.homepage ?? "";
+
+// Serves `public/r` like the deployed site: a build's own files first, then
+// the fallback for styles it doesn't build. URLs under the homepage point here
+// instead.
 const server = createServer(async (request, response) => {
-  const file = path.join(
-    OUTPUT_PATH,
-    path.normalize(decodeURIComponent(request.url!.split("?")[0])),
-  );
+  const url = decodeURIComponent(request.url!.split("?")[0]!);
+  const [, style = "", name = ""] = url.match(/^\/r\/([^/]+)\/(.+)$/) ?? [];
+  const file = path.join(OUTPUT_PATH, path.normalize(url.replace(/^\/r/, "")));
   const content = file.startsWith(OUTPUT_PATH)
-    ? await fs.readFile(file).catch(() => null)
+    ? await fs
+        .readFile(file, "utf8")
+        .catch(() => {
+          const build = resolveStyle(style);
+          return build && build !== style
+            ? fs.readFile(path.join(OUTPUT_PATH, build, name), "utf8")
+            : null;
+        })
+        .catch(() => null)
     : null;
-  response.writeHead(content ? 200 : 404, {
+  response.writeHead(content === null ? 404 : 200, {
     "content-type": "application/json",
   });
-  response.end(content);
+  response.end(content?.replaceAll(`"${homepage}/r/`, `"${origin}/r/`));
 });
 await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-const registryUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}/r/{style}/{name}.json`;
+const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+const registryUrl = `${origin}/r/{style}/{name}.json`;
 
 const fixtures = await fs.mkdtemp(path.join(os.tmpdir(), "registry-test-"));
 
-async function createFixture(style: string, namespace: string) {
+async function createFixture(style: string) {
   const dir = path.join(fixtures, style);
   await fs.mkdir(path.join(dir, "src/app"), { recursive: true });
   await Promise.all([
@@ -88,7 +109,7 @@ async function createFixture(style: string, namespace: string) {
           lib: "@/lib",
           hooks: "@/hooks",
         },
-        registries: { [`@${namespace}`]: registryUrl },
+        registries: { [`@${NAMESPACE}`]: registryUrl },
       }),
     ),
   ]);
@@ -99,50 +120,82 @@ const failures: string[] = [];
 let count = 0;
 
 try {
-  const cases = (
-    await forEachBase(async (base) => {
-      const registry = await readRegistry(base);
-      return STYLES.map(({ name }) => ({ style: `${base}-${name}`, registry }));
-    })
-  ).flat();
+  const built: readonly string[] = STYLES.map(({ name }) => name);
+  const cases = [
+    ...BASES.flatMap(({ name: base }) => [
+      ...built.map((style) => `${base}-${style}`),
+      // A style the registry doesn't build, like one shadcn/ui adds later.
+      `${base}-unbuilt`,
+    ]),
+    ...LEGACY_STYLES.filter((style) => resolveStyle(style) !== null).slice(
+      0,
+      1,
+    ),
+  ];
 
-  await runWithConcurrency(cases, 4, async ({ style, registry }) => {
-    const cwd = await createFixture(style, registry.name);
+  await runWithConcurrency(cases, 4, async (style) => {
+    const cwd = await createFixture(style);
+    // The base of the build the style gets.
+    const base = resolveStyle(style)?.split("-")[0];
+    const registry = registries.find((entry) => entry.base === base)?.registry;
+    if (!registry) {
+      failures.push(`${style}: no build to install from`);
+      return;
+    }
 
     for (const item of registry.items) {
-      for (const file of getItemFiles(item)) {
-        const target = `${TARGETS[item.type] ?? "src/components"}/${path.basename(file)}`;
-        const label = `${style} @${registry.name}/${item.name} → ${target}`;
-        count++;
+      const label = `${style} @${NAMESPACE}/${item.name}`;
+      const add = (...args: string[]) =>
+        run(
+          SHADCN_BIN,
+          [
+            "add",
+            `@${NAMESPACE}/${item.name}`,
+            "--dry-run",
+            "--cwd",
+            cwd,
+            ...args,
+          ],
+          { maxBuffer: 16 * 1024 * 1024 },
+        ).then(({ stdout }) => stripVTControlCharacters(stdout));
 
-        try {
-          const { stdout } = await run(
-            SHADCN_BIN,
-            [
-              "add",
-              `@${registry.name}/${item.name}`,
-              "--dry-run",
-              "--view",
-              target,
-              "--cwd",
-              cwd,
-            ],
-            { maxBuffer: 16 * 1024 * 1024 },
+      try {
+        // The CLI decides where each file goes, from its type, path and
+        // target, so read the paths from its summary.
+        const installed = [...(await add()).matchAll(/\s(src\/\S+)\s/g)].map(
+          ([, file]) => file,
+        );
+
+        for (const file of item.files ?? []) {
+          const source = typeof file === "string" ? file : file.path;
+          const name = path.basename(
+            typeof file !== "string" && file.target ? file.target : source,
           );
+          const target = installed.find(
+            (installedFile) => path.basename(installedFile) === name,
+          );
+          count++;
+          if (target === undefined) {
+            failures.push(`${label}: ${source} missing from the install`);
+            continue;
+          }
+
+          const content = await add("--view", target);
           const problems = [
-            !stdout.includes(target) && "file missing from the install",
-            /\bcn-[a-z]/.test(stdout) && "unresolved cn-* marker",
-            stdout.includes("@/registry/") && "unresolved @/registry import",
+            /\bcn-[a-z]/.test(content) && "unresolved cn-* marker",
+            content.includes("@/registry/") && "unresolved @/registry import",
           ].filter(Boolean);
           if (problems.length > 0)
-            failures.push(`${label}: ${problems.join(", ")}\n${stdout}`);
-        } catch (error) {
-          const { stdout = "", stderr = "" } = error as {
-            stdout?: string;
-            stderr?: string;
-          };
-          failures.push(`${label}: shadcn add failed\n${stdout}${stderr}`);
+            failures.push(
+              `${label} → ${target}: ${problems.join(", ")}\n${content}`,
+            );
         }
+      } catch (error) {
+        const { stdout = "", stderr = "" } = error as {
+          stdout?: string;
+          stderr?: string;
+        };
+        failures.push(`${label}: shadcn add failed\n${stdout}${stderr}`);
       }
     }
     console.log(`  ${style}`);
@@ -158,4 +211,8 @@ if (failures.length > 0) {
   );
   process.exit(1);
 }
-console.log(`All ${count} installs passed.`);
+console.log(
+  count === 0
+    ? "The registry has no items, so there was nothing to install."
+    : `All ${count} installs passed.`,
+);

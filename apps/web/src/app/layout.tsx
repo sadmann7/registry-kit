@@ -1,12 +1,19 @@
 import type { Metadata, Viewport } from "next";
 
+import { cn } from "cn";
+
 import "../index.css";
 import Providers from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { fontMono, fontSans } from "@/lib/fonts";
 import { siteConfig, siteTitle } from "@/lib/site";
+import { REGISTRIES } from "@/registry/__generated__/registries";
+import { DEFAULT_BASE } from "@/registry/config";
 
 export const metadata: Metadata = {
+  // The registry is served from the site, so the homepage is its URL too.
+  // Vercel would otherwise use the production URL, other hosts localhost.
+  metadataBase: new URL(REGISTRIES[DEFAULT_BASE].homepage),
   title: `${siteTitle} | An example registry for every base and style`,
   description: siteConfig.description,
 };
@@ -29,7 +36,7 @@ export default function RootLayout({
     // --font-mono resolve on every element, including bare <code> and <pre>.
     <html
       lang="en"
-      className={`${fontSans.variable} ${fontMono.variable}`}
+      className={cn(fontSans.variable, fontMono.variable)}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground antialiased">

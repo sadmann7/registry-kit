@@ -10,9 +10,9 @@ registry-kit is a starter for shadcn registries that build every base and style.
 
 ## What to look for
 
-- **Bases drift.** Items exist under `bases/radix` and `bases/base`. A fix in one base and not the other is a bug unless the difference is the primitive's API.
+- **Bases drift.** Items exist under `bases/radix`, `bases/base` and `bases/aria`. A fix in one base and not the others is a bug unless the difference is the primitive's API.
 - **Markers.** Classes that change between styles belong in a `cn-*` marker with a rule in `style-nova.css`. Layout that never changes stays inline. Other styles override a marker's whole rule, not part of it.
-- **RTL.** Source uses physical classes (`left-*`, `pl-*`, `border-l`) and `cn-rtl-flip`, like shadcn/ui, and the CLI converts them for `rtl: true` projects. Hand-written `rtl:` variants can clash with the ones the CLI adds.
+- **RTL.** Source prefers logical classes (`start-*`, `ps-*`, `border-s`), so the preview's direction toggle shows the RTL layout. Physical classes still install correctly, since the CLI converts them for `rtl: true` projects, but the preview can't show that. Icons that should mirror use `cn-rtl-flip`. Hand-written `rtl:` variants can clash with the ones the CLI adds.
 - **Dependencies.** Every `@/registry/bases/...` import is listed in `registryDependencies`, by name for shadcn/ui primitives and by namespace for the registry's own items. npm imports are listed in `dependencies`.
 - **Synced from shadcn/ui.** Files listed in `src/registry/shadcn.json` are overwritten on the next sync. Changes to them belong upstream or in the sync script.
 - **Build parity.** The preview's CSS and the published JSON come from the same style maps. A change to one path in `scripts/` without the other is a finding.

@@ -7,6 +7,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const CONFIG_FILE = "apps/web/src/registry/config.ts";
+const SITE_FILE = "apps/web/src/lib/site.ts";
 
 type Option = { name: string; title: string; package?: string };
 
@@ -27,6 +28,8 @@ export type Kit = {
   defaultStyle: string;
   name: string;
   homepage: string;
+  // The repository the site links to.
+  github: string;
   // Item names across every base. Removing the examples removes all of them.
   items: string[];
 };
@@ -34,6 +37,7 @@ export type Kit = {
 export type KitOptions = {
   name: string;
   homepage: string;
+  github: string;
   bases: string[];
   styles: string[];
   examples: boolean;
@@ -67,6 +71,7 @@ export async function findKit(from: string): Promise<Kit> {
     ),
   );
   const registry = registries[0]!;
+  const site = await fs.readFile(path.join(root, SITE_FILE), "utf8");
 
   return {
     root,
@@ -75,6 +80,7 @@ export async function findKit(from: string): Promise<Kit> {
     defaultStyle: config.DEFAULT_STYLE,
     name: registry.name,
     homepage: registry.homepage,
+    github: site.match(/github: "([^"]*)"/)?.[1] ?? "",
     items: [
       ...new Set(
         registries.flatMap((base) => base.items.map((item) => item.name)),
@@ -88,18 +94,41 @@ export function validateName(name: string) {
     return "Use lowercase letters, numbers and dashes, like acme or acme-ui.";
 }
 
+// Dependencies on the registry's own items are built as URLs under the
+// homepage, so it has to be the origin the registry is served from.
 export function validateHomepage(homepage: string) {
   try {
     const url = new URL(homepage);
-    if (url.protocol === "https:" || url.protocol === "http:") return;
+    if (
+      (url.protocol === "https:" || url.protocol === "http:") &&
+      url.origin === homepage.replace(/\/+$/, "")
+    )
+      return;
   } catch {}
-  return "Use a full URL, like https://acme.com.";
+  return "Use the origin the registry is served from, like https://acme.com.";
+}
+
+// The template's homepage only fits the template's name: a renamed registry
+// keeping it would install its dependencies from the template.
+export function validateOwnHomepage(kit: Kit, name: string, homepage: string) {
+  if (name !== kit.name && homepage.replace(/\/+$/, "") === kit.homepage)
+    return `Set a homepage for ${name}: keeping ${kit.homepage} would install its dependencies from ${kit.name}.`;
+}
+
+export function validateGitHub(github: string) {
+  try {
+    const url = new URL(github);
+    if (url.protocol === "https:" && url.hostname === "github.com") return;
+  } catch {}
+  return "Use a GitHub URL, like https://github.com/acme/ui.";
 }
 
 export function validateOptions(kit: Kit, options: KitOptions) {
   const errors = [
     validateName(options.name),
     validateHomepage(options.homepage),
+    validateOwnHomepage(kit, options.name, options.homepage),
+    validateGitHub(options.github),
     ...getUnknown(options.bases, kit.bases, "base"),
     ...getUnknown(options.styles, kit.styles, "style"),
     options.bases.length === 0 && "Pick at least one base.",
@@ -198,6 +227,24 @@ export async function applyKit(kit: Kit, options: KitOptions) {
   for (const style of removeStyles)
     removals.push(path.join(registryPath, "styles", `style-${style.name}.css`));
 
+  // Without items, every rule is for a marker nothing uses, which the build
+  // rejects. The default style's file stays, since it's required.
+  if (!options.examples) {
+    for (const style of options.styles) {
+      const styleFile = path.join(registryPath, "styles", `style-${style}.css`);
+      const css = await fs.readFile(styleFile, "utf8").catch(() => null);
+      if (css === null) continue;
+      // Keeps the comment above the rules, if there is one.
+      const start = css.indexOf(`.style-${style} {`);
+      if (start === -1) {
+        throw new Error(
+          `Couldn't find .style-${style} in styles/style-${style}.css.`,
+        );
+      }
+      writes.set(styleFile, `${css.slice(0, start)}.style-${style} {\n}\n`);
+    }
+  }
+
   for (const base of options.bases) {
     const basePath = path.join(registryPath, "bases", base);
     const registryFile = path.join(basePath, "registry.json");
@@ -245,14 +292,16 @@ export async function applyKit(kit: Kit, options: KitOptions) {
     );
   }
 
-  const siteFile = path.join(kit.root, "apps/web/src/lib/site.ts");
+  const siteFile = path.join(kit.root, SITE_FILE);
   const site = await fs.readFile(siteFile, "utf8");
   writes.set(
     siteFile,
-    site.replace(
-      /name: "[^"]*"/,
-      () => `name: ${JSON.stringify(options.name)}`,
-    ),
+    site
+      .replace(/name: "[^"]*"/, () => `name: ${JSON.stringify(options.name)}`)
+      .replace(
+        /github: "[^"]*"/,
+        () => `github: ${JSON.stringify(options.github)}`,
+      ),
   );
 
   const packageFile = path.join(kit.root, "apps/web/package.json");

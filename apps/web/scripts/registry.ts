@@ -51,11 +51,22 @@ export function getItemFiles(item: Registry["items"][number]) {
   );
 }
 
+// Null when the file doesn't exist.
 async function readStyleMap(file: string) {
   const css = await fs
     .readFile(path.join(STYLES_PATH, file), "utf8")
     .catch(() => null);
-  return css ? createStyleMap(css) : {};
+  return css === null ? null : createStyleMap(css);
+}
+
+// The rules in each of the registry's own style files, without fallbacks.
+// Styles without a file have no rules.
+export async function getOwnStyleMaps() {
+  const maps = new Map<StyleName, StyleMap>();
+  for (const { name } of STYLES) {
+    maps.set(name, (await readStyleMap(`style-${name}.css`)) ?? {});
+  }
+  return maps;
 }
 
 // The registry's own maps: a style's rules replace the default style's rules
@@ -63,19 +74,34 @@ async function readStyleMap(file: string) {
 // shadcn primitives, which the preview needs and the build doesn't.
 export async function getStyleMaps({ withShadcn = false } = {}) {
   const defaultMap = await readStyleMap(`style-${DEFAULT_STYLE}.css`);
-  if (Object.keys(defaultMap).length === 0) {
-    throw new Error(`Missing rules in styles/style-${DEFAULT_STYLE}.css`);
+  if (defaultMap === null) {
+    throw new Error(`Missing styles/style-${DEFAULT_STYLE}.css`);
   }
 
+  const ownMaps = await getOwnStyleMaps();
   const maps = new Map<StyleName, StyleMap>();
   for (const { name } of STYLES) {
     maps.set(name, {
-      ...(withShadcn ? await readStyleMap(`shadcn/style-${name}.css`) : {}),
+      ...(withShadcn
+        ? await readStyleMap(`shadcn/style-${name}.css`)
+        : undefined),
       ...defaultMap,
-      ...(await readStyleMap(`style-${name}.css`)),
+      ...ownMaps.get(name),
     });
   }
   return maps;
+}
+
+// The base's files a source imports, by their path in the base without the
+// extension, like `ui/button` for `@/registry/bases/radix/ui/button`.
+export function getRegistryImports(source: string, base: BaseName) {
+  const pattern = new RegExp(
+    `["']@/registry/bases/${base}/([\\w./-]+)["']`,
+    "g",
+  );
+  return [...source.matchAll(pattern)].map(([, file]) =>
+    file.replace(/\.tsx?$/, ""),
+  );
 }
 
 export function getMarkers(source: string) {

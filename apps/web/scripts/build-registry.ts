@@ -10,6 +10,7 @@ import type { Registry } from "shadcn/schema";
 
 import { execFile } from "node:child_process";
 import { promises as fs } from "node:fs";
+import { isBuiltin } from "node:module";
 import { availableParallelism } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -29,8 +30,11 @@ import {
   getBasePath,
   getItemFiles,
   getMarkers,
+  getOwnStyleMaps,
+  getRegistryImports,
   getStyleMaps,
   readRegistry,
+  REGISTRY_PATH,
   ROOT,
   runWithConcurrency,
   type StyleMap,
@@ -55,12 +59,32 @@ async function readSources(base: BaseName, registry: Registry) {
   );
 }
 
+// Packages every project has, which items don't list in `dependencies`.
+const HOST_PACKAGES = new Set(["react", "react-dom", "next"]);
+
+// The npm packages a source imports, like `@base-ui/react` for
+// `@base-ui/react/number-field`, including dynamic `import()`s.
+function getPackageImports(source: string) {
+  const packages = new Set<string>();
+  for (const [, specifier] of source.matchAll(
+    /\b(?:from|import)\s*\(?\s*["']([^"']+)["']/g,
+  )) {
+    if (/^(?:\.|@\/|#|node:)/.test(specifier) || isBuiltin(specifier)) continue;
+    const parts = specifier.split("/");
+    packages.add(
+      specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0],
+    );
+  }
+  return packages;
+}
+
 // Fail on what would otherwise only show up after someone installs an item.
-function check(
+function checkBase(
   base: BaseName,
   registry: Registry,
   sources: Source[],
   defaultMap: StyleMap,
+  synced: Set<string>,
 ) {
   const errors: string[] = [];
   const contents = new Map(
@@ -75,7 +99,34 @@ function check(
     ),
   );
 
+  // Dependencies on the registry's own items become URLs under it.
+  if (!/^https?:\/\/[^/]+$/.test(registry.homepage)) {
+    errors.push(
+      `homepage must be the origin the registry is served from, like https://acme.com, not "${registry.homepage}"`,
+    );
+  }
+  const names = new Set(registry.items.map((item) => item.name));
+
   for (const item of registry.items) {
+    for (const dependency of item.registryDependencies ?? []) {
+      const prefix = `@${registry.name}/`;
+      if (
+        dependency.startsWith(prefix) &&
+        !names.has(dependency.slice(prefix.length))
+      ) {
+        errors.push(
+          `${item.name}: depends on ${dependency}, which isn't an item`,
+        );
+      }
+    }
+
+    // Listed with or without a version, like `zod` or `zod@^4`.
+    const dependencies = new Set(
+      (item.dependencies ?? []).map((dependency) =>
+        dependency.replace(/(?<=.)@.*$/, ""),
+      ),
+    );
+
     for (const file of getItemFiles(item)) {
       const content = contents.get(file)!;
 
@@ -87,21 +138,28 @@ function check(
         }
       }
 
-      const imports = content.matchAll(
-        new RegExp(
-          `["']@/registry/bases/${base}/((?:ui|hooks|lib)/[\\w-]+)["']`,
-          "g",
-        ),
-      );
-      for (const [, imported] of imports) {
+      for (const name of getPackageImports(content)) {
+        if (!HOST_PACKAGES.has(name) && !dependencies.has(name)) {
+          errors.push(
+            `${item.name}: imports ${name} but doesn't list it in dependencies`,
+          );
+        }
+      }
+
+      for (const imported of getRegistryImports(content, base)) {
         const owner = owners.get(imported);
+        if (owner === item.name) continue;
+        // Primitives synced from shadcn/ui install by their name.
         const dependency = owner
           ? `@${registry.name}/${owner}`
-          : path.basename(imported);
-        if (
-          owner !== item.name &&
-          !item.registryDependencies?.includes(dependency)
-        ) {
+          : synced.has(imported)
+            ? path.basename(imported)
+            : null;
+        if (dependency === null) {
+          errors.push(
+            `${item.name}: imports ${imported}, which no item publishes and shadcn/ui doesn't provide. Add it to an item, or run pnpm registry:sync if it's a shadcn/ui primitive.`,
+          );
+        } else if (!item.registryDependencies?.includes(dependency)) {
           errors.push(
             `${item.name}: imports ${imported} but doesn't list "${dependency}" in registryDependencies`,
           );
@@ -110,11 +168,83 @@ function check(
     }
   }
 
-  if (errors.length > 0) {
-    throw new Error(
-      `The ${base} registry has problems:\n${errors.map((error) => `  - ${error}`).join("\n")}`,
-    );
+  return errors.map((error) => `${base}: ${error}`);
+}
+
+// Every base serves the same registry, so a project gets the same items
+// whichever base it's on.
+function checkBases(registries: { base: BaseName; registry: Registry }[]) {
+  const errors: string[] = [];
+  const [first, ...rest] = registries;
+  if (!first) return errors;
+  const items = new Set(first.registry.items.map((item) => item.name));
+
+  for (const { base, registry } of rest) {
+    for (const key of ["name", "homepage"] as const) {
+      if (registry[key] !== first.registry[key]) {
+        errors.push(
+          `${base}: ${key} is "${registry[key]}" but ${first.base} has "${first.registry[key]}"`,
+        );
+      }
+    }
+    const names = new Set(registry.items.map((item) => item.name));
+    for (const name of items.difference(names))
+      errors.push(`${base}: missing ${name}, which ${first.base} has`);
+    for (const name of names.difference(items))
+      errors.push(`${first.base}: missing ${name}, which ${base} has`);
   }
+  return errors;
+}
+
+// A rule for a marker no item uses never applies, which usually means a typo
+// in its name, so the default style's rule shows instead.
+function checkStyles(ownMaps: Map<string, StyleMap>, sources: Source[][]) {
+  const used = new Set(
+    sources.flat().flatMap((source) => [...getMarkers(source.content)]),
+  );
+  return [...ownMaps].flatMap(([style, styleMap]) =>
+    Object.keys(styleMap)
+      .filter((marker) => !used.has(marker))
+      .map(
+        (marker) =>
+          `styles/style-${style}.css: .${marker} isn't used by any item`,
+      ),
+  );
+}
+
+// The synced shadcn/ui primitives of a base, like `ui/button`.
+async function readSynced(base: BaseName) {
+  const lock: { files: string[] } = JSON.parse(
+    await fs.readFile(path.join(REGISTRY_PATH, "shadcn.json"), "utf8"),
+  );
+  const prefix = `bases/${base}/`;
+  return new Set(
+    lock.files
+      .filter((file) => file.startsWith(prefix))
+      .map((file) => file.slice(prefix.length).replace(/\.tsx?$/, "")),
+  );
+}
+
+// Points dependencies on the registry's own items, like `@acme/format`, at
+// their URL in the same build. Projects then install them whatever namespace
+// they gave the registry, or with none when they add an item by URL.
+function withItemUrls(registry: Registry, build: string): Registry {
+  const prefix = `@${registry.name}/`;
+  return {
+    ...registry,
+    items: registry.items.map((item) =>
+      item.registryDependencies
+        ? {
+            ...item,
+            registryDependencies: item.registryDependencies.map((dependency) =>
+              dependency.startsWith(prefix)
+                ? `${registry.homepage}/r/${build}/${dependency.slice(prefix.length)}.json`
+                : dependency,
+            ),
+          }
+        : item,
+    ),
+  };
 }
 
 async function buildStyle(
@@ -141,7 +271,7 @@ async function buildStyle(
   await fs.mkdir(buildPath, { recursive: true });
   await fs.writeFile(
     path.join(buildPath, "registry.json"),
-    JSON.stringify(registry, null, 2),
+    JSON.stringify(withItemUrls(registry, name), null, 2),
   );
 
   // File paths in registry.json are relative to the base, so build from the
@@ -158,16 +288,35 @@ async function buildStyle(
 
 const start = performance.now();
 
-const [registries, styleMaps] = await Promise.all([
+const [registries, styleMaps, ownStyleMaps] = await Promise.all([
   forEachBase(async (base) => {
     const registry = await readRegistry(base);
-    return { base, registry, sources: await readSources(base, registry) };
+    return {
+      base,
+      registry,
+      sources: await readSources(base, registry),
+      synced: await readSynced(base),
+    };
   }),
   getStyleMaps(),
+  getOwnStyleMaps(),
 ]);
 
-for (const { base, registry, sources } of registries) {
-  check(base, registry, sources, styleMaps.get(DEFAULT_STYLE)!);
+const errors = [
+  ...checkBases(registries),
+  ...registries.flatMap(({ base, registry, sources, synced }) =>
+    checkBase(base, registry, sources, styleMaps.get(DEFAULT_STYLE)!, synced),
+  ),
+  ...checkStyles(
+    ownStyleMaps,
+    registries.map(({ sources }) => sources),
+  ),
+];
+if (errors.length > 0) {
+  console.error(
+    `The registry has problems:\n${errors.map((error) => `  - ${error}`).join("\n")}`,
+  );
+  process.exit(1);
 }
 
 await Promise.all([

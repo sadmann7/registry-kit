@@ -15,10 +15,10 @@ pnpm install
 pnpm registry:init
 ```
 
-`registry:init` asks for your registry's name and homepage, which bases and styles to keep, and whether to keep the example items. It then removes the rest: the bases' sources, the style files, and dependencies nothing uses anymore. Every prompt has a flag, so it also runs without prompts:
+`registry:init` asks for your registry's name, homepage and GitHub repository, which bases and styles to keep, and whether to keep the example items. It then removes the rest: the bases' sources, the style files, and dependencies nothing uses anymore. Every prompt has a flag, so it also runs without prompts:
 
 ```bash
-pnpm registry:init --name acme --homepage https://acme.com --bases base,radix --styles nova,lyra --no-examples --yes
+pnpm registry:init --name acme --homepage https://acme.com --github https://github.com/acme/ui --bases base,radix --styles nova,lyra --no-examples --yes
 ```
 
 Nova is always built, since it's the fallback for styles the registry doesn't build. Run it on a clean working tree, so you can review the changes and undo them with git.
@@ -53,15 +53,13 @@ Styles that don't define a marker fall back to the default style (`nova`), so a 
 
 ## Installing items
 
-The registry isn't listed in shadcn's registry directory, so a project adds it to its `components.json` once:
+The registry isn't listed in shadcn's registry directory, so a project adds it once:
 
-```json
-{
-  "registries": {
-    "@acme": "https://acme.com/r/{style}/{name}.json"
-  }
-}
+```bash
+pnpm dlx shadcn@latest registry add "@acme=https://acme.com/r/{style}/{name}.json"
 ```
+
+It adds the URL under `registries` in the project's `components.json`, which also works by hand.
 
 Then items install by name:
 
@@ -69,7 +67,7 @@ Then items install by name:
 pnpm dlx shadcn@latest add @acme/stat-card
 ```
 
-The CLI fills `{style}` from the project's own `style`, like `base-nova`, so each project gets the build for its base and style. The demo site shows the same snippet. Use your registry's name and homepage in place of `acme`; `registry:init` sets both.
+The CLI fills `{style}` from the project's own `style`, like `base-nova`, so each project gets the build for its base and style. The demo site shows the `components.json` entry. Use your registry's name and homepage in place of `acme`; `registry:init` sets both.
 
 ## Layout
 
@@ -95,12 +93,16 @@ apps/web/
 ## Adding an item
 
 1. Add the source to `bases/radix`, `bases/base` and `bases/aria`, with markers for anything style-specific. React Aria components take `onPress` instead of `onClick` and have no `asChild`.
-2. Add the item to every `registry.json`. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`.
+2. Add the item to every `registry.json`. List shadcn/ui primitives you import by name (`"button"`) and your own items by namespace (`"@acme/use-copy-to-clipboard"`) in `registryDependencies`. The build turns your own items into their URL in the same build, like `https://acme.com/r/radix-nova/use-copy-to-clipboard.json`, so they install whatever namespace a project gives the registry. That's why `homepage` must be the origin the registry is served from.
 3. Give every new marker a rule in `styles/style-nova.css`, and override it in other styles as needed.
 4. If you import a shadcn/ui primitive the registry didn't use before, run `pnpm registry:sync`.
 5. Add a demo to each base as `examples/{name}-demo.tsx`. The preview finds it by name. Items without a demo, like hooks, show as cards under "Hooks and utilities".
 
-`pnpm registry:build` fails when a marker has no default rule, or when an item imports another item without listing it in `registryDependencies`.
+`pnpm registry:build` fails when:
+
+- a marker has no rule in the default style, or a style has a rule for a marker no item uses;
+- an item imports another item or a shadcn/ui primitive without listing it in `registryDependencies`, or a package without listing it in `dependencies`;
+- the bases don't have the same `name`, `homepage` and items.
 
 ## shadcn/ui primitives
 
@@ -114,19 +116,22 @@ The direction toggle renders previews right-to-left, which shows what logical cl
 
 ## Serving unknown styles
 
-Projects on a style this registry doesn't build would get a 404. `next.config.ts` rewrites those requests to the default style of the same base, like `aria-lyra` to `aria-nova`. Styles without a base, like `new-york-v4` or `default`, are Radix in shadcn/ui, so they go to `radix-nova`. Projects on a base the registry doesn't build still get a 404, including those older styles when Radix isn't built, since another base's components import a different library. `SHADCN_BASES` in `config.ts` lists every shadcn/ui base.
+Projects on a style this registry doesn't build would get a 404. `resolveStyle` in `config.ts` picks the build they get instead: the default style of the same base, like `aria-lyra` to `aria-nova`. shadcn/ui's older styles without a base (`new-york-v4`, `new-york` and `default`) are Radix, so they go to `radix-nova`. Projects on a base the registry doesn't build still get a 404, including those older styles when Radix isn't built, since another base's components import a different library.
+
+`next.config.ts` turns `resolveStyle` into rewrites for every built base and the older styles (`LEGACY_STYLES`), so styles shadcn/ui adds later fall back too. `pnpm registry:test` serves the build with `resolveStyle`, so the test covers the fallbacks.
 
 ## Scripts
 
 | Command               | What it does                                            |
 | --------------------- | ------------------------------------------------------- |
 | `pnpm registry:init`  | Choose the registry's name, bases, styles and items.    |
-| `pnpm dev`            | Start the preview on http://localhost:3001.             |
+| `pnpm dev`            | Start the preview on http://localhost:3002.             |
 | `pnpm build`          | Build the registry, then the site.                      |
 | `pnpm registry:build` | Build `public/r` for every base and style.              |
 | `pnpm registry:test`  | Install every item for every base and style, in RTL.    |
 | `pnpm registry:sync`  | Sync shadcn/ui primitives and styles from `SHADCN_REF`. |
 | `pnpm typecheck`      | Type-check, after generating the preview files.         |
+| `pnpm test`           | Test `registry:init` on a copy of the registry.         |
 | `pnpm check`          | Lint, check formatting and type-check.                  |
 | `pnpm lint`           | Run oxlint.                                             |
 | `pnpm format`         | Run oxfmt.                                              |

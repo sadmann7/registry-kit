@@ -7,6 +7,7 @@
     "registry-kit": "./src/cli.ts"
   },
   "scripts": {
+    "test": "node --test src/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

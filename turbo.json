@@ -22,7 +22,8 @@
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]
-    }
+    },
+    "test": {}
   },
   "globalEnv": [
     "CI",
