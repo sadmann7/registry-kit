@@ -3,26 +3,33 @@ function formatDate(
   options: Intl.DateTimeFormatOptions = {},
   locale = "en-US",
 ) {
-  // A date-only string is read as UTC, which is the day before west of it.
   const dateOnly =
-    typeof date === "string" ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(date) : null;
-  const value = dateOnly
-    ? new Date(
-        Number(dateOnly[1]),
-        Number(dateOnly[2]) - 1,
-        Number(dateOnly[3]),
-      )
-    : new Date(date);
-  if (Number.isNaN(value.getTime())) return "";
+    typeof date === "string" ? /^\d{4}-\d{2}-(\d{2})$/.exec(date) : null;
+  const value = new Date(date);
+  // `Date` rolls an impossible day like 2026-02-30 over into the next month.
+  if (
+    Number.isNaN(value.getTime()) ||
+    (dateOnly && value.getUTCDate() !== Number(dateOnly[1]))
+  )
+    return "";
 
+  // A date-only string is read as UTC midnight, so it keeps its day only when
+  // shown in UTC, whatever the runtime's or the caller's time zone.
+  const timeZone = dateOnly ? "UTC" : options.timeZone;
   // `dateStyle` and `timeStyle` can't be combined with the fields below.
   const hasStyle =
     options.dateStyle !== undefined || options.timeStyle !== undefined;
   return new Intl.DateTimeFormat(
     locale,
     hasStyle
-      ? options
-      : { month: "long", day: "numeric", year: "numeric", ...options },
+      ? { ...options, timeZone }
+      : {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          ...options,
+          timeZone,
+        },
   ).format(value);
 }
 

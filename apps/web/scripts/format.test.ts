@@ -45,6 +45,32 @@ for (const { name: base } of BASES) {
         "Nov 3, 2026",
       );
       assert.equal(formatDate("not a date"), "");
+      assert.equal(formatDate("2026-02-30"), "");
+    },
+  );
+
+  test(
+    `${base}: formatDate shows a date-only string's day in every time zone`,
+    { skip },
+    async () => {
+      const { formatDate } = await load();
+      const timeZone = process.env.TZ;
+      try {
+        for (const zone of ["America/Los_Angeles", "UTC", "Asia/Tokyo"]) {
+          process.env.TZ = zone;
+          assert.equal(formatDate("2026-11-03"), "November 3, 2026");
+          assert.equal(
+            formatDate("2026-11-03", {
+              month: "short",
+              year: undefined,
+              timeZone: "UTC",
+            }),
+            "Nov 3",
+          );
+        }
+      } finally {
+        process.env.TZ = timeZone;
+      }
     },
   );
 
