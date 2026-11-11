@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "oxc", "react", "import", "nextjs"],
+  "jsPlugins": ["./lint/plugin.ts"],
   "categories": {
     "correctness": "error",
     "suspicious": "warn"
@@ -106,7 +107,9 @@
       {
         "name": "error"
       }
-    ]
+    ],
+    "registry-kit/comment-style": "error",
+    "registry-kit/no-low-value-comments": "error"
   },
   "overrides": [
     {
@@ -114,6 +117,13 @@
       "rules": {
         "nextjs/no-img-element": "off",
         "nextjs/no-html-link-for-pages": "off"
+      }
+    },
+    {
+      "files": ["apps/web/src/registry/bases/*/ui/**"],
+      "rules": {
+        "registry-kit/comment-style": "off",
+        "registry-kit/no-low-value-comments": "off"
       }
     }
   ]

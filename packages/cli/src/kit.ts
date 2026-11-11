@@ -54,7 +54,7 @@ export async function findKit(from: string): Promise<Kit> {
     root = parent;
   }
 
-  // The config is import-free so the scripts can load it, and so can we.
+  // The config is import-free so both the scripts and the CLI can load it.
   const config = (await import(
     pathToFileURL(path.join(root, CONFIG_FILE)).href
   )) as {
