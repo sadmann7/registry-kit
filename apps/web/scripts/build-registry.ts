@@ -227,7 +227,7 @@ async function checkCompiled(
       const compiled = await transformStyle(source.content, { styleMap });
       return getUncompiledMarkers(compiled).map(
         (marker) =>
-          `${base}: ${source.path}: ${marker} can't be compiled where it's written. Write it as a plain string in className, cn() or cva(), not in a condition or a variable.`,
+          `${base}: ${source.path}: ${marker} can't be compiled where it's written. Write it as a plain string in className, a cn() argument, or a cva() base or variant, not in a condition, a variable or compoundVariants.`,
       );
     }),
   );
