@@ -270,8 +270,11 @@ export function CustomizerSheet(props: PreviewState) {
       </Drawer.Trigger>
       <Drawer.Portal>
         <Drawer.Backdrop className="site-chrome fixed inset-0 z-50 min-h-dvh bg-black opacity-[calc(0.3*(1-var(--drawer-swipe-progress)))] transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:opacity-0 data-starting-style:opacity-0 data-swiping:duration-0 dark:opacity-[calc(0.5*(1-var(--drawer-swipe-progress)))]" />
-        <Drawer.Viewport className="site-chrome fixed inset-0 z-50 flex items-end justify-center">
-          <Drawer.Popup className="flex max-h-[calc(100dvh-6rem)] w-full [transform:translateY(var(--drawer-swipe-movement-y))] flex-col rounded-t-2xl bg-background text-foreground shadow-[0_-8px_32px_rgb(0_0_0/15%)] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none data-ending-style:[transform:translateY(100%)] data-starting-style:[transform:translateY(100%)] data-swiping:select-none dark:border-t dark:border-border">
+        <Drawer.Viewport
+          ref={trackVisualViewport}
+          className="site-chrome fixed inset-0 z-50 flex items-end justify-center"
+        >
+          <Drawer.Popup className="flex max-h-[calc(100%-6rem)] w-full [transform:translateY(var(--drawer-swipe-movement-y))] flex-col rounded-t-2xl bg-background text-foreground shadow-[0_-8px_32px_rgb(0_0_0/15%)] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none data-ending-style:[transform:translateY(100%)] data-starting-style:[transform:translateY(100%)] data-swiping:select-none dark:border-t dark:border-border">
             <div className="flex flex-col items-center gap-1.5 pt-2">
               <div className="h-1 w-9 rounded-full bg-border" />
               <div className="flex w-full items-center gap-2 border-b border-border ps-5 pe-3 pt-1.5 pb-3">
@@ -300,6 +303,31 @@ export function CustomizerSheet(props: PreviewState) {
       </Drawer.Portal>
     </Drawer.Root>
   );
+}
+
+function trackVisualViewport(element: HTMLDivElement | null) {
+  const viewport = window.visualViewport;
+  if (!element || !viewport) return;
+
+  const update = () => {
+    element.style.top = `${viewport.offsetTop}px`;
+    element.style.height = `${viewport.height}px`;
+  };
+
+  const onResize = () => {
+    update();
+    if (element.contains(document.activeElement)) {
+      document.activeElement?.scrollIntoView({ block: "center" });
+    }
+  };
+
+  update();
+  viewport.addEventListener("resize", onResize);
+  viewport.addEventListener("scroll", update);
+  return () => {
+    viewport.removeEventListener("resize", onResize);
+    viewport.removeEventListener("scroll", update);
+  };
 }
 
 function ResetButton({ customizer }: { customizer: Customizer }) {
