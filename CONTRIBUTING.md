@@ -45,17 +45,6 @@ pnpm registry:test
 
 `registry:test` installs every item for every base and style, so run it whenever an item, a style or a script changes.
 
-### Write comments sparingly
-
-Default to no comment. Write one only for a constraint, an external quirk, or an invariant the code can't show. `pnpm lint` checks the form with the `comment-style` rule.
-
-- Don't restate names, narrate steps, record history, or explain the fix you just made. The pull request carries that.
-- One line where you can, four at most. A file's leading doc block can run longer.
-- Full sentences ending with a full stop, with no "we" or "our".
-- JSDoc on exported props, options and functions: one sentence, no types, no empty `@param` or `@returns`.
-- A `TODO:` links the issue that tracks it.
-- No section dividers, commented-out code, test step labels, or filler like "Note:".
-
 ### Commit your changes
 
 When committing your changes, use the following format:
