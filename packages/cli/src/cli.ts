@@ -10,8 +10,7 @@
 import * as p from "@clack/prompts";
 import { execFile } from "node:child_process";
 import path from "node:path";
-import { promisify } from "node:util";
-import { parseArgs } from "node:util";
+import { parseArgs, promisify } from "node:util";
 
 import {
   applyKit,

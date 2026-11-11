@@ -11,8 +11,7 @@
 //
 //   node scripts/generate.ts [--watch]
 
-import { watch } from "node:fs";
-import { promises as fs } from "node:fs";
+import { promises as fs, watch } from "node:fs";
 import path from "node:path";
 
 import { BASES, STYLES } from "../src/registry/config.ts";
