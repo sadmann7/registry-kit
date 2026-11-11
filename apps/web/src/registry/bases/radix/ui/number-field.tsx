@@ -35,13 +35,15 @@ function useNumberField() {
 // Reads text in the formatter's locale, like "1.024,5" in de-DE or "١٢٣٤٫٥" in
 // ar-EG, and NaN for text without a number in it.
 function parseNumber(text: string, formatter: Intl.NumberFormat) {
-  const { locale, style } = formatter.resolvedOptions();
+  const { locale, numberingSystem, style } = formatter.resolvedOptions();
   const parts = new Intl.NumberFormat(locale, {
+    numberingSystem,
     useGrouping: true,
   }).formatToParts(-11111.1);
   const group = parts.find((part) => part.type === "group")?.value;
   const decimal = parts.find((part) => part.type === "decimal")?.value ?? ".";
   const digits = new Intl.NumberFormat(locale, {
+    numberingSystem,
     useGrouping: false,
   }).format(9876543210);
 
