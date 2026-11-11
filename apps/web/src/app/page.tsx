@@ -167,7 +167,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         <p>
           Built by{" "}
           <a
-            href="https://github.com/sadmann7"
+            href="https://x.com/sadmann17"
             target="_blank"
             rel="noreferrer"
             className="rounded-sm font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
