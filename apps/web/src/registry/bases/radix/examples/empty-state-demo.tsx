@@ -22,7 +22,7 @@ export default function EmptyStateDemo() {
       </EmptyStateIcon>
       <EmptyStateTitle>No projects yet</EmptyStateTitle>
       <EmptyStateDescription>
-        Create a project to start adding components, or import one.
+        Create a project to get started, or import one.
       </EmptyStateDescription>
       <EmptyStateActions>
         <Button size="sm">
