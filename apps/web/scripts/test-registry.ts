@@ -106,6 +106,8 @@ const VARIANTS: Omit<Fixture, "style">[] = [
   ...["inverted", "default-translucent", "inverted-translucent"].map(
     (menuColor) => ({ name: `menuColor ${menuColor}`, config: { menuColor } }),
   ),
+  // The CLI strips "use client" from only every other file it transforms, as
+  // its RSC regex keeps state, so the directive itself isn't checked.
   { name: "rsc false", config: { rsc: false } },
   { name: "tsx false", config: { tsx: false } },
   { name: "prefix", tailwind: { prefix: "tw" } },
@@ -163,6 +165,22 @@ async function createFixture(fixture: Fixture) {
     ),
   ]);
   return dir;
+}
+
+// Each file's path and contents from `shadcn add --view` output, which boxes
+// every content line in a `│ │ ` prefix.
+function parseView(output: string) {
+  return new Map(
+    [...output.matchAll(/^├ (\S+) \(\w+\).*\n│ ┌─+\n([^]*?)\n│ └─+$/gm)].map(
+      ([, file, body]) => [
+        file,
+        body
+          .split("\n")
+          .map((line) => line.slice("│ │ ".length))
+          .join("\n"),
+      ],
+    ),
+  );
 }
 
 const failures: string[] = [];
@@ -224,101 +242,100 @@ try {
     // items that depend on one, like `button`, can't install there. A style
     // shadcn/ui adds later has them.
     const fakeStyle = style.endsWith("-unbuilt");
-    for (const item of registry.items) {
-      if (
-        fakeStyle &&
-        item.registryDependencies?.some(
+    const items = registry.items.filter(
+      (item) =>
+        !fakeStyle ||
+        !item.registryDependencies?.some(
           (dependency) => !/^(?:@|https?:)/.test(dependency),
-        )
-      )
-        continue;
+        ),
+    );
+    if (items.length === 0) return;
+
+    // One CLI run per fixture, since each run costs seconds. The CLI decides
+    // where each file goes, from its type, path and target, so read the paths
+    // and contents from its output.
+    let installed: Map<string, string>;
+    try {
+      const { stdout } = await run(
+        SHADCN_BIN,
+        [
+          "add",
+          ...items.map((item) => `@${NAMESPACE}/${item.name}`),
+          "--dry-run",
+          "--cwd",
+          cwd,
+          "--view",
+          "src/",
+        ],
+        { maxBuffer: 64 * 1024 * 1024 },
+      );
+      installed = parseView(stripVTControlCharacters(stdout));
+    } catch (error) {
+      const { stdout = "", stderr = "" } = error as {
+        stdout?: string;
+        stderr?: string;
+      };
+      failures.push(`${name}: shadcn add failed\n${stdout}${stderr}`);
+      return;
+    }
+
+    for (const item of items) {
       const label = `${name} @${NAMESPACE}/${item.name}`;
-      const add = (...args: string[]) =>
-        run(
-          SHADCN_BIN,
-          [
-            "add",
-            `@${NAMESPACE}/${item.name}`,
-            "--dry-run",
-            "--cwd",
-            cwd,
-            ...args,
-          ],
-          { maxBuffer: 16 * 1024 * 1024 },
-        ).then(({ stdout }) => stripVTControlCharacters(stdout));
-
-      try {
-        // The CLI decides where each file goes, from its type, path and
-        // target, so read the paths from its summary.
-        const installed = [...(await add()).matchAll(/\s(src\/\S+)\s/g)].map(
-          ([, file]) => file,
+      for (const file of item.files ?? []) {
+        const source = typeof file === "string" ? file : file.path;
+        // Without the extension, which the CLI changes for JavaScript.
+        const { name } = path.parse(
+          typeof file !== "string" && file.target ? file.target : source,
         );
-
-        for (const file of item.files ?? []) {
-          const source = typeof file === "string" ? file : file.path;
-          // Without the extension, which the CLI changes for JavaScript.
-          const { name } = path.parse(
-            typeof file !== "string" && file.target ? file.target : source,
-          );
-          const target = installed.find(
-            (installedFile) => path.parse(installedFile).name === name,
-          );
-          count++;
-          if (target === undefined) {
-            failures.push(`${label}: ${source} missing from the install`);
-            continue;
-          }
-
-          const content = await add("--view", target);
-          const raw = await fs.readFile(
-            path.join(getBasePath(base as BaseName), source),
-            "utf8",
-          );
-          const rtl = fixture.config?.rtl !== false;
-          const menuColor =
-            typeof fixture.config?.menuColor === "string"
-              ? fixture.config.menuColor
-              : "default";
-          const problems = [
-            /\bcn-[a-z]/.test(content) && "unresolved cn-* marker",
-            content.includes("@/registry/") && "unresolved @/registry import",
-            content.includes("IconPlaceholder") && "unresolved IconPlaceholder",
-            javascript && /\.tsx?$/.test(target) && "TypeScript file",
-            fixture.config?.rsc === false &&
-              /^["']use client["']/m.test(content) &&
-              '"use client" without RSC',
-            typeof fixture.tailwind?.prefix === "string" &&
-              content.includes("className") &&
-              !content.includes(`${fixture.tailwind.prefix}:`) &&
-              "classes without the Tailwind prefix",
-            otherAliases.some((alias) => content.includes(`"${alias}/`)) &&
-              "import outside the project's aliases",
-            fixture.tailwind?.cssVariables === false &&
-              THEME_COLOR_CLASS.test(content) &&
-              "theme color not inlined",
-            raw.includes("cn-rtl-flip") &&
-              rtl !== content.includes("rtl:rotate-180") &&
-              (rtl ? "cn-rtl-flip not flipped" : "rtl: variant without RTL"),
-            raw.includes("cn-menu-target") &&
-              menuColor.startsWith("inverted") &&
-              !/(?<![\w:-])dark(?![\w:-])/.test(content) &&
-              "inverted menu without dark",
-            raw.includes("cn-menu-translucent") &&
-              menuColor.endsWith("-translucent") &&
-              !content.includes("backdrop-blur") &&
-              "translucent menu without its classes",
-          ].filter(Boolean);
-          if (problems.length > 0)
-            failures.push(
-              `${label} → ${target}: ${problems.join(", ")}\n${content}`,
-            );
+        const target = [...installed.keys()].find(
+          (installedFile) => path.parse(installedFile).name === name,
+        );
+        count++;
+        if (target === undefined) {
+          failures.push(`${label}: ${source} missing from the install`);
+          continue;
         }
-      } catch (error) {
-        const { stdout = "", stderr = "" } = error as {
-          stdout?: string;
-          stderr?: string;
-        };
-        failures.push(`${label}: shadcn add failed\n${stdout}${stderr}`);
+
+        const content = installed.get(target)!;
+        const raw = await fs.readFile(
+          path.join(getBasePath(base as BaseName), source),
+          "utf8",
+        );
+        const rtl = fixture.config?.rtl !== false;
+        const menuColor =
+          typeof fixture.config?.menuColor === "string"
+            ? fixture.config.menuColor
+            : "default";
+        const problems = [
+          /\bcn-[a-z]/.test(content) && "unresolved cn-* marker",
+          content.includes("@/registry/") && "unresolved @/registry import",
+          content.includes("IconPlaceholder") && "unresolved IconPlaceholder",
+          javascript && /\.tsx?$/.test(target) && "TypeScript file",
+          typeof fixture.tailwind?.prefix === "string" &&
+            content.includes("className") &&
+            !content.includes(`${fixture.tailwind.prefix}:`) &&
+            "classes without the Tailwind prefix",
+          otherAliases.some((alias) => content.includes(`"${alias}/`)) &&
+            "import outside the project's aliases",
+          fixture.tailwind?.cssVariables === false &&
+            THEME_COLOR_CLASS.test(content) &&
+            "theme color not inlined",
+          raw.includes("cn-rtl-flip") &&
+            rtl !== content.includes("rtl:rotate-180") &&
+            (rtl ? "cn-rtl-flip not flipped" : "rtl: variant without RTL"),
+          raw.includes("cn-menu-target") &&
+            menuColor.startsWith("inverted") &&
+            !/(?<![\w:-])dark(?![\w:-])/.test(content) &&
+            "inverted menu without dark",
+          raw.includes("cn-menu-translucent") &&
+            menuColor.endsWith("-translucent") &&
+            !content.includes("backdrop-blur") &&
+            "translucent menu without its classes",
+        ].filter(Boolean);
+        if (problems.length > 0)
+          failures.push(
+            `${label} → ${target}: ${problems.join(", ")}\n${content}`,
+          );
       }
     }
     console.log(`  ${name}`);
