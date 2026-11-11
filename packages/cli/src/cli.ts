@@ -19,6 +19,7 @@ import {
   type KitOptions,
   validateGitHub,
   validateHomepage,
+  validateOwnHomepage,
   validateName,
   validateOptions,
 } from "./kit.ts";
@@ -131,8 +132,11 @@ const homepage = (
     ? exitIfCancelled(
         await p.text({
           message: "Where will the registry be served?",
-          initialValue: kit.homepage,
-          validate: (value) => validateHomepage(value ?? ""),
+          initialValue: name === kit.name ? kit.homepage : undefined,
+          placeholder: "https://acme.com",
+          validate: (value) =>
+            validateHomepage(value ?? "") ??
+            validateOwnHomepage(kit, name, value ?? ""),
         }),
       )
     : kit.homepage)

@@ -94,12 +94,25 @@ export function validateName(name: string) {
     return "Use lowercase letters, numbers and dashes, like acme or acme-ui.";
 }
 
+// Dependencies on the registry's own items are built as URLs under the
+// homepage, so it has to be the origin the registry is served from.
 export function validateHomepage(homepage: string) {
   try {
     const url = new URL(homepage);
-    if (url.protocol === "https:" || url.protocol === "http:") return;
+    if (
+      (url.protocol === "https:" || url.protocol === "http:") &&
+      url.origin === homepage.replace(/\/+$/, "")
+    )
+      return;
   } catch {}
-  return "Use a full URL, like https://acme.com.";
+  return "Use the origin the registry is served from, like https://acme.com.";
+}
+
+// The template's homepage only fits the template's name: a renamed registry
+// keeping it would install its dependencies from the template.
+export function validateOwnHomepage(kit: Kit, name: string, homepage: string) {
+  if (name !== kit.name && homepage.replace(/\/+$/, "") === kit.homepage)
+    return `Set a homepage for ${name}: keeping ${kit.homepage} would install its dependencies from ${kit.name}.`;
 }
 
 export function validateGitHub(github: string) {
@@ -114,6 +127,7 @@ export function validateOptions(kit: Kit, options: KitOptions) {
   const errors = [
     validateName(options.name),
     validateHomepage(options.homepage),
+    validateOwnHomepage(kit, options.name, options.homepage),
     validateGitHub(options.github),
     ...getUnknown(options.bases, kit.bases, "base"),
     ...getUnknown(options.styles, kit.styles, "style"),

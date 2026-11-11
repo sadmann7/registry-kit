@@ -159,6 +159,9 @@ test("invalid options change nothing", async () => {
   for (const options of [
     { name: "Not Valid" },
     { homepage: "acme.com" },
+    { homepage: "https://acme.github.io/ui" },
+    { homepage: "https://acme.com#" },
+    { name: "orbit" },
     { github: "https://gitlab.com/acme/ui" },
     { bases: [] },
     { bases: ["unknown"] },
