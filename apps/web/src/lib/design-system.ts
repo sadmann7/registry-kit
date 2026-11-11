@@ -72,6 +72,17 @@ export const MENU_ACCENTS = [
   { name: "bold", title: "Bold" },
 ] as const;
 
+// shadcn/ui's radius scale, as `--radius-{size}` multiples of `--radius`.
+const RADIUS_SCALE = {
+  sm: 0.6,
+  md: 0.8,
+  lg: 1,
+  xl: 1.4,
+  "2xl": 1.8,
+  "3xl": 2.2,
+  "4xl": 2.6,
+};
+
 export type MenuColor = (typeof MENU_COLORS)[number]["name"];
 
 export interface DesignSystem {
@@ -117,9 +128,9 @@ function pick<T extends string>(
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
-// Reads the options like the create page does: from `?preset=` if there's
-// one, with the other params taking precedence, then fixes combinations it
-// doesn't allow.
+// Reads the options from `?preset=` if there's one, with the other params
+// taking precedence, so a link can change one option of a preset. Then fixes
+// combinations the create page doesn't allow.
 export function parseDesignSystem(params: SearchParams): DesignSystem {
   const preset =
     typeof params.preset === "string" && isPresetCode(params.preset)
@@ -227,6 +238,11 @@ export function getDesignSystemCss(design: DesignSystem) {
   }
   const radius = RADII.find((option) => option.name === design.radius)?.value;
   if (radius) light.radius = radius;
+  // Tailwind declares the scale on :root, where it resolves against the
+  // site's radius, so the previews declare their own.
+  for (const [size, scale] of Object.entries(RADIUS_SCALE)) {
+    light[`radius-${size}`] = `calc(var(--radius) * ${scale})`;
+  }
 
   const fontHeading =
     design.fontHeading === "inherit" ? design.font : design.fontHeading;
