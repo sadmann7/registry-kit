@@ -98,7 +98,11 @@ apps/web/
 4. If you import a shadcn/ui primitive the registry didn't use before, run `pnpm registry:sync`.
 5. Add a demo to each base as `examples/{name}-demo.tsx`. The preview finds it by name. Items without a demo, like hooks, show as cards under "Hooks and utilities".
 
-`pnpm registry:build` fails when a marker has no default rule, or when an item imports another item without listing it in `registryDependencies`.
+`pnpm registry:build` fails when:
+
+- a marker has no rule in the default style, or a style has a rule for a marker no item uses;
+- an item imports another item or a shadcn/ui primitive without listing it in `registryDependencies`, or a package without listing it in `dependencies`;
+- the bases don't have the same `name`, `homepage` and items.
 
 ## shadcn/ui primitives
 

@@ -15,6 +15,7 @@ import {
   forEachBase,
   getBasePath,
   getItemFiles,
+  getRegistryImports,
   readRegistry,
   REGISTRY_PATH,
   ROOT,
@@ -40,14 +41,6 @@ async function fetchText(url: string) {
   if (!response.ok)
     throw new Error(`${response.status} ${response.statusText}: ${url}`);
   return response.text();
-}
-
-function getRegistryImports(source: string, base: BaseName) {
-  const pattern = new RegExp(
-    `["']@/registry/bases/${base}/((?:ui|hooks|lib)/[\\w-]+)["']`,
-    "g",
-  );
-  return [...source.matchAll(pattern)].map(([, file]) => file);
 }
 
 async function syncBase(base: BaseName) {

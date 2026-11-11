@@ -12,12 +12,11 @@ import { promises as fs } from "node:fs";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { promisify } from "node:util";
+import { promisify, stripVTControlCharacters } from "node:util";
 
 import { STYLES } from "../src/registry/config.ts";
 import {
   forEachBase,
-  getItemFiles,
   readRegistry,
   ROOT,
   runWithConcurrency,
@@ -25,11 +24,6 @@ import {
 
 const OUTPUT_PATH = path.join(ROOT, "public");
 const SHADCN_BIN = path.join(ROOT, "node_modules/.bin/shadcn");
-const TARGETS: Record<string, string> = {
-  "registry:ui": "src/components/ui",
-  "registry:hook": "src/hooks",
-  "registry:lib": "src/lib",
-};
 
 const run = promisify(execFile);
 
@@ -110,39 +104,58 @@ try {
     const cwd = await createFixture(style, registry.name);
 
     for (const item of registry.items) {
-      for (const file of getItemFiles(item)) {
-        const target = `${TARGETS[item.type] ?? "src/components"}/${path.basename(file)}`;
-        const label = `${style} @${registry.name}/${item.name} → ${target}`;
-        count++;
+      const label = `${style} @${registry.name}/${item.name}`;
+      const add = (...args: string[]) =>
+        run(
+          SHADCN_BIN,
+          [
+            "add",
+            `@${registry.name}/${item.name}`,
+            "--dry-run",
+            "--cwd",
+            cwd,
+            ...args,
+          ],
+          { maxBuffer: 16 * 1024 * 1024 },
+        ).then(({ stdout }) => stripVTControlCharacters(stdout));
 
-        try {
-          const { stdout } = await run(
-            SHADCN_BIN,
-            [
-              "add",
-              `@${registry.name}/${item.name}`,
-              "--dry-run",
-              "--view",
-              target,
-              "--cwd",
-              cwd,
-            ],
-            { maxBuffer: 16 * 1024 * 1024 },
+      try {
+        // The CLI decides where each file goes, from its type, path and
+        // target, so read the paths from its summary.
+        const installed = [...(await add()).matchAll(/\s(src\/\S+)\s/g)].map(
+          ([, file]) => file,
+        );
+
+        for (const file of item.files ?? []) {
+          const source = typeof file === "string" ? file : file.path;
+          const name = path.basename(
+            typeof file !== "string" && file.target ? file.target : source,
           );
+          const target = installed.find(
+            (installedFile) => path.basename(installedFile) === name,
+          );
+          count++;
+          if (target === undefined) {
+            failures.push(`${label}: ${source} missing from the install`);
+            continue;
+          }
+
+          const content = await add("--view", target);
           const problems = [
-            !stdout.includes(target) && "file missing from the install",
-            /\bcn-[a-z]/.test(stdout) && "unresolved cn-* marker",
-            stdout.includes("@/registry/") && "unresolved @/registry import",
+            /\bcn-[a-z]/.test(content) && "unresolved cn-* marker",
+            content.includes("@/registry/") && "unresolved @/registry import",
           ].filter(Boolean);
           if (problems.length > 0)
-            failures.push(`${label}: ${problems.join(", ")}\n${stdout}`);
-        } catch (error) {
-          const { stdout = "", stderr = "" } = error as {
-            stdout?: string;
-            stderr?: string;
-          };
-          failures.push(`${label}: shadcn add failed\n${stdout}${stderr}`);
+            failures.push(
+              `${label} → ${target}: ${problems.join(", ")}\n${content}`,
+            );
         }
+      } catch (error) {
+        const { stdout = "", stderr = "" } = error as {
+          stdout?: string;
+          stderr?: string;
+        };
+        failures.push(`${label}: shadcn add failed\n${stdout}${stderr}`);
       }
     }
     console.log(`  ${style}`);
