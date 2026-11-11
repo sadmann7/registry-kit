@@ -13,11 +13,12 @@ function IconPlaceholder({
   remixicon: _remixicon,
   ...props
 }: React.ComponentProps<"svg"> & {
+  // The CLI leaves a placeholder without a name for the project's library.
   lucide: string;
-  tabler?: string;
-  hugeicons?: string;
-  phosphor?: string;
-  remixicon?: string;
+  tabler: string;
+  hugeicons: string;
+  phosphor: string;
+  remixicon: string;
 }) {
   const Icon = (
     icons as Record<

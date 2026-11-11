@@ -18,6 +18,8 @@ import { promisify, stripVTControlCharacters } from "node:util";
 
 import {
   BASES,
+  DEFAULT_BASE,
+  DEFAULT_STYLE,
   LEGACY_STYLES,
   resolveStyle,
   STYLES,
@@ -32,6 +34,13 @@ import {
 const OUTPUT_PATH = path.join(ROOT, "public/r");
 // Not the registry's own name, so installs can't rely on it.
 const NAMESPACE = "registry-test";
+const ICON_LIBRARIES = [
+  "lucide",
+  "tabler",
+  "hugeicons",
+  "phosphor",
+  "remixicon",
+];
 const SHADCN_BIN = path.join(ROOT, "node_modules/.bin/shadcn");
 
 const run = promisify(execFile);
@@ -72,8 +81,8 @@ const registryUrl = `${origin}/r/{style}/{name}.json`;
 
 const fixtures = await fs.mkdtemp(path.join(os.tmpdir(), "registry-test-"));
 
-async function createFixture(style: string) {
-  const dir = path.join(fixtures, style);
+async function createFixture(style: string, iconLibrary: string) {
+  const dir = path.join(fixtures, `${style}-${iconLibrary}`);
   await fs.mkdir(path.join(dir, "src/app"), { recursive: true });
   await Promise.all([
     fs.writeFile(
@@ -95,7 +104,7 @@ async function createFixture(style: string) {
         rsc: true,
         tsx: true,
         rtl: true,
-        iconLibrary: "lucide",
+        iconLibrary,
         tailwind: {
           config: "",
           css: "src/app/globals.css",
@@ -121,6 +130,7 @@ let count = 0;
 
 try {
   const built: readonly string[] = STYLES.map(({ name }) => name);
+  const [defaultLibrary = "lucide", ...otherLibraries] = ICON_LIBRARIES;
   const cases = [
     ...BASES.flatMap(({ name: base }) => [
       ...built.map((style) => `${base}-${style}`),
@@ -131,19 +141,29 @@ try {
       0,
       1,
     ),
-  ];
+  ]
+    .map((style) => ({ style, iconLibrary: defaultLibrary }))
+    .concat(
+      // Icons resolve the same way in every build, so one is enough.
+      otherLibraries.map((iconLibrary) => ({
+        style: `${DEFAULT_BASE}-${DEFAULT_STYLE}`,
+        iconLibrary,
+      })),
+    );
 
-  await runWithConcurrency(cases, 4, async (style) => {
-    const cwd = await createFixture(style);
+  await runWithConcurrency(cases, 4, async ({ style, iconLibrary }) => {
+    const cwd = await createFixture(style, iconLibrary);
+    const name =
+      iconLibrary === defaultLibrary ? style : `${style} (${iconLibrary})`;
     const base = resolveStyle(style)?.split("-")[0];
     const registry = registries.find((entry) => entry.base === base)?.registry;
     if (!registry) {
-      failures.push(`${style}: no build to install from`);
+      failures.push(`${name}: no build to install from`);
       return;
     }
 
     for (const item of registry.items) {
-      const label = `${style} @${NAMESPACE}/${item.name}`;
+      const label = `${name} @${NAMESPACE}/${item.name}`;
       const add = (...args: string[]) =>
         run(
           SHADCN_BIN,
@@ -183,6 +203,7 @@ try {
           const problems = [
             /\bcn-[a-z]/.test(content) && "unresolved cn-* marker",
             content.includes("@/registry/") && "unresolved @/registry import",
+            content.includes("IconPlaceholder") && "unresolved IconPlaceholder",
           ].filter(Boolean);
           if (problems.length > 0)
             failures.push(
@@ -197,7 +218,7 @@ try {
         failures.push(`${label}: shadcn add failed\n${stdout}${stderr}`);
       }
     }
-    console.log(`  ${style}`);
+    console.log(`  ${name}`);
   });
 } finally {
   server.close();
