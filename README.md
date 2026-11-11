@@ -88,6 +88,7 @@ Dependencies on your own items are published as URLs under `homepage`, so projec
 `pnpm registry:build` fails when:
 
 - a marker has no rule in Nova, or a style has a rule for a marker no item uses
+- a marker is written where it can't be compiled, like inside a condition or a variable
 - an item imports a package, primitive or item without listing it in its dependencies
 - an item imports a file no item publishes and shadcn/ui doesn't provide
 - the bases differ in `name`, `homepage` or items

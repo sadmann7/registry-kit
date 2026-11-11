@@ -33,6 +33,7 @@ import {
   getOwnStyleMaps,
   getRegistryImports,
   getStyleMaps,
+  getUncompiledMarkers,
   readRegistry,
   REGISTRY_PATH,
   ROOT,
@@ -212,6 +213,27 @@ function checkStyles(ownMaps: Map<string, StyleMap>, sources: Source[][]) {
   );
 }
 
+// `transformStyle` only rewrites a marker written as a plain string in
+// `className`, `cn()` or `cva()`. One left behind is styled in the preview
+// and dropped by the CLI on install.
+async function checkCompiled(
+  base: BaseName,
+  sources: Source[],
+  styleMap: StyleMap,
+) {
+  const errors = await Promise.all(
+    sources.map(async (source) => {
+      if (!source.content.includes("cn-")) return [];
+      const compiled = await transformStyle(source.content, { styleMap });
+      return getUncompiledMarkers(compiled).map(
+        (marker) =>
+          `${base}: ${source.path}: ${marker} can't be compiled where it's written. Write it as a plain string in className, a cn() argument, or a cva() base or variant, not in a condition, a variable or compoundVariants.`,
+      );
+    }),
+  );
+  return errors.flat();
+}
+
 // The synced shadcn/ui primitives of a base, like `ui/button`.
 async function readSynced(base: BaseName) {
   const lock: { files: string[] } = JSON.parse(
@@ -311,6 +333,13 @@ const errors = [
     ownStyleMaps,
     registries.map(({ sources }) => sources),
   ),
+  ...(
+    await Promise.all(
+      registries.map(({ base, sources }) =>
+        checkCompiled(base, sources, styleMaps.get(DEFAULT_STYLE)!),
+      ),
+    )
+  ).flat(),
 ];
 if (errors.length > 0) {
   console.error(
