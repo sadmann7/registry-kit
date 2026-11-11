@@ -11,7 +11,7 @@ watchRegistry();
 
 const next = spawn(
   path.join(ROOT, "node_modules/.bin/next"),
-  ["dev", "--port", "3002", ...process.argv.slice(2)],
+  ["dev", ...process.argv.slice(2)],
   {
     stdio: "inherit",
   },

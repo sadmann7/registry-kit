@@ -26,7 +26,7 @@ pnpm registry:init
 pnpm dev
 ```
 
-`registry:init` asks for your registry's name, homepage and repository, and which bases, styles and example items to keep. Open <http://localhost:3002> to see the preview.
+`registry:init` asks for your registry's name, homepage and repository, and which bases, styles and example items to keep. Open the URL `pnpm dev` prints to see the preview.
 
 See [Setup](./docs/setup.md) for the flags and for deploying.
 
@@ -57,7 +57,7 @@ The CLI fills `{style}` from the project's `components.json`, like `base-nova`, 
 | Command               | What it does                                                          |
 | --------------------- | --------------------------------------------------------------------- |
 | `pnpm registry:init`  | Choose the registry's name, bases, styles and items                   |
-| `pnpm dev`            | Start the preview on port 3002                                        |
+| `pnpm dev`            | Start the preview                                                     |
 | `pnpm build`          | Build the registry, then the site                                     |
 | `pnpm registry:build` | Build `public/r` for every base and style                             |
 | `pnpm registry:test`  | Install every item for every base, style and `components.json` option |
