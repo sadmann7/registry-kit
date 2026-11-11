@@ -72,15 +72,31 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               className="size-6 rounded-md border-transparent bg-transparent text-muted-foreground hover:bg-muted dark:bg-transparent pointer-coarse:size-9"
             />
           </div>
-          <pre className="overflow-x-auto px-4 pt-4 pb-4.5 font-mono text-[12.5px] leading-normal text-muted-foreground">
-            <span className="text-foreground">&quot;registries&quot;</span>
-            {": {\n  "}
-            <span className="text-foreground">
-              &quot;@{registry.name}&quot;
+          <pre className="overflow-x-auto px-4 pt-4 pb-4.5 font-mono text-[12.5px] leading-normal whitespace-pre-wrap text-muted-foreground">
+            <span className="block">
+              <span className="text-foreground">&quot;registries&quot;</span>
+              {": {"}
             </span>
-            {": "}
-            <span className="text-foreground">&quot;{registryUrl}&quot;</span>
-            {"\n}"}
+            {/* A URL too long for the line wraps at its slashes, indented. */}
+            <span className="block ps-[4ch] -indent-[2ch]">
+              <span className="text-foreground">
+                &quot;@{registry.name}&quot;
+              </span>
+              {": "}
+              <span className="text-foreground">
+                &quot;
+                {registryUrl
+                  .split(/(?<=[^/]\/)(?!\/)/)
+                  .flatMap((part, index) => [
+                    index > 0 && <wbr key={`break-${index}`} />,
+                    <span key={index} className="whitespace-nowrap">
+                      {part}
+                    </span>,
+                  ])}
+                &quot;
+              </span>
+            </span>
+            <span className="block">{"}"}</span>
           </pre>
         </div>
       </section>
