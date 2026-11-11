@@ -99,36 +99,37 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col gap-14 px-4 pt-10 pb-20 sm:px-12 sm:pt-12">
-        {components.map((item) => {
-          const Example = examples[item.name];
-          return (
-            <ItemSection
-              key={item.name}
-              item={item}
-              base={base}
-              style={style}
-              namespace={registry.name}
-              dir={dir}
-            >
-              <Example />
-            </ItemSection>
-          );
-        })}
+      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-4 pt-10 pb-20 sm:px-12 sm:pt-14">
+        {components.length > 0 && (
+          <div className="flex flex-col gap-10 sm:gap-12">
+            {components.map((item) => {
+              const Example = examples[item.name];
+              return (
+                <ItemSection
+                  key={item.name}
+                  item={item}
+                  base={base}
+                  style={style}
+                  namespace={registry.name}
+                  dir={dir}
+                >
+                  <Example />
+                </ItemSection>
+              );
+            })}
+          </div>
+        )}
 
         {extras.length > 0 && (
           <section
             aria-labelledby="extras-title"
-            className="flex flex-col gap-3.5"
+            className="flex flex-col gap-3 border-t pt-10 sm:gap-3.5 sm:pt-12"
           >
-            <div className="flex flex-col gap-0.5 text-sm sm:flex-row sm:items-baseline sm:gap-2.5">
-              <h2 id="extras-title" className="font-medium">
-                Hooks and utilities
-              </h2>
-              <p className="text-muted-foreground sm:border-l sm:pl-2.5">
-                The logic behind the components, available on its own.
-              </p>
-            </div>
+            <Heading
+              id="extras-title"
+              title="Hooks and utilities"
+              description="Shared logic for your components."
+            />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {extras.map((item) => (
                 <article
@@ -179,6 +180,33 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </footer>
     </main>
+  );
+}
+
+// Title and description on one line, split by a rule; stacked on phones.
+function Heading({
+  id,
+  title,
+  description,
+}: {
+  id: string;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1.5 text-sm sm:flex-row sm:items-center sm:gap-3">
+      <h2
+        id={id}
+        className="shrink-0 text-base font-semibold tracking-[-0.01em] sm:text-[15px]"
+      >
+        {title}
+      </h2>
+      {description && (
+        <p className="leading-[1.45] text-muted-foreground sm:truncate sm:border-l sm:pl-3">
+          {description}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -246,22 +274,14 @@ function ItemSection({
     <section
       id={item.name}
       aria-labelledby={`${item.name}-title`}
-      className="flex scroll-mt-36 flex-col gap-3 sm:scroll-mt-24"
+      className="flex scroll-mt-36 flex-col gap-3.5 sm:scroll-mt-24"
     >
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div className="flex min-w-0 flex-col gap-0.5 text-sm sm:flex-row sm:items-baseline sm:gap-2.5">
-          <div className="flex shrink-0 items-center gap-2">
-            <h2 id={`${item.name}-title`} className="font-medium">
-              {item.title ?? item.name}
-            </h2>
-            <TypeTag item={item} />
-          </div>
-          {item.description && (
-            <p className="text-muted-foreground sm:truncate sm:border-l sm:pl-2.5">
-              {item.description}
-            </p>
-          )}
-        </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <Heading
+          id={`${item.name}-title`}
+          title={item.title ?? item.name}
+          description={item.description}
+        />
         <ItemLinks
           item={item}
           base={base}
