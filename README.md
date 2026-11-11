@@ -2,10 +2,6 @@
 
 A starter for [shadcn registries](https://ui.shadcn.com/docs/registry) that builds every item for every base and style, with RTL, the way shadcn/ui builds its own registry.
 
-Write a component once per base. Projects install the version that matches the base and style in their `components.json`.
-
-[Live preview](https://registry-kit.vercel.app) · [Documentation](#documentation) · [Contributing](./CONTRIBUTING.md)
-
 [![The registry-kit preview site](./.github/assets/screenshot.png)](https://registry-kit.vercel.app)
 
 ## Features
