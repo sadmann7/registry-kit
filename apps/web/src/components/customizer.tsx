@@ -778,12 +778,15 @@ function PresetField({
         aria-invalid={invalid || undefined}
         spellCheck={false}
         autoComplete="off"
+        autoCapitalize="none"
+        autoCorrect="off"
+        enterKeyHint="done"
         onChange={(event) => {
           setValue(event.target.value);
           setInvalid(false);
         }}
         onBlur={submit}
-        className="h-full min-w-0 flex-1 bg-transparent font-mono text-[12.5px] outline-none"
+        className="h-full min-w-0 flex-1 bg-transparent font-mono text-[12.5px] outline-none pointer-coarse:text-base"
       />
       <button
         type="button"
