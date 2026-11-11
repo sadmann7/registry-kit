@@ -32,8 +32,8 @@ function useNumberField() {
   return context;
 }
 
-// Reads text in the formatter's locale, like "1.024,5" in de-DE, and NaN for
-// text without a number in it.
+// Reads text in the formatter's locale, like "1.024,5" in de-DE or "١٢٣٤٫٥" in
+// ar-EG, and NaN for text without a number in it.
 function parseNumber(text: string, formatter: Intl.NumberFormat) {
   const { locale, style } = formatter.resolvedOptions();
   const parts = new Intl.NumberFormat(locale, {
@@ -41,8 +41,13 @@ function parseNumber(text: string, formatter: Intl.NumberFormat) {
   }).formatToParts(-11111.1);
   const group = parts.find((part) => part.type === "group")?.value;
   const decimal = parts.find((part) => part.type === "decimal")?.value ?? ".";
+  const digits = new Intl.NumberFormat(locale, {
+    useGrouping: false,
+  }).format(9876543210);
 
   let normalized = text.replaceAll("−", "-");
+  for (const [index, digit] of [...digits].entries())
+    normalized = normalized.replaceAll(digit, String(9 - index));
   if (group) normalized = normalized.replaceAll(group, "");
   normalized = normalized.replaceAll(decimal, ".").replace(/[^\d.-]/g, "");
   if (!/\d/.test(normalized)) return Number.NaN;
