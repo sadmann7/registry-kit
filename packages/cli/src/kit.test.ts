@@ -13,8 +13,8 @@ import { applyKit, findKit, type Kit, type KitOptions } from "./kit.ts";
 
 const ROOT = path.resolve(import.meta.dirname, "../../..");
 const REGISTRY = "apps/web/src/registry";
-// Everything `applyKit` reads or writes.
-const FILES = [REGISTRY, "apps/web/src/lib/site.ts", "apps/web/package.json"];
+// The site's sources, which `applyKit` reads, edits and scans for imports.
+const FILES = ["apps/web/src", "apps/web/package.json"];
 
 let root: string;
 let kit: Kit;
@@ -51,6 +51,18 @@ function read(file: string) {
 
 async function readJson<T>(file: string): Promise<T> {
   return JSON.parse(await read(file)) as T;
+}
+
+async function importsPackage(name: string) {
+  const dir = "apps/web/src";
+  const files = await fs.readdir(path.join(root, dir), { recursive: true });
+  for (const file of files) {
+    if (!/\.tsx?$/.test(file)) continue;
+    const source = await read(path.join(dir, file));
+    if (source.includes(`"${name}"`) || source.includes(`"${name}/`))
+      return true;
+  }
+  return false;
 }
 
 function exists(file: string) {
@@ -102,8 +114,34 @@ test("removes the bases and styles that aren't kept", async () => {
   const pkg = await readJson<{ dependencies: Record<string, string> }>(
     "apps/web/package.json",
   );
-  for (const base of remove)
-    if (base.package) assert.equal(pkg.dependencies[base.package], undefined);
+  // A package the site still imports outside the removed base stays.
+  for (const base of remove) {
+    if (!base.package) continue;
+    assert.equal(
+      base.package in pkg.dependencies,
+      await importsPackage(base.package),
+    );
+  }
+});
+
+test("keeps a removed base's package when the site imports it", async () => {
+  const keep = kit.bases.at(-1)!;
+  const remove = kit.bases.filter(
+    (base) => base.name !== keep.name && base.package,
+  );
+  await fs.writeFile(
+    path.join(root, "apps/web/src/lib/uses-removed-bases.ts"),
+    remove
+      .map((base) => `export * from "${base.package}/anything";\n`)
+      .join(""),
+  );
+
+  await applyKit(kit, getOptions({ bases: [keep.name] }));
+
+  const pkg = await readJson<{ dependencies: Record<string, string> }>(
+    "apps/web/package.json",
+  );
+  for (const base of remove) assert.ok(base.package! in pkg.dependencies);
 });
 
 test("renames the registry, its dependencies and the site", async () => {

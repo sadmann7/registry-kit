@@ -23,7 +23,14 @@
     "typecheck": {
       "dependsOn": ["^typecheck"]
     },
-    "test": {}
+    "test": {},
+    "@registry-kit/cli#test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/web/src/**",
+        "$TURBO_ROOT$/apps/web/package.json"
+      ]
+    }
   },
   "globalEnv": [
     "CI",

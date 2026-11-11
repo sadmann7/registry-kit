@@ -303,11 +303,21 @@ export async function applyKit(kit: Kit, options: KitOptions) {
   const pkg = await readJson<{ dependencies: Record<string, string> }>(
     packageFile,
   );
-  const removePackages = removeBases
-    .map((base) => base.package)
-    .filter((name) => name !== undefined && name in pkg.dependencies);
+  // The site can import a base's library outside the base, which keeps it.
+  const basePackages = removeBases.flatMap((base) => base.package ?? []);
+  const imported = await getImportedPackages(
+    path.join(kit.root, "apps/web/src"),
+    [
+      path.join(registryPath, "config.ts"),
+      ...removeBases.map((base) => path.join(registryPath, "bases", base.name)),
+    ],
+    basePackages,
+  );
+  const removePackages = basePackages.filter(
+    (name) => name in pkg.dependencies && !imported.has(name),
+  );
   if (removePackages.length > 0) {
-    for (const name of removePackages) delete pkg.dependencies[name!];
+    for (const name of removePackages) delete pkg.dependencies[name];
     writes.set(packageFile, `${JSON.stringify(pkg, null, 2)}\n`);
   }
 
@@ -378,6 +388,32 @@ async function removeEmptyDirs(dir: string) {
     await removeEmptyDirs(child);
     if ((await fs.readdir(child)).length === 0) await fs.rmdir(child);
   }
+}
+
+// The packages among `names` that a source under `dir` imports, without
+// looking inside `skip`.
+async function getImportedPackages(
+  dir: string,
+  skip: string[],
+  names: string[],
+) {
+  const imported = new Set<string>();
+  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    const file = path.join(dir, entry.name);
+    if (skip.includes(file)) continue;
+    if (entry.isDirectory()) {
+      if (entry.name === "__generated__") continue;
+      for (const name of await getImportedPackages(file, skip, names))
+        imported.add(name);
+    } else if (/\.tsx?$/.test(entry.name)) {
+      const source = await fs.readFile(file, "utf8");
+      for (const name of names) {
+        if (source.includes(`"${name}"`) || source.includes(`"${name}/`))
+          imported.add(name);
+      }
+    }
+  }
+  return imported;
 }
 
 async function readJson<T>(file: string): Promise<T> {

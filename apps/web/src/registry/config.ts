@@ -2,7 +2,8 @@
 // built-in TypeScript support, so keep this file free of imports.
 
 // `package` is the library the base's components import. `pnpm registry:init`
-// removes it from the site's dependencies along with the base.
+// removes it from the site's dependencies along with the base, unless the
+// site imports it elsewhere.
 export const BASES = [
   { name: "base", title: "Base UI", package: "@base-ui/react" },
   { name: "radix", title: "Radix UI", package: "radix-ui" },
