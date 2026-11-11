@@ -92,4 +92,4 @@ pnpm registry:test
 - the bases differ in `name`, `homepage` or items
 - `homepage` isn't an origin, like `https://acme.com`
 
-`registry:test` installs every item into an RTL project for every base and style, and for every icon library, with `shadcn add --dry-run`. It catches what only shows up on install, like an icon left without a name for the project's library. It needs network access, since items pull shadcn/ui's primitives from ui.shadcn.com.
+`registry:test` installs every item into an RTL project for every base and style, for every icon library, and with each `components.json` option the CLI changes source for, like `tsx: false`, `menuColor` and custom aliases, with `shadcn add --dry-run`. It catches what only shows up on install, like an icon left without a name for the project's library. It needs network access, since items pull shadcn/ui's primitives from ui.shadcn.com.

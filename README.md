@@ -58,16 +58,16 @@ The CLI fills `{style}` from the project's `components.json`, like `base-nova`, 
 
 ## Scripts
 
-| Command               | What it does                                           |
-| --------------------- | ------------------------------------------------------ |
-| `pnpm registry:init`  | Choose the registry's name, bases, styles and items    |
-| `pnpm dev`            | Start the preview on port 3002                         |
-| `pnpm build`          | Build the registry, then the site                      |
-| `pnpm registry:build` | Build `public/r` for every base and style              |
-| `pnpm registry:test`  | Install every item for every base and style, in RTL    |
-| `pnpm registry:sync`  | Sync shadcn/ui primitives and styles from `SHADCN_REF` |
-| `pnpm test`           | Test `registry:init` on a copy of the registry         |
-| `pnpm check`          | Lint, check formatting and type-check                  |
+| Command               | What it does                                                          |
+| --------------------- | --------------------------------------------------------------------- |
+| `pnpm registry:init`  | Choose the registry's name, bases, styles and items                   |
+| `pnpm dev`            | Start the preview on port 3002                                        |
+| `pnpm build`          | Build the registry, then the site                                     |
+| `pnpm registry:build` | Build `public/r` for every base and style                             |
+| `pnpm registry:test`  | Install every item for every base, style and `components.json` option |
+| `pnpm registry:sync`  | Sync shadcn/ui primitives and styles from `SHADCN_REF`                |
+| `pnpm test`           | Test `registry:init` on a copy of the registry                        |
+| `pnpm check`          | Lint, check formatting and type-check                                 |
 
 Requires Node 24.2 or later and pnpm. The scripts run on Node's built-in TypeScript support.
 
