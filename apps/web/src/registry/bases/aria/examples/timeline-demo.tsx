@@ -33,7 +33,11 @@ export default function TimelineDemo() {
         <TimelineItem key={event.title}>
           <TimelineDot />
           <TimelineTime dateTime={event.date}>
-            {formatDate(event.date, { month: "short", timeZone: "UTC" })}
+            {formatDate(event.date, {
+              month: "short",
+              year: undefined,
+              timeZone: "UTC",
+            })}
           </TimelineTime>
           <TimelineTitle>{event.title}</TimelineTitle>
           <TimelineDescription>{event.description}</TimelineDescription>

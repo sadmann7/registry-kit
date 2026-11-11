@@ -1,4 +1,71 @@
 .style-luma {
+  /* MARK: Empty State */
+  .cn-empty-state {
+    @apply rounded-2xl border border-dashed p-12;
+  }
+
+  .cn-empty-state-icon {
+    @apply mb-4 size-10 rounded-xl bg-muted text-foreground [&_svg:not([class*='size-'])]:size-5;
+  }
+
+  .cn-empty-state-title {
+    @apply text-lg font-medium tracking-tight;
+  }
+
+  .cn-empty-state-description {
+    @apply mt-2 text-sm/relaxed text-muted-foreground;
+  }
+
+  .cn-empty-state-actions {
+    @apply mt-6 gap-2;
+  }
+
+  /* MARK: Number Field */
+  .cn-number-field-group {
+    @apply h-9 overflow-hidden rounded-3xl border border-transparent bg-input/50 transition-[color,box-shadow] has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/30 data-disabled:opacity-50;
+  }
+
+  .cn-number-field-input {
+    @apply w-20 bg-transparent px-3 text-center text-sm tabular-nums outline-none;
+  }
+
+  .cn-number-field-button {
+    @apply w-10 rounded-3xl bg-transparent text-foreground transition-colors outline-none hover:bg-input disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4;
+  }
+
+  .cn-number-field-addon {
+    @apply ps-3.5 text-sm text-muted-foreground;
+  }
+
+  .cn-number-field-stepper {
+    @apply w-8 py-0.5 pe-1 *:w-full *:flex-1 *:rounded-full *:[&_svg:not([class*='size-'])]:size-3;
+  }
+
+  /* MARK: Stat Card */
+  .cn-stat-card {
+    @apply gap-3 rounded-4xl bg-card p-6 text-card-foreground shadow-md ring-1 ring-foreground/5 dark:ring-foreground/10;
+  }
+
+  .cn-stat-card-label {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .cn-stat-card-delta {
+    @apply gap-1 rounded-3xl bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground [&_svg:not([class*='size-'])]:size-3;
+  }
+
+  .cn-stat-card-value {
+    @apply text-3xl/none font-medium tracking-tight;
+  }
+
+  .cn-stat-card-sparkline {
+    @apply h-12 gap-1.5 pt-2;
+  }
+
+  .cn-stat-card-bar {
+    @apply rounded-full bg-secondary data-current:bg-primary;
+  }
+
   /* MARK: Timeline */
   .cn-timeline-item {
     @apply pb-8;

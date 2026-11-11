@@ -3,31 +3,83 @@
  * other styles fall back to it for any marker they don't define.
  */
 .style-nova {
-  /* MARK: Announcement */
-  .cn-announcement {
-    @apply gap-2 rounded-full border bg-background py-1 pr-3 pl-1 text-sm shadow-xs transition-[background-color,scale] duration-150 ease-out outline-none [&:is(a)]:active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&:is(a)]:hover:bg-muted;
+  /* MARK: Empty State */
+  .cn-empty-state {
+    @apply rounded-xl border bg-card p-6 text-card-foreground;
   }
 
-  .cn-announcement-tag {
-    @apply rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground;
+  .cn-empty-state-icon {
+    @apply mb-4 size-10 rounded-[10px] bg-secondary text-foreground [&_svg:not([class*='size-'])]:size-4.5;
   }
 
-  .cn-announcement-title {
-    @apply gap-1 font-medium [&_svg]:size-3.5 [&_svg]:text-muted-foreground [&_svg]:transition-transform [&_svg]:duration-150 [&_svg]:ease-out group-hover/announcement:[&_svg]:translate-x-0.5 motion-reduce:[&_svg]:transition-none;
+  .cn-empty-state-title {
+    @apply text-[15px] font-semibold tracking-tight;
   }
 
-  /* MARK: Copy Button */
-  .cn-copy-button {
-    @apply data-copied:text-primary;
+  .cn-empty-state-description {
+    @apply mt-1 text-[13px]/normal text-muted-foreground;
   }
 
-  /* MARK: Rating */
-  .cn-rating {
-    @apply gap-0.5;
+  .cn-empty-state-actions {
+    @apply mt-4 gap-2;
   }
 
-  .cn-rating-item {
-    @apply rounded-sm text-muted-foreground/40 transition-[color,scale] duration-150 ease-out outline-none active:scale-90 motion-reduce:active:scale-100 focus-visible:ring-3 focus-visible:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-active:text-primary [&_svg]:size-5 data-active:[&_svg]:fill-current;
+  /* MARK: Number Field */
+  .cn-number-field {
+    @apply gap-2;
+  }
+
+  .cn-number-field-group {
+    @apply h-9 divide-x divide-input overflow-hidden rounded-lg border border-input transition-[color,box-shadow] has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-disabled:opacity-50 dark:bg-input/30;
+  }
+
+  .cn-number-field-input {
+    @apply w-27.5 bg-transparent px-2.5 text-center font-mono text-sm outline-none;
+  }
+
+  .cn-number-field-button {
+    @apply w-9 bg-secondary text-foreground transition-colors outline-none hover:bg-secondary/70 active:bg-secondary/50 disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-3.5;
+  }
+
+  .cn-number-field-addon {
+    @apply w-9 bg-secondary font-mono text-[13px] text-muted-foreground;
+  }
+
+  .cn-number-field-stepper {
+    @apply w-7 divide-y divide-input *:w-full *:flex-1 *:bg-transparent *:[&_svg:not([class*='size-'])]:size-3;
+  }
+
+  /* MARK: Stat Card */
+  .cn-stat-card {
+    @apply gap-2.5 rounded-xl border bg-card p-5 text-card-foreground shadow-[0_1px_2px_rgb(0_0_0/4%),0_8px_24px_rgb(0_0_0/5%)];
+  }
+
+  .cn-stat-card-header {
+    @apply gap-2;
+  }
+
+  .cn-stat-card-label {
+    @apply text-[13px] text-muted-foreground;
+  }
+
+  .cn-stat-card-delta {
+    @apply gap-0.75 rounded-full bg-secondary px-1.75 py-0.5 text-xs font-medium text-secondary-foreground [&_svg:not([class*='size-'])]:size-3;
+  }
+
+  .cn-stat-card-value {
+    @apply text-[28px]/none font-semibold tracking-tight;
+  }
+
+  .cn-stat-card-caption {
+    @apply text-xs text-muted-foreground;
+  }
+
+  .cn-stat-card-sparkline {
+    @apply h-9 gap-1 pt-1.5;
+  }
+
+  .cn-stat-card-bar {
+    @apply rounded-[2px] bg-secondary data-current:bg-primary;
   }
 
   /* MARK: Timeline */
@@ -40,7 +92,7 @@
   }
 
   .cn-timeline-dot {
-    @apply size-2.5 rounded-full bg-primary ring-3 ring-background;
+    @apply size-2.5 rounded-full border-2 border-primary bg-background ring-3 ring-background group-last/timeline-item:bg-primary;
   }
 
   .cn-timeline-title {
@@ -52,6 +104,6 @@
   }
 
   .cn-timeline-time {
-    @apply mb-1.5 text-xs text-muted-foreground tabular-nums;
+    @apply mb-1.5 font-mono text-xs text-muted-foreground tabular-nums;
   }
 }

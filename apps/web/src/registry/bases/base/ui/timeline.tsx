@@ -16,7 +16,7 @@ function TimelineItem({ className, ...props }: React.ComponentProps<"li">) {
     <li
       data-slot="timeline-item"
       className={cn(
-        "cn-timeline-item relative border-l pl-6 last:border-transparent",
+        "cn-timeline-item group/timeline-item relative border-s ps-6 last:border-transparent",
         className,
       )}
       {...props}
@@ -30,7 +30,7 @@ function TimelineDot({ className, ...props }: React.ComponentProps<"span">) {
       data-slot="timeline-dot"
       aria-hidden="true"
       className={cn(
-        "cn-timeline-dot absolute top-1 left-0 -translate-x-1/2",
+        "cn-timeline-dot absolute start-0 top-1 -translate-x-1/2 rtl:translate-x-1/2",
         className,
       )}
       {...props}

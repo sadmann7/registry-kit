@@ -1,12 +1,73 @@
 .style-sera {
-  /* MARK: Announcement */
-  .cn-announcement-tag {
-    @apply rounded-full bg-foreground px-2 py-0.5 text-[0.625rem] font-medium tracking-widest text-background uppercase;
+  /* MARK: Empty State */
+  .cn-empty-state {
+    @apply border border-dashed p-12;
   }
 
-  /* MARK: Rating */
-  .cn-rating-item {
-    @apply rounded-sm text-muted-foreground/40 transition-[color,scale] duration-150 ease-out outline-none active:scale-90 motion-reduce:active:scale-100 focus-visible:ring-3 focus-visible:ring-ring/50 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-active:text-foreground [&_svg]:size-5 data-active:[&_svg]:fill-current;
+  .cn-empty-state-icon {
+    @apply mb-4 size-10 rounded-none bg-muted text-foreground [&_svg:not([class*='size-'])]:size-5;
+  }
+
+  .cn-empty-state-title {
+    @apply text-lg font-semibold tracking-wider uppercase;
+  }
+
+  .cn-empty-state-description {
+    @apply mt-2.5 text-sm/relaxed text-muted-foreground;
+  }
+
+  .cn-empty-state-actions {
+    @apply mt-6 gap-3;
+  }
+
+  /* MARK: Number Field */
+  .cn-number-field-group {
+    @apply h-10 overflow-hidden rounded-none border border-transparent border-b-input bg-transparent transition-colors has-focus-visible:border-b-ring data-disabled:opacity-50;
+  }
+
+  .cn-number-field-input {
+    @apply w-20 bg-transparent px-0 text-center text-sm tabular-nums outline-none;
+  }
+
+  .cn-number-field-button {
+    @apply w-8 bg-transparent text-muted-foreground transition-colors outline-none hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4;
+  }
+
+  .cn-number-field-addon {
+    @apply pe-2 text-[0.625rem] font-semibold tracking-widest text-muted-foreground uppercase;
+  }
+
+  .cn-number-field-stepper {
+    @apply w-6 *:w-full *:flex-1 *:[&_svg:not([class*='size-'])]:size-3;
+  }
+
+  /* MARK: Stat Card */
+  .cn-stat-card {
+    @apply gap-3 bg-card p-8 text-card-foreground shadow-sm ring-1 ring-foreground/5;
+  }
+
+  .cn-stat-card-label {
+    @apply text-[0.625rem] font-semibold tracking-widest text-muted-foreground uppercase;
+  }
+
+  .cn-stat-card-delta {
+    @apply gap-1 text-[0.625rem] font-semibold tracking-widest uppercase [&_svg:not([class*='size-'])]:size-3;
+  }
+
+  .cn-stat-card-value {
+    @apply text-3xl/none font-semibold tracking-tight;
+  }
+
+  .cn-stat-card-caption {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .cn-stat-card-sparkline {
+    @apply h-10 gap-0.5 pt-3;
+  }
+
+  .cn-stat-card-bar {
+    @apply rounded-none bg-muted data-current:bg-foreground;
   }
 
   /* MARK: Timeline */
