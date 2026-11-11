@@ -11,11 +11,11 @@ export const metadata: Metadata = {
   description: "A shadcn registry built for every base and style.",
 };
 
-// The status bar matches the header, which uses --site from index.css.
+// The status bar matches the header, which uses --background.
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafaf9" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f0f0e" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
   ],
 };
 
@@ -32,7 +32,7 @@ export default function RootLayout({
       className={`${fontSans.variable} ${fontMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="bg-site text-site-ink antialiased">
+      <body className="bg-background text-foreground antialiased">
         <Providers>
           <SiteHeader />
           {children}

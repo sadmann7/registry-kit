@@ -32,9 +32,14 @@ export const DEFAULT_STYLE = "nova";
 
 export const DEFAULT_BASE = "base";
 
+// Previews render in either direction. The CLI flips classes for RTL projects
+// on install; the preview shows what the logical classes do.
+export const DIRECTIONS = ["ltr", "rtl"] as const;
+
 // The shadcn/ui commit the primitives in `bases/*/ui` and the styles in
 // `styles/shadcn` are synced from. Bump it and run `pnpm registry:sync`.
 export const SHADCN_REF = "8ab27715521cbd4f87ae6886cd989cbb678f6de7";
 
 export type BaseName = (typeof BASES)[number]["name"];
 export type StyleName = (typeof STYLES)[number]["name"];
+export type Direction = (typeof DIRECTIONS)[number];

@@ -1,4 +1,5 @@
 import { Button } from "@registry-kit/ui/components/button";
+import { BlocksIcon } from "lucide-react";
 import Link from "next/link";
 
 import { GitHubIcon } from "@/components/github-icon";
@@ -7,15 +8,21 @@ import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-site-hairline">
+    <header className="border-b border-border">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-12">
         <Link
           href="/"
           className="flex items-center gap-2.5 rounded-sm text-[15px] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
-          <span aria-hidden className="size-4.5 rounded-[4px] bg-site-ink" />
-          <span className="font-semibold text-site-ink">{siteConfig.name}</span>
-          <span className="text-site-muted">registry</span>
+          <span
+            aria-hidden
+            className="flex size-5.5 items-center justify-center rounded-md bg-primary text-primary-foreground"
+          >
+            <BlocksIcon className="size-3.5" />
+          </span>
+          <span className="font-semibold tracking-[-0.02em] text-foreground">
+            {siteConfig.name}
+          </span>
         </Link>
         <nav className="flex items-center gap-2">
           <Button
