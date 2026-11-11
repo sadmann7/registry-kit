@@ -102,7 +102,11 @@ function StatCardSparkline({
   className,
   ...props
 }: React.ComponentProps<"div"> & { data: readonly number[] }) {
-  const max = Math.max(...data, 0) || 1;
+  // A NaN or infinite value would stretch every other bar.
+  const values = data.map((value) =>
+    Number.isFinite(value) ? Math.max(value, 0) : 0,
+  );
+  const max = values.reduce((a, b) => Math.max(a, b), 0) || 1;
 
   return (
     <div
@@ -111,12 +115,12 @@ function StatCardSparkline({
       className={cn("cn-stat-card-sparkline flex items-end", className)}
       {...props}
     >
-      {data.map((value, index) => (
+      {values.map((value, index) => (
         <span
           key={index}
-          data-current={index === data.length - 1 || undefined}
+          data-current={index === values.length - 1 || undefined}
           className="cn-stat-card-bar flex-1"
-          style={{ height: `${(Math.max(value, 0) / max) * 100}%` }}
+          style={{ height: `${(value / max) * 100}%` }}
         />
       ))}
     </div>
