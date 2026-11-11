@@ -609,14 +609,14 @@ function Segmented({
       aria-label={label}
       value={value}
       onValueChange={(next) => onValueChange(next)}
-      className="flex gap-0.5 rounded-lg bg-secondary p-0.5"
+      className="flex gap-0.5 rounded-lg bg-muted p-0.5"
     >
       {options.map((option) => (
         <Radio.Root
           key={option.value}
           value={option.value}
           disabled={option.disabled}
-          className="flex h-7 flex-1 items-center justify-center rounded-md text-[12.5px] text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:h-8.5 data-checked:bg-card data-checked:font-medium data-checked:text-foreground data-checked:shadow-[0_1px_2px_rgb(0_0_0/10%)] dark:data-checked:bg-input data-disabled:pointer-events-none data-disabled:opacity-50"
+          className="flex h-7 flex-1 cursor-default items-center justify-center rounded-md border border-transparent text-[12.5px] text-muted-foreground outline-none select-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:h-8.5 data-checked:bg-background data-checked:font-medium data-checked:text-foreground data-checked:shadow-[0_1px_2px_rgb(0_0_0/10%)] dark:data-checked:border-input dark:data-checked:bg-input/30 dark:data-checked:shadow-none data-disabled:pointer-events-none data-disabled:opacity-50"
         >
           {option.label}
         </Radio.Root>
@@ -645,7 +645,7 @@ function Swatches({
           value={color.name}
           aria-label={color.title}
           title={color.title}
-          className="flex size-7.5 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:ring-[1.5px] data-checked:ring-foreground"
+          className="flex size-7.5 cursor-default items-center justify-center rounded-full outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:ring-[1.5px] data-checked:ring-foreground"
         >
           <span
             className="size-5.5 rounded-full"
@@ -677,9 +677,9 @@ function Toggle({
         id={id}
         checked={checked}
         onCheckedChange={onCheckedChange}
-        className="flex h-4.5 w-8 shrink-0 rounded-full bg-input p-0.5 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:bg-primary"
+        className="flex h-4.5 w-8 shrink-0 cursor-default rounded-full p-0.5 transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80"
       >
-        <Switch.Thumb className="size-3.5 rounded-full bg-white shadow-sm transition-transform data-checked:translate-x-3.5 rtl:data-checked:-translate-x-3.5" />
+        <Switch.Thumb className="size-3.5 rounded-full bg-background shadow-sm transition-transform dark:bg-foreground data-checked:translate-x-3.5 rtl:data-checked:-translate-x-3.5 dark:data-checked:bg-primary-foreground" />
       </Switch.Root>
     </div>
   );
