@@ -8,10 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@registry-kit/ui/components/select";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@registry-kit/ui/components/toggle-group";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
@@ -24,19 +20,21 @@ import {
   STYLES,
 } from "@/registry/config";
 
+const BASE_ITEMS = BASES.map((option) => ({
+  value: option.name,
+  label: option.title,
+}));
+
 const STYLE_ITEMS = STYLES.map((option) => ({
   value: option.name,
   label: option.title,
 }));
 
-const GROUP_CLASS_NAME =
-  "gap-0.5 rounded-lg border border-border bg-card p-0.75";
-
-const ITEM_CLASS_NAME =
-  "h-7 rounded-md px-2 text-[13px] font-normal select-none active:scale-[0.97] sm:px-3 pointer-coarse:h-9 text-muted-foreground hover:bg-transparent hover:text-foreground aria-pressed:bg-primary aria-pressed:font-medium aria-pressed:text-primary-foreground";
-
-const LABEL_CLASS_NAME =
-  "w-13 shrink-0 font-mono text-[11px] tracking-wider text-muted-foreground uppercase sm:w-auto";
+const DIRECTION_ITEMS = DIRECTIONS.map((option) => ({
+  value: option,
+  label: option.toUpperCase(),
+  hint: option === "rtl" ? "Right to left" : "Left to right",
+}));
 
 interface Selection {
   base: BaseName;
@@ -46,7 +44,6 @@ interface Selection {
 
 export function PreviewControls({ base, style, dir }: Selection) {
   const router = useRouter();
-  const id = React.useId();
   const [, startTransition] = React.useTransition();
   const [selection, setSelection] = React.useOptimistic({ base, style, dir });
 
@@ -59,83 +56,88 @@ export function PreviewControls({ base, style, dir }: Selection) {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-8">
-      <div className="flex items-center gap-3">
-        <span id={`${id}-base`} className={LABEL_CLASS_NAME}>
-          Base
-        </span>
-        <ToggleGroup
-          aria-labelledby={`${id}-base`}
-          value={[selection.base]}
-          onValueChange={([value]) => {
-            if (value) select({ base: value as BaseName });
-          }}
-          className={`${GROUP_CLASS_NAME} flex-1 sm:flex-none`}
-        >
-          {BASES.map((option) => (
-            <ToggleGroupItem
-              key={option.name}
-              value={option.name}
-              className={`${ITEM_CLASS_NAME} flex-1 sm:flex-none`}
-            >
-              {option.title}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span id={`${id}-style`} className={LABEL_CLASS_NAME}>
-          Style
-        </span>
-        <Select
-          items={STYLE_ITEMS}
-          value={selection.style}
-          onValueChange={(value) => {
-            if (value) select({ style: value });
-          }}
-        >
-          <SelectTrigger
-            aria-labelledby={`${id}-style`}
-            className="h-9 flex-1 border-border bg-card text-[13px] font-medium text-foreground sm:w-45 sm:flex-none dark:bg-card dark:hover:bg-card pointer-coarse:h-11"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {STYLE_ITEMS.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span id={`${id}-dir`} className={LABEL_CLASS_NAME}>
-          Dir
-        </span>
-        <ToggleGroup
-          aria-labelledby={`${id}-dir`}
-          value={[selection.dir]}
-          onValueChange={([value]) => {
-            if (value) select({ dir: value as Direction });
-          }}
-          className={`${GROUP_CLASS_NAME} flex-1 sm:flex-none`}
-        >
-          {DIRECTIONS.map((option) => (
-            <ToggleGroupItem
-              key={option}
-              value={option}
-              className={`${ITEM_CLASS_NAME} flex-1 sm:flex-none`}
-            >
-              {option.toUpperCase()}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
+    <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+      <PreviewSelect
+        label="Base"
+        items={BASE_ITEMS}
+        value={selection.base}
+        onValueChange={(value) => select({ base: value })}
+      />
+      <PreviewSelect
+        label="Style"
+        items={STYLE_ITEMS}
+        value={selection.style}
+        onValueChange={(value) => select({ style: value })}
+      />
+      <PreviewSelect
+        label="Dir"
+        items={DIRECTION_ITEMS}
+        value={selection.dir}
+        onValueChange={(value) => select({ dir: value })}
+      />
     </div>
+  );
+}
+
+// A select with its label inside the trigger, like `BASE  Base UI`.
+function PreviewSelect<T extends string>({
+  label,
+  items,
+  value,
+  onValueChange,
+}: {
+  label: string;
+  items: readonly { value: T; label: string; hint?: string }[];
+  value: T;
+  onValueChange: (value: T) => void;
+}) {
+  const labelId = React.useId();
+
+  return (
+    <Select
+      items={items}
+      value={value}
+      onValueChange={(next) => {
+        if (next) onValueChange(next);
+      }}
+    >
+      <SelectTrigger
+        aria-labelledby={labelId}
+        className="h-9 w-full gap-2.5 border-border bg-card pr-2.5 pl-3 text-[13px] font-medium text-foreground data-popup-open:border-muted-foreground sm:w-fit dark:bg-card dark:hover:bg-card pointer-coarse:h-11"
+      >
+        <span
+          id={labelId}
+          className="w-11 shrink-0 text-start font-mono text-[11px] font-normal tracking-wider text-muted-foreground uppercase sm:w-auto"
+        >
+          {label}
+        </span>
+        <SelectValue />
+      </SelectTrigger>
+      {/* A plain menu below the trigger, not one that moves to put the
+          selected item over it. */}
+      <SelectContent
+        alignItemWithTrigger={false}
+        align="start"
+        sideOffset={6}
+        className="w-50 min-w-50 rounded-[10px] p-1 shadow-[0_1px_2px_rgb(0_0_0/4%),0_8px_24px_rgb(0_0_0/8%)]"
+      >
+        <SelectGroup className="flex flex-col gap-px">
+          {items.map((item) => (
+            <SelectItem
+              key={item.value}
+              value={item.value}
+              className="gap-2 py-1.75 pr-8 pl-2 text-[13px] focus:bg-secondary pointer-coarse:py-2.5 data-selected:font-medium [&_svg:not([class*='size-'])]:size-3.5"
+            >
+              {item.label}
+              {item.hint && (
+                <span className="font-normal text-muted-foreground">
+                  {item.hint}
+                </span>
+              )}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }
