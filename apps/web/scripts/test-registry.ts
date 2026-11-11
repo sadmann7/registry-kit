@@ -215,7 +215,18 @@ try {
       return;
     }
 
+    // shadcn/ui has no primitives for the made-up `{base}-unbuilt` style, so
+    // items that depend on one, like `button`, can't install there. A style
+    // shadcn/ui adds later has them.
+    const fakeStyle = style.endsWith("-unbuilt");
     for (const item of registry.items) {
+      if (
+        fakeStyle &&
+        item.registryDependencies?.some(
+          (dependency) => !/^(?:@|https?:)/.test(dependency),
+        )
+      )
+        continue;
       const label = `${name} @${NAMESPACE}/${item.name}`;
       const add = (...args: string[]) =>
         run(
