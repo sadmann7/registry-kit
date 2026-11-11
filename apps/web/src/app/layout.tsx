@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
+import { cn } from "cn";
+
 import "../index.css";
 import Providers from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
@@ -34,7 +36,7 @@ export default function RootLayout({
     // --font-mono resolve on every element, including bare <code> and <pre>.
     <html
       lang="en"
-      className={`${fontSans.variable} ${fontMono.variable}`}
+      className={cn(fontSans.variable, fontMono.variable)}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground antialiased">

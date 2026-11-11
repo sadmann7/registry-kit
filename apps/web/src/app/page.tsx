@@ -1,6 +1,7 @@
 import type { Registry } from "shadcn/schema";
 
 import { Button } from "@registry-kit/ui/components/button";
+import { cn } from "cn";
 import { ArrowUpRightIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
@@ -20,7 +21,6 @@ import {
 
 type Item = Registry["items"][number];
 
-// Matches the pen's two-layer card shadow.
 const CARD_CLASS_NAME =
   "rounded-xl border bg-card text-card-foreground shadow-[0_1px_2px_rgb(17_17_16/4%),0_8px_24px_rgb(17_17_16/5%)]";
 
@@ -62,7 +62,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           </p>
         </div>
 
-        <div className={`${CARD_CLASS_NAME} overflow-hidden`}>
+        <div className={cn(CARD_CLASS_NAME, "overflow-hidden")}>
           <div className="flex items-center justify-between border-b border-border bg-background py-2.5 pr-3 pl-4">
             <span className="font-mono text-xs">components.json</span>
             <CopyButton
@@ -130,7 +130,10 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                   key={item.name}
                   id={item.name}
                   aria-labelledby={`${item.name}-title`}
-                  className={`${CARD_CLASS_NAME} flex scroll-mt-36 flex-col justify-between gap-4 p-5 sm:scroll-mt-24`}
+                  className={cn(
+                    CARD_CLASS_NAME,
+                    "flex scroll-mt-36 flex-col justify-between gap-4 p-5 sm:scroll-mt-24",
+                  )}
                 >
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2.5">
@@ -290,7 +293,10 @@ function ItemSection({
 
       <div
         dir={dir}
-        className={`${CARD_CLASS_NAME} flex min-h-72 items-center justify-center overflow-x-auto px-4 py-7 sm:min-h-75 sm:px-10 sm:py-8`}
+        className={cn(
+          CARD_CLASS_NAME,
+          "flex min-h-72 items-center justify-center overflow-x-auto px-4 py-7 sm:min-h-75 sm:px-10 sm:py-8",
+        )}
       >
         {children}
       </div>
