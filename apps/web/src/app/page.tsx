@@ -109,7 +109,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           aria-label="Customize the preview"
           className="hidden w-78 shrink-0 lg:block"
         >
-          <div className="sticky top-0 max-h-svh overflow-y-auto overscroll-contain ps-12 pe-6 pt-7 pb-8">
+          <div className="sticky top-0 max-h-svh scroll-fade [scrollbar-width:thin] overflow-y-auto ps-12 pe-6 pt-7 pb-8">
             <CustomizerPanel base={base} dir={dir} design={design} />
           </div>
         </aside>

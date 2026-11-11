@@ -319,7 +319,7 @@ export function CustomizerSheet(props: PreviewState) {
                 </Drawer.Close>
               </div>
             </div>
-            <Drawer.Content className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-5 pb-6">
+            <Drawer.Content className="min-h-0 flex-1 scroll-fade overflow-y-auto overscroll-contain px-5 pt-5 pb-6">
               <CustomizerFields customizer={customizer} />
             </Drawer.Content>
             <div className="border-t border-border px-5 pt-3 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))]">
