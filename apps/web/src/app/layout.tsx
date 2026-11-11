@@ -7,6 +7,7 @@ import Providers from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { SkipNav } from "@/components/skip-nav";
 import { fontMono, fontSans } from "@/lib/fonts";
+import { previewFontVariables } from "@/lib/preview-fonts";
 import { siteConfig, siteTitle } from "@/lib/site";
 import { REGISTRIES } from "@/registry/__generated__/registries";
 import { DEFAULT_BASE } from "@/registry/config";
@@ -37,7 +38,7 @@ export default function RootLayout({
     // --font-mono resolve on every element, including bare <code> and <pre>.
     <html
       lang="en"
-      className={cn(fontSans.variable, fontMono.variable)}
+      className={cn(fontSans.variable, fontMono.variable, previewFontVariables)}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground antialiased">

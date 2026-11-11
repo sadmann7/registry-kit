@@ -3,8 +3,9 @@
 // - `__generated__/styles.css`: every style's rules as `.style-{name} .cn-*`,
 //   with the default style filled in for markers a style doesn't define, so
 //   the preview matches what the build publishes.
-// - `__generated__/icons.ts`: the lucide icons `IconPlaceholder` names, so
-//   the preview doesn't bundle all of `lucide-react`.
+// - `__generated__/icons.ts`: the icons `IconPlaceholder` names in each icon
+//   library, so the preview doesn't bundle whole libraries, and a name the
+//   library doesn't export fails the typecheck.
 // - `__generated__/registries.ts`: each base's `registry.json` and the demos
 //   in its `examples/`, so adding or removing a base or a demo needs no
 //   imports by hand.
@@ -13,6 +14,7 @@
 
 import { promises as fs, watch } from "node:fs";
 import path from "node:path";
+import { iconLibraries } from "shadcn/icons";
 
 import { BASES, STYLES } from "../src/registry/config.ts";
 import {
@@ -102,6 +104,34 @@ ${examples.join("\n")}
 `;
 }
 
+// Imports are aliased by library, since two libraries can export the same
+// name.
+function getIconsModule(
+  libraries: { name: string; export: string; icons: string[] }[],
+) {
+  const imports = libraries
+    .filter((library) => library.icons.length > 0)
+    .map(
+      (library) =>
+        `import {\n${library.icons.map((icon) => `  ${icon} as ${library.name}_${icon},`).join("\n")}\n} from "${library.export}";`,
+    );
+  const entries = libraries.map(
+    (library) =>
+      `  ${library.name}: {\n${library.icons.map((icon) => `    ${icon}: ${library.name}_${icon},`).join("\n")}\n  },`,
+  );
+
+  return `// ${HEADER}
+
+import type { IconLibraryName } from "shadcn/icons";
+
+${imports.join("\n")}
+
+export const ICONS: Record<IconLibraryName, Record<string, unknown>> = {
+${entries.join("\n")}
+};
+`;
+}
+
 export async function generate() {
   const [sources, styleMaps] = await Promise.all([
     readSources(),
@@ -120,13 +150,18 @@ export async function generate() {
     return `.style-${name} {\n${rules.join("\n\n")}\n}\n`;
   });
 
-  const icons = [
-    ...new Set(
-      sources.flatMap((source) =>
-        [...source.matchAll(/\blucide="(\w+)"/g)].map(([, icon]) => icon),
+  const libraries = Object.values(iconLibraries).map((library) => ({
+    ...library,
+    icons: [
+      ...new Set(
+        sources.flatMap((source) =>
+          [
+            ...source.matchAll(new RegExp(`\\b${library.name}="(\\w+)"`, "g")),
+          ].map(([, icon]) => icon),
+        ),
       ),
-    ),
-  ].sort();
+    ].sort(),
+  }));
 
   await Promise.all([
     writeFileIfChanged(
@@ -135,7 +170,7 @@ export async function generate() {
     ),
     writeFileIfChanged(
       path.join(GENERATED_PATH, "icons.ts"),
-      `// ${HEADER}\n\nexport {\n${icons.map((icon) => `  ${icon},`).join("\n")}\n} from "lucide-react";\n`,
+      getIconsModule(libraries),
     ),
     writeFileIfChanged(
       path.join(GENERATED_PATH, "registries.ts"),

@@ -57,10 +57,12 @@ This covers styles shadcn/ui adds later, too. `resolveStyle` in `config.ts` pick
 The site renders the raw source, not the build, and styles the markers with CSS, like shadcn/ui's `/create` page. `scripts/generate.ts` writes what it needs into `src/registry/__generated__`:
 
 - every style's rules as `.style-{name} .cn-*`, with Nova's filling the gaps
-- the icons `IconPlaceholder` names, so the site doesn't bundle every icon
+- the icons `IconPlaceholder` names in each icon library, so the site doesn't bundle whole libraries, and a name a library doesn't export fails the typecheck
 - each base's items and demos
 
 `pnpm dev` regenerates them when the registry changes.
+
+Besides base, style and direction, **Customize** has every option of the create page: base color, theme, chart color, radius, font, heading font, icon library, menu color, menu accent and cursor. They use the create page's URL params, and a `?preset=` code from it opens the same design system. `src/lib/design-system.ts` turns them into the CSS variables a project would get, scoped to the previews and the popups they open. The site's own header, main and menus carry `site-chrome`, so they keep the site's theme.
 
 The direction toggle shows what logical classes do. Physical classes are only converted on install, so check those with `pnpm registry:test`.
 
@@ -68,7 +70,7 @@ The direction toggle shows what logical classes do. Physical classes are only co
 
 Items depend on shadcn/ui's own primitives, like `button`, through `registryDependencies`, so projects install them from shadcn/ui. The registry never publishes them.
 
-The preview still needs them, so `pnpm registry:sync` copies the ones the registry imports, and shadcn/ui's style files, from the commit in `SHADCN_REF`. `src/registry/shadcn.json` lists what it copied. To update them, change `SHADCN_REF` in `config.ts` and sync again.
+The preview still needs them, so `pnpm registry:sync` copies the ones the registry imports, shadcn/ui's style files and its themes, from the commit in `SHADCN_REF`. `src/registry/shadcn.json` lists what it copied. To update them, change `SHADCN_REF` in `config.ts` and sync again.
 
 ## Project structure
 
@@ -87,8 +89,10 @@ apps/web/
       examples/            demos for the preview, not published
     styles/
       style-{style}.css    the registry's rules for each style
-      shadcn/              shadcn/ui's style files, synced
+      shadcn/              shadcn/ui's style files and themes, synced
     icons/                 IconPlaceholder
+  src/lib/
+    design-system.ts       create page options, as preview CSS
 packages/
   cli/                     registry:init
   ui/                      the preview site's own components

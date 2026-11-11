@@ -15,7 +15,7 @@ Write a component once per base. Projects install the version that matches the b
 - **RTL:** logical classes in the source, which the shadcn CLI converts on install
 - **Fallbacks:** projects on a style you don't build get your Nova build, not a 404
 - **Build checks:** missing dependencies, unstyled markers and bases that drift apart fail the build
-- **Preview site:** every item in every base, style and direction
+- **Preview site:** every item in every base, style and direction, with every option from shadcn/ui's create page, like theme, font, radius and icon library
 - **Setup CLI:** keep only the bases, styles and items you need
 
 ## Quick start
@@ -65,7 +65,7 @@ The CLI fills `{style}` from the project's `components.json`, like `base-nova`, 
 | `pnpm build`          | Build the registry, then the site                                     |
 | `pnpm registry:build` | Build `public/r` for every base and style                             |
 | `pnpm registry:test`  | Install every item for every base, style and `components.json` option |
-| `pnpm registry:sync`  | Sync shadcn/ui primitives and styles from `SHADCN_REF`                |
+| `pnpm registry:sync`  | Sync shadcn/ui primitives, styles and themes from `SHADCN_REF`        |
 | `pnpm test`           | Test `registry:init` on a copy of the registry                        |
 | `pnpm check`          | Lint, check formatting and type-check                                 |
 

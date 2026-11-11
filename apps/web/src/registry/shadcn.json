@@ -20,6 +20,7 @@
     "styles/shadcn/style-nova.css",
     "styles/shadcn/style-rhea.css",
     "styles/shadcn/style-sera.css",
-    "styles/shadcn/style-vega.css"
+    "styles/shadcn/style-vega.css",
+    "styles/shadcn/themes.ts"
   ]
 }

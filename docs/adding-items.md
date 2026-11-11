@@ -16,6 +16,7 @@ Write markers as plain strings in `className`, a `cn()` argument, or a `cva()` b
 
 - Use logical classes, like `start-0` and `ps-6`, so the item works in RTL. Add `cn-rtl-flip` to anything that should mirror, like an arrow icon.
 - Use `IconPlaceholder` with a name for every icon library, not an icon import.
+- Add `cn-font-heading` to titles, so they take the project's heading font, and `cn-menu-target cn-menu-translucent` to menu popups, so they follow its menu color.
 - Import other files with `@/registry/bases/{base}/...`, like `@/registry/bases/radix/ui/button`.
 - React Aria components take `onPress` instead of `onClick` and have no `asChild`.
 

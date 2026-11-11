@@ -17,7 +17,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <ThemeColor />
       <ThemeShortcut />
       {children}
-      <Toaster richColors />
+      <div className="site-chrome">
+        <Toaster richColors />
+      </div>
     </ThemeProvider>
   );
 }
