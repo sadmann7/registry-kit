@@ -63,11 +63,11 @@ async function readSources(base: BaseName, registry: Registry) {
 const HOST_PACKAGES = new Set(["react", "react-dom", "next"]);
 
 // The npm packages a source imports, like `@base-ui/react` for
-// `@base-ui/react/number-field`.
+// `@base-ui/react/number-field`, including dynamic `import()`s.
 function getPackageImports(source: string) {
   const packages = new Set<string>();
   for (const [, specifier] of source.matchAll(
-    /\b(?:from|import)\s*["']([^"']+)["']/g,
+    /\b(?:from|import)\s*\(?\s*["']([^"']+)["']/g,
   )) {
     if (/^(?:\.|@\/|#|node:)/.test(specifier) || isBuiltin(specifier)) continue;
     const parts = specifier.split("/");
