@@ -50,7 +50,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     <main className={`style-${style}`}>
       <StyleClass style={style} />
 
-      <section className="mx-auto grid max-w-6xl items-end gap-12 px-4 pt-16 pb-14 sm:px-12 sm:pt-18 lg:grid-cols-[minmax(0,1fr)_440px]">
+      <section className="mx-auto grid max-w-6xl items-end gap-8 px-4 pt-10 pb-8 sm:gap-12 sm:px-12 sm:pt-18 sm:pb-14 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-12">
         <div className="flex max-w-155 flex-col gap-5">
           <p className="w-fit rounded-full border bg-card px-2.5 py-1 font-mono text-xs tracking-[0.02em]">
             {pluralize(BASES.length, "base")} ·{" "}
@@ -66,12 +66,12 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
 
         <div className={`${CARD_CLASS_NAME} overflow-hidden`}>
-          <div className="flex items-center justify-between border-b border-border bg-background py-2 pr-2.5 pl-4">
+          <div className="flex items-center justify-between border-b border-border bg-background py-2.5 pr-3 pl-4">
             <span className="font-mono text-xs">components.json</span>
             <CopyButton
               label="Copy registry config"
               value={`"registries": {\n  "@${registry.name}": "${registryUrl}"\n}`}
-              className="border-transparent bg-transparent text-muted-foreground"
+              className="size-6 rounded-md border-transparent bg-transparent text-muted-foreground hover:bg-muted dark:bg-transparent pointer-coarse:size-9"
             />
           </div>
           <pre className="overflow-x-auto px-4 pt-4 pb-4.5 font-mono text-[12.5px] leading-normal text-muted-foreground">
@@ -87,7 +87,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </section>
 
-      <div className="sticky top-0 z-10 border-y border-border bg-background">
+      <div className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="mx-auto flex max-w-6xl items-center px-4 py-3 sm:px-12">
           <PreviewControls base={base} style={style} dir={dir} />
           <span className="ml-auto hidden font-mono text-xs text-muted-foreground sm:block">
@@ -169,16 +169,16 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           {/* Points at the template, not at siteConfig.links, which forks
               change to their own repo. */}
           <p>
-            The preview site for{" "}
+            Built with{" "}
             <a
               href="https://github.com/sadmann7/registry-kit"
               target="_blank"
               rel="noreferrer"
-              className="rounded-sm font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="rounded-sm underline-offset-4 transition-colors outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               registry-kit
             </a>
-            , a starter for shadcn registries.
+            .
           </p>
         </div>
       </footer>
