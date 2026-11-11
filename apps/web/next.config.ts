@@ -2,26 +2,20 @@ import type { NextConfig } from "next";
 
 import { varlockNextConfigPlugin } from "@varlock/nextjs-integration/plugin";
 
-import {
-  LEGACY_STYLES,
-  resolveStyle,
-  SHADCN_BASES,
-  SHADCN_STYLES,
-} from "./src/registry/config.ts";
+import { BASES, LEGACY_STYLES, resolveStyle } from "./src/registry/config.ts";
 
 const withVarlock = varlockNextConfigPlugin();
 
-// Every style a shadcn/ui project can have, and the build it gets when this
-// registry doesn't build that style. `registry:test` serves the build with
-// `resolveStyle` too, so it checks these.
+// The build a project gets when this registry doesn't build its style: any
+// style of a built base, including ones shadcn/ui adds later, and the older
+// styles without a base. `registry:test` serves the build with `resolveStyle`
+// too, so it checks these.
 const FALLBACKS = [
-  ...SHADCN_BASES.flatMap((base) =>
-    SHADCN_STYLES.map((style) => `${base}-${style}`),
-  ),
+  ...BASES.map(({ name }) => `${name}-:style`),
   ...LEGACY_STYLES,
 ].flatMap((style) => {
   const build = resolveStyle(style);
-  return build && build !== style ? [{ style, build }] : [];
+  return build ? [{ style, build }] : [];
 });
 
 const nextConfig: NextConfig = {

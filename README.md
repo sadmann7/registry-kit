@@ -118,7 +118,7 @@ The direction toggle renders previews right-to-left, which shows what logical cl
 
 Projects on a style this registry doesn't build would get a 404. `resolveStyle` in `config.ts` picks the build they get instead: the default style of the same base, like `aria-lyra` to `aria-nova`. shadcn/ui's older styles without a base (`new-york-v4`, `new-york` and `default`) are Radix, so they go to `radix-nova`. Projects on a base the registry doesn't build still get a 404, including those older styles when Radix isn't built, since another base's components import a different library.
 
-`next.config.ts` turns `resolveStyle` into rewrites for every shadcn/ui style (`SHADCN_BASES`, `SHADCN_STYLES` and `LEGACY_STYLES`), and `pnpm registry:test` serves the build with it, so the test covers the fallbacks too. Other style names get a 404.
+`next.config.ts` turns `resolveStyle` into rewrites for every built base and the older styles (`LEGACY_STYLES`), so styles shadcn/ui adds later fall back too. `pnpm registry:test` serves the build with `resolveStyle`, so the test covers the fallbacks.
 
 ## Scripts
 

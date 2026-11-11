@@ -20,7 +20,6 @@ import {
   BASES,
   LEGACY_STYLES,
   resolveStyle,
-  SHADCN_STYLES,
   STYLES,
 } from "../src/registry/config.ts";
 import {
@@ -125,10 +124,8 @@ try {
   const cases = [
     ...BASES.flatMap(({ name: base }) => [
       ...built.map((style) => `${base}-${style}`),
-      // One style the registry doesn't build, if there is one.
-      ...SHADCN_STYLES.filter((style) => !built.includes(style))
-        .slice(0, 1)
-        .map((style) => `${base}-${style}`),
+      // A style the registry doesn't build, like one shadcn/ui adds later.
+      `${base}-unbuilt`,
     ]),
     ...LEGACY_STYLES.filter((style) => resolveStyle(style) !== null).slice(
       0,
@@ -141,8 +138,12 @@ try {
     // The base of the build the style gets.
     const base = resolveStyle(style)?.split("-")[0];
     const registry = registries.find((entry) => entry.base === base)?.registry;
+    if (!registry) {
+      failures.push(`${style}: no build to install from`);
+      return;
+    }
 
-    for (const item of registry?.items ?? []) {
+    for (const item of registry.items) {
       const label = `${style} @${NAMESPACE}/${item.name}`;
       const add = (...args: string[]) =>
         run(

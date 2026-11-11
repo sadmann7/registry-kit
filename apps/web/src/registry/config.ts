@@ -9,20 +9,6 @@ export const BASES = [
   { name: "aria", title: "React Aria", package: "react-aria-components" },
 ] as const;
 
-// Every base and style shadcn/ui has, whether this registry builds it or
-// not, so projects on any of them get a build. See `resolveStyle`.
-export const SHADCN_BASES = ["base", "radix", "aria"] as const;
-export const SHADCN_STYLES = [
-  "vega",
-  "nova",
-  "maia",
-  "lyra",
-  "mira",
-  "luma",
-  "sera",
-  "rhea",
-] as const;
-
 // shadcn/ui's styles from before bases, which are Radix.
 export const LEGACY_STYLES = ["new-york-v4", "new-york", "default"] as const;
 
@@ -54,13 +40,13 @@ export const SHADCN_REF = "8ab27715521cbd4f87ae6886cd989cbb678f6de7";
 
 // The build a project on `style` (its `style` in components.json, like
 // `radix-lyra`) installs from, or null when there's none. A style this
-// registry doesn't build falls back to the default style of the same base.
+// registry doesn't build, including ones shadcn/ui adds later, falls back to
+// the default style of the same base.
 // A base it doesn't build has no fallback, since another base's components
 // import a different library.
 export function resolveStyle(style: string) {
   const bases: readonly string[] = BASES.map((base) => base.name);
   const styles: readonly string[] = STYLES.map((style) => style.name);
-  const shadcnStyles: readonly string[] = SHADCN_STYLES;
   const legacy: readonly string[] = LEGACY_STYLES;
   const [base, ...rest] = style.split("-");
   const name = rest.join("-");
@@ -68,8 +54,7 @@ export function resolveStyle(style: string) {
   if (legacy.includes(style)) {
     return bases.includes("radix") ? `radix-${DEFAULT_STYLE}` : null;
   }
-  if (!base || !bases.includes(base) || !shadcnStyles.includes(name))
-    return null;
+  if (!base || !bases.includes(base) || !name) return null;
   return styles.includes(name) ? style : `${base}-${DEFAULT_STYLE}`;
 }
 
