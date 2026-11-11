@@ -15,6 +15,7 @@ interface NumberFieldContextValue {
   max: number;
   disabled: boolean;
   format: (value: number) => string;
+  parse: (text: string) => number;
   commit: (next: number | null) => void;
   stepFrom: (from: number | null, direction: 1 | -1) => void;
 }
@@ -29,6 +30,33 @@ function useNumberField() {
     throw new Error("NumberField parts must be used within <NumberField>");
   }
   return context;
+}
+
+// Reads text in the formatter's locale, like "1.024,5" in de-DE or "١٢٣٤٫٥" in
+// ar-EG, and NaN for text without a number in it.
+function parseNumber(text: string, formatter: Intl.NumberFormat) {
+  const { locale, numberingSystem, style } = formatter.resolvedOptions();
+  const parts = new Intl.NumberFormat(locale, {
+    numberingSystem,
+    useGrouping: true,
+  }).formatToParts(-11111.1);
+  const group = parts.find((part) => part.type === "group")?.value;
+  const decimal = parts.find((part) => part.type === "decimal")?.value ?? ".";
+  const digits = new Intl.NumberFormat(locale, {
+    numberingSystem,
+    useGrouping: false,
+  }).format(9876543210);
+
+  let normalized = text.replaceAll("−", "-");
+  for (const [index, digit] of [...digits].entries())
+    normalized = normalized.replaceAll(digit, String(9 - index));
+  if (group) normalized = normalized.replaceAll(group, "");
+  normalized = normalized.replaceAll(decimal, ".").replace(/[^\d.-]/g, "");
+  if (!/\d/.test(normalized)) return Number.NaN;
+
+  const parsed = Number(normalized);
+  // A percent field shows 0.5 as "50%".
+  return style === "percent" ? Number((parsed / 100).toPrecision(12)) : parsed;
 }
 
 function NumberField({
@@ -81,6 +109,7 @@ function NumberField({
         max,
         disabled,
         format: (next) => formatter.format(next),
+        parse: (text) => parseNumber(text, formatter),
         commit,
         stepFrom: (from, direction) =>
           // Rounds away float noise like 0.1 + 0.2.
@@ -131,8 +160,7 @@ function NumberFieldInput({
   function parseDraft() {
     if (draft === null) return field.value;
     if (draft.trim() === "") return null;
-    // Drops symbols and grouping, like "$1,024.50".
-    const parsed = Number(draft.replace(/[^\d.-]/g, ""));
+    const parsed = field.parse(draft);
     return Number.isNaN(parsed) ? field.value : parsed;
   }
 
