@@ -23,8 +23,6 @@ type Item = Registry["items"][number];
 const CARD_CLASS_NAME =
   "rounded-xl border bg-card text-card-foreground shadow-[0_1px_2px_rgb(17_17_16/4%),0_8px_24px_rgb(17_17_16/5%)]";
 
-const LIST_FORMAT = new Intl.ListFormat("en", { type: "conjunction" });
-
 function pluralize(count: number, noun: string) {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
@@ -59,12 +57,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             {pluralize(STYLES.length, "style")} · RTL
           </p>
           <h1 className="text-[clamp(2.5rem,5vw,3.5rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-balance">
-            Components that fit every shadcn project.
+            One registry for every shadcn project.
           </h1>
           <p className="max-w-120 text-base leading-normal text-muted-foreground">
-            Built for {LIST_FORMAT.format(BASES.map((option) => option.title))},
-            in {pluralize(STYLES.length, "style")}. The CLI handles icons and
-            right-to-left layout when you install.
+            Components, hooks and utilities for shadcn/ui. Each one installs in
+            your project&apos;s base and style, with RTL support.
           </p>
         </div>
 
@@ -169,7 +166,20 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
       <footer className="border-t border-border">
         <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted-foreground sm:px-12 sm:py-7">
-          <p>Built with registry-kit. Items install with the shadcn CLI.</p>
+          {/* Points at the template, not at siteConfig.links, which forks
+              change to their own repo. */}
+          <p>
+            The preview site for{" "}
+            <a
+              href="https://github.com/sadmann7/registry-kit"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-sm font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              registry-kit
+            </a>
+            , a starter for shadcn registries.
+          </p>
         </div>
       </footer>
     </main>

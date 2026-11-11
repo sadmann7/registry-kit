@@ -7,8 +7,10 @@ import { fontMono, fontSans } from "@/lib/fonts";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: `${siteConfig.name} registry`,
-  description: "A shadcn registry built for every base and style.",
+  // Like "Acme | ...", from the registry's name.
+  title: `${siteConfig.name.charAt(0).toUpperCase()}${siteConfig.name.slice(1)} | An example registry for every base and style`,
+  description:
+    "Components, hooks and utilities for shadcn/ui. Each one installs in your project's base and style, with RTL support.",
 };
 
 // The status bar matches the header, which uses --background.
