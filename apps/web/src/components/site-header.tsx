@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
   return (
-    <header className="site-chrome border-b border-border">
+    <header className="site-chrome border-b border-border pt-[env(safe-area-inset-top,0px)]">
       <div className="flex h-15 items-center justify-between px-4 sm:h-17 sm:px-12">
         <Link
           href="/"
@@ -26,7 +26,7 @@ export function SiteHeader() {
         </Link>
         <nav className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon-sm"
             nativeButton={false}
             className="pointer-coarse:size-9"
@@ -39,7 +39,7 @@ export function SiteHeader() {
               />
             }
           >
-            <GitHubIcon className="size-3.5" />
+            <GitHubIcon className="size-4" />
           </Button>
           <ModeToggle />
         </nav>

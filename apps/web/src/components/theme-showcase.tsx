@@ -36,8 +36,13 @@ export function ThemeShowcase({
   dir: Direction;
 }) {
   return (
-    <div className="grid gap-3 sm:gap-4 lg:grid-cols-2 xl:grid-cols-3">
-      <ShowcaseCard dir={dir} title="Visitors" description="January to June">
+    <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <ShowcaseCard
+        dir={dir}
+        title="Visitors"
+        description="January to June"
+        className="md:col-span-2 xl:col-span-1"
+      >
         <BarChart />
       </ShowcaseCard>
       <ShowcaseCard
@@ -51,7 +56,6 @@ export function ThemeShowcase({
         dir={dir}
         title="Workspace"
         description="Menus follow your menu color and accent"
-        className="lg:col-span-2 xl:col-span-1"
       >
         <Menu menuColor={design.menuColor} />
         <div className="mt-auto flex gap-2 pt-4">
@@ -132,11 +136,11 @@ function BarChart() {
           >
             <div className="flex h-full w-full items-end justify-center gap-0.75">
               <div
-                className="w-full max-w-4 rounded-t-[min(var(--radius-sm),4px)] bg-chart-1"
+                className="w-full max-w-[min(2rem,max(1rem,30%))] rounded-t-[min(var(--radius-sm),4px)] bg-chart-1"
                 style={{ height: `${entry.desktop}%` }}
               />
               <div
-                className="w-full max-w-4 rounded-t-[min(var(--radius-sm),4px)] bg-chart-2"
+                className="w-full max-w-[min(2rem,max(1rem,30%))] rounded-t-[min(var(--radius-sm),4px)] bg-chart-2"
                 style={{ height: `${entry.mobile}%` }}
               />
             </div>

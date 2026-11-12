@@ -80,7 +80,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
               <span className="text-foreground">&quot;registries&quot;</span>
               {": {"}
             </span>
-            {/* A URL too long for the line wraps at its slashes, indented. */}
             <span className="block ps-[4ch] -indent-[2ch]">
               <span className="text-foreground">
                 &quot;@{registry.name}&quot;
@@ -114,7 +113,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           </div>
         </aside>
 
-        <div className="sticky top-0 z-10 border-b border-border bg-background px-4 py-3 sm:px-12 lg:hidden">
+        <div className="sticky top-[env(safe-area-inset-top,0px)] z-10 border-b border-border bg-background px-4 py-3 sm:px-12 lg:hidden">
           <CustomizerSheet base={base} dir={dir} design={design} />
         </div>
 
