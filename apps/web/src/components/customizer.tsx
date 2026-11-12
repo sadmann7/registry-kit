@@ -274,7 +274,7 @@ export function CustomizerSheet(props: PreviewState) {
           ref={trackVisualViewport}
           className="site-chrome fixed inset-0 z-50 flex items-end justify-center"
         >
-          <Drawer.Popup className="flex max-h-[calc(100%-6rem)] w-full [transform:translateY(var(--drawer-swipe-movement-y))] flex-col rounded-t-2xl bg-background text-foreground shadow-[0_-8px_32px_rgb(0_0_0/15%)] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none data-ending-style:[transform:translateY(100%)] data-starting-style:[transform:translateY(100%)] data-swiping:select-none dark:border-t dark:border-border">
+          <Drawer.Popup className="flex max-h-[calc(100%-6rem)] w-full [transform:translateY(var(--drawer-swipe-movement-y))] flex-col rounded-t-2xl bg-background pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)] text-foreground shadow-[0_-8px_32px_rgb(0_0_0/15%)] transition-transform duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] outline-none in-data-compact:max-h-full data-ending-style:[transform:translateY(100%)] data-starting-style:[transform:translateY(100%)] data-swiping:select-none dark:border-t dark:border-border">
             <div className="flex flex-col items-center gap-1.5 pt-2">
               <div className="h-1 w-9 rounded-full bg-border" />
               <div className="flex w-full items-center gap-2 border-b border-border ps-5 pe-3 pt-1.5 pb-3">
@@ -290,10 +290,13 @@ export function CustomizerSheet(props: PreviewState) {
                 </Drawer.Close>
               </div>
             </div>
-            <Drawer.Content className="min-h-0 flex-1 scroll-fade overflow-y-auto overscroll-contain px-5 pt-5 pb-6">
+            <Drawer.Content
+              data-drawer-scroll
+              className="min-h-0 flex-1 scroll-fade overflow-y-auto overscroll-contain px-5 pt-5 pb-6"
+            >
               <CustomizerFields customizer={customizer} />
             </Drawer.Content>
-            <div className="border-t border-border px-5 pt-3 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))]">
+            <div className="border-t border-border px-5 pt-3 pb-[calc(1.75rem+env(safe-area-inset-bottom,0px))] in-data-compact:hidden">
               <Drawer.Close className="flex h-11 w-full items-center justify-center rounded-[10px] bg-primary text-sm font-medium text-primary-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
                 Done
               </Drawer.Close>
@@ -309,16 +312,35 @@ function trackVisualViewport(element: HTMLDivElement | null) {
   const viewport = window.visualViewport;
   if (!element || !viewport) return;
 
+  let top = -1;
+  let height = -1;
+
   const update = () => {
-    element.style.top = `${viewport.offsetTop}px`;
-    element.style.height = `${viewport.height}px`;
+    if (viewport.offsetTop !== top) {
+      top = viewport.offsetTop;
+      element.style.top = `${top}px`;
+    }
+    if (viewport.height !== height) {
+      height = viewport.height;
+      element.style.height = `${height}px`;
+      element.toggleAttribute("data-compact", height < 300);
+    }
   };
 
   const onResize = () => {
+    const previous = height;
     update();
-    if (element.contains(document.activeElement)) {
-      document.activeElement?.scrollIntoView({ block: "center" });
-    }
+    if (height >= previous || viewport.scale !== 1) return;
+
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement) || !element.contains(active)) return;
+    const scroller = active.closest<HTMLElement>("[data-drawer-scroll]");
+    if (!scroller) return;
+
+    const field = active.getBoundingClientRect();
+    const area = scroller.getBoundingClientRect();
+    scroller.scrollTop +=
+      field.top + field.height / 2 - (area.top + area.height / 2);
   };
 
   update();
