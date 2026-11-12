@@ -136,11 +136,11 @@ function BarChart() {
           >
             <div className="flex h-full w-full items-end justify-center gap-0.75">
               <div
-                className="w-full max-w-4 rounded-t-[min(var(--radius-sm),4px)] bg-chart-1"
+                className="w-full max-w-[min(2rem,max(1rem,30%))] rounded-t-[min(var(--radius-sm),4px)] bg-chart-1"
                 style={{ height: `${entry.desktop}%` }}
               />
               <div
-                className="w-full max-w-4 rounded-t-[min(var(--radius-sm),4px)] bg-chart-2"
+                className="w-full max-w-[min(2rem,max(1rem,30%))] rounded-t-[min(var(--radius-sm),4px)] bg-chart-2"
                 style={{ height: `${entry.mobile}%` }}
               />
             </div>
