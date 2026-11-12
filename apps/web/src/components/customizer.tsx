@@ -564,6 +564,7 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
         <PresetCode code={getPresetCode(design)} />
         <PresetActions
           onPreset={(preset) => {
+            if (preset === getPresetCode(design)) return;
             select({
               ...state,
               design: parseDesignSystem({
