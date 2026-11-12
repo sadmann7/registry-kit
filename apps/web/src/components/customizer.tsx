@@ -81,12 +81,7 @@ interface Option {
 
 type IconProps = { className?: string };
 
-// Short enough to share a row.
-const BASE_LABELS: Record<string, string> = {
-  base: "Base UI",
-  radix: "Radix",
-  aria: "Aria",
-};
+const BASE_ORDER: readonly string[] = ["base", "aria", "radix"];
 
 const ICON_SAMPLES: Record<IconLibraryName, React.ComponentType<IconProps>[]> =
   {
@@ -397,10 +392,9 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
           <Segmented
             label="Base"
             value={state.base}
-            options={BASES.map((base) => ({
-              value: base.name,
-              label: BASE_LABELS[base.name] ?? base.title,
-            }))}
+            options={BASES.toSorted(
+              (a, b) => BASE_ORDER.indexOf(a.name) - BASE_ORDER.indexOf(b.name),
+            ).map((base) => ({ value: base.name, label: base.title }))}
             onValueChange={(base) =>
               select({ ...state, base: base as BaseName })
             }
