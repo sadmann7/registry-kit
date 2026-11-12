@@ -103,7 +103,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </section>
 
-      <div className="border-t border-border lg:flex">
+      <div className="lg:flex lg:border-t lg:border-border">
         <aside
           aria-label="Customize the preview"
           className="hidden w-78 shrink-0 lg:block"
