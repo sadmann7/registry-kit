@@ -26,7 +26,7 @@ export function SiteHeader() {
         </Link>
         <nav className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon-sm"
             nativeButton={false}
             className="pointer-coarse:size-9"
@@ -39,7 +39,7 @@ export function SiteHeader() {
               />
             }
           >
-            <GitHubIcon className="size-3.5" />
+            <GitHubIcon className="size-4" />
           </Button>
           <ModeToggle />
         </nav>
