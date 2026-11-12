@@ -204,7 +204,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       </div>
 
       <footer className="border-t border-border px-4 py-5 text-center text-[13px] text-muted-foreground sm:px-12 sm:py-6">
-        {/* Points at the template's author, not at siteConfig.links, which
+        {/* Points at the template's author, not at `GITHUB_URL`, which
             forks change to their own repo. */}
         <p>
           Built by{" "}
