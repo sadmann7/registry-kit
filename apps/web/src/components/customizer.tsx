@@ -801,12 +801,16 @@ function PresetField({
     return () => clearTimeout(timeout);
   }, [copied]);
 
-  function submit() {
+  function parse() {
     // Also takes the `--preset` flag the create page's command uses.
-    const preset = value
+    return value
       .trim()
       .replace(/^--preset\s+/i, "")
       .trim();
+  }
+
+  function submit() {
+    const preset = parse();
     if (preset === code) return;
     if (!isPresetCode(preset)) {
       setInvalid(true);
@@ -819,7 +823,14 @@ function PresetField({
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        inputRef.current?.blur();
+        if (
+          window.matchMedia("(pointer: coarse)").matches &&
+          isPresetCode(parse())
+        ) {
+          inputRef.current?.blur();
+          return;
+        }
+        submit();
       }}
       className="flex h-8.5 items-center gap-2 rounded-lg border border-border bg-card ps-2.5 pe-1 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive pointer-coarse:h-10"
     >
