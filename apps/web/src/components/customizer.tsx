@@ -192,12 +192,13 @@ function usePreviewState(initial: PreviewState) {
   const [state, setState] = React.useOptimistic(initial);
 
   function select(next: PreviewState) {
+    // A preset code can't hold base, direction or the pointer cursor.
     const query = new URLSearchParams({
       base: next.base,
-      style: next.design.style,
       dir: next.dir,
-      ...getDesignSystemParams(next.design),
+      preset: getPresetCode(next.design),
     });
+    if (next.design.pointer) query.set("pointer", "true");
     startTransition(() => {
       setState(next);
       router.push(`?${query}`, { scroll: false });
