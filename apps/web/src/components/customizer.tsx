@@ -771,6 +771,7 @@ function PresetField({
   const [value, setValue] = React.useState(code);
   const [invalid, setInvalid] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (!copied) return;
@@ -796,11 +797,12 @@ function PresetField({
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        submit();
+        inputRef.current?.blur();
       }}
       className="flex h-8.5 items-center gap-2 rounded-lg border border-border bg-card ps-2.5 pe-1 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive pointer-coarse:h-10"
     >
       <input
+        ref={inputRef}
         aria-label="Preset code"
         value={value}
         aria-invalid={invalid || undefined}
