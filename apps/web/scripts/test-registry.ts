@@ -223,7 +223,10 @@ try {
       ),
     );
 
-  await runWithConcurrency(cases, 4, async (fixture) => {
+  // Each run spends about half its time waiting on ui.shadcn.com, so run two
+  // per core. Past 8 they slow each other down.
+  const concurrency = Math.min(os.availableParallelism() * 2, 8);
+  await runWithConcurrency(cases, concurrency, async (fixture) => {
     const { name, style } = fixture;
     const cwd = await createFixture(fixture);
     const javascript = fixture.config?.tsx === false;
