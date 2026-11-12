@@ -390,8 +390,6 @@ async function removeEmptyDirs(dir: string) {
   }
 }
 
-// The packages among `names` that a source under `dir` imports, without
-// looking inside `skip`.
 async function getImportedPackages(
   dir: string,
   skip: string[],

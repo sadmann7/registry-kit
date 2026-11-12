@@ -154,7 +154,6 @@ function NumberFieldInput({
   ...props
 }: Omit<React.ComponentProps<"input">, "value" | "defaultValue" | "type">) {
   const field = useNumberField();
-  // What the user is typing, committed on blur or Enter.
   const [draft, setDraft] = React.useState<string | null>(null);
 
   function parseDraft() {
@@ -313,7 +312,6 @@ function NumberFieldAddon({
   );
 }
 
-// Increment over decrement, for the end of a field.
 function NumberFieldStepper({
   className,
   ...props

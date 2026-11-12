@@ -165,7 +165,6 @@ const files = [
   await syncThemes(),
 ].sort();
 
-// Remove primitives the registry no longer imports.
 await Promise.all(
   (previous.files ?? [])
     .filter((file) => !files.includes(file))

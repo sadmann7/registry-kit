@@ -117,7 +117,6 @@ function NumberFieldAddon({
   );
 }
 
-// Increment over decrement, for the end of a field.
 function NumberFieldStepper({
   className,
   ...props
