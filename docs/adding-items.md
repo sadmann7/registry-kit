@@ -31,13 +31,13 @@ Add the item to each base's `registry.json`, with the same name in all of them. 
   "title": "Number Field",
   "description": "A numeric input with step buttons.",
   "dependencies": ["cn"],
-  "registryDependencies": ["@acme/use-controllable-state"],
+  "registryDependencies": ["@registry-kit/use-controllable-state"],
   "files": [{ "path": "ui/number-field.tsx", "type": "registry:ui" }]
 }
 ```
 
 - `dependencies`: the npm packages the item imports. `react`, `react-dom` and `next` don't need listing.
-- `registryDependencies`: shadcn/ui primitives by name, like `"button"`, and your own items by namespace, like `"@acme/use-controllable-state"`.
+- `registryDependencies`: shadcn/ui primitives by name, like `"button"`, and your own items by namespace, like `"@registry-kit/use-controllable-state"`.
 
 ## 3. Style it
 
