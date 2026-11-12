@@ -79,7 +79,7 @@ export async function findKit(from: string): Promise<Kit> {
     defaultStyle: config.DEFAULT_STYLE,
     name: registry.name,
     homepage: registry.homepage,
-    github: site.match(/github: "([^"]*)"/)?.[1] ?? "",
+    github: site.match(/GITHUB_URL = "([^"]*)"/)?.[1] ?? "",
     items: [
       ...new Set(
         registries.flatMap((base) => base.items.map((item) => item.name)),
@@ -292,10 +292,13 @@ export async function applyKit(kit: Kit, options: KitOptions) {
   writes.set(
     siteFile,
     site
-      .replace(/name: "[^"]*"/, () => `name: ${JSON.stringify(options.name)}`)
       .replace(
-        /github: "[^"]*"/,
-        () => `github: ${JSON.stringify(options.github)}`,
+        /SITE_NAME = "[^"]*"/,
+        () => `SITE_NAME = ${JSON.stringify(options.name)}`,
+      )
+      .replace(
+        /GITHUB_URL = "[^"]*"/,
+        () => `GITHUB_URL = ${JSON.stringify(options.github)}`,
       ),
   );
 

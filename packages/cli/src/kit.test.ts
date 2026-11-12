@@ -163,8 +163,8 @@ test("renames the registry, its dependencies and the site", async () => {
   }
 
   const site = await read("apps/web/src/lib/site.ts");
-  assert.match(site, /name: "orbit"/);
-  assert.match(site, /github: "https:\/\/github.com\/orbit\/ui"/);
+  assert.match(site, /SITE_NAME = "orbit"/);
+  assert.match(site, /GITHUB_URL = "https:\/\/github.com\/orbit\/ui"/);
 });
 
 test("without examples, removes every item and style rule", async () => {

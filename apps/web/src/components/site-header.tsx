@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { GitHubIcon } from "@/components/github-icon";
 import { ModeToggle } from "@/components/mode-toggle";
-import { siteConfig } from "@/lib/site";
+import { GITHUB_URL, SITE_NAME } from "@/lib/site";
 
 export function SiteHeader() {
   return (
@@ -21,7 +21,7 @@ export function SiteHeader() {
             <BlocksIcon className="size-3.5" />
           </span>
           <span className="font-semibold tracking-[-0.02em] text-foreground">
-            {siteConfig.name}
+            {SITE_NAME}
           </span>
         </Link>
         <nav className="flex items-center gap-2">
@@ -32,7 +32,7 @@ export function SiteHeader() {
             className="pointer-coarse:size-9"
             render={
               <a
-                href={siteConfig.links.github}
+                href={GITHUB_URL}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="GitHub"

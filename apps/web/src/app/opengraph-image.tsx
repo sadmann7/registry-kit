@@ -1,13 +1,13 @@
 import { ImageResponse } from "next/og";
 
-import { siteConfig } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site";
 import { pluralize } from "@/lib/utils";
 import { BASES, STYLES } from "@/registry/config";
 
 const HEADLINE = "One registry for every shadcn project.";
 const TAGLINE = `${pluralize(BASES.length, "base")} · ${pluralize(STYLES.length, "style")} · RTL`;
 
-export const alt = `${siteConfig.name}: ${HEADLINE} ${TAGLINE.replaceAll(" ·", ",")}.`;
+export const alt = `${SITE_NAME}: ${HEADLINE} ${TAGLINE.replaceAll(" ·", ",")}.`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,7 +26,7 @@ async function loadFont(family: string, weight: number, text: string) {
 
 export default async function Image() {
   const [sans, mono] = await Promise.all([
-    loadFont("Geist", 600, `${siteConfig.name}${HEADLINE}`),
+    loadFont("Geist", 600, `${SITE_NAME}${HEADLINE}`),
     loadFont("Geist+Mono", 400, TAGLINE),
   ]);
 
@@ -73,7 +73,7 @@ export default async function Image() {
           </svg>
         </div>
         <span style={{ fontSize: 28, letterSpacing: "-0.02em" }}>
-          {siteConfig.name}
+          {SITE_NAME}
         </span>
       </div>
 
