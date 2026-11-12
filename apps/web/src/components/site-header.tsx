@@ -8,7 +8,7 @@ import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
   return (
-    <header className="site-chrome border-b border-border">
+    <header className="site-chrome border-b border-border pt-[env(safe-area-inset-top,0px)]">
       <div className="flex h-15 items-center justify-between px-4 sm:h-17 sm:px-12">
         <Link
           href="/"

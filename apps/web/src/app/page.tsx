@@ -113,7 +113,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           </div>
         </aside>
 
-        <div className="sticky top-0 z-10 border-b border-border bg-background px-4 py-3 sm:px-12 lg:hidden">
+        <div className="sticky top-[env(safe-area-inset-top,0px)] z-10 border-b border-border bg-background px-4 py-3 sm:px-12 lg:hidden">
           <CustomizerSheet base={base} dir={dir} design={design} />
         </div>
 
