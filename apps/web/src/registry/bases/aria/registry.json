@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "acme",
+  "name": "registry-kit",
   "homepage": "https://registry-kit.vercel.app",
   "items": [
     {

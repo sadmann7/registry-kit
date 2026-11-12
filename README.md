@@ -35,13 +35,13 @@ See [Setup](./docs/setup.md) for the flags and for deploying.
 A project adds your registry once:
 
 ```bash
-pnpm dlx shadcn@latest registry add "@acme=https://acme.com/r/{style}/{name}.json"
+pnpm dlx shadcn@latest registry add "@registry-kit=https://registry-kit.vercel.app/r/{style}/{name}.json"
 ```
 
 Then installs items by name:
 
 ```bash
-pnpm dlx shadcn@latest add @acme/stat-card
+pnpm dlx shadcn@latest add @registry-kit/stat-card
 ```
 
 The CLI fills `{style}` from the project's `components.json`, like `base-nova`, so each project gets the build for its own base and style.

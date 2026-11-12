@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "acme",
+  "name": "registry-kit",
   "homepage": "https://registry-kit.vercel.app",
   "items": [
     {
@@ -42,7 +42,7 @@
           "type": "registry:ui"
         }
       ],
-      "registryDependencies": ["@acme/use-controllable-state"]
+      "registryDependencies": ["@registry-kit/use-controllable-state"]
     },
     {
       "name": "empty-state",

@@ -3,6 +3,7 @@
 import type { IconLibraryName } from "shadcn/icons";
 
 import { Drawer } from "@base-ui/react/drawer";
+import { Popover } from "@base-ui/react/popover";
 import { Radio } from "@base-ui/react/radio";
 import { RadioGroup } from "@base-ui/react/radio-group";
 import { Switch } from "@base-ui/react/switch";
@@ -30,11 +31,13 @@ import { IconHome, IconSearch, IconSettings } from "@tabler/icons-react";
 import {
   CheckIcon,
   ChevronUpIcon,
+  ClipboardPasteIcon,
   CopyIcon,
   HouseIcon,
   RotateCcwIcon,
   SearchIcon,
   SettingsIcon,
+  ShuffleIcon,
   SlidersHorizontalIcon,
   XIcon,
 } from "lucide-react";
@@ -49,6 +52,7 @@ import {
   FONTS,
   getDesignSystemParams,
   getPresetCode,
+  getRandomDesignSystem,
   getThemes,
   ICON_LIBRARIES,
   parseDesignSystem,
@@ -77,12 +81,7 @@ interface Option {
 
 type IconProps = { className?: string };
 
-// Short enough to share a row.
-const BASE_LABELS: Record<string, string> = {
-  base: "Base UI",
-  radix: "Radix",
-  aria: "Aria",
-};
+const BASE_ORDER: readonly string[] = ["base", "aria", "radix"];
 
 const ICON_SAMPLES: Record<IconLibraryName, React.ComponentType<IconProps>[]> =
   {
@@ -189,12 +188,13 @@ function usePreviewState(initial: PreviewState) {
   const [state, setState] = React.useOptimistic(initial);
 
   function select(next: PreviewState) {
+    // A preset code can't hold base, direction or the pointer cursor.
     const query = new URLSearchParams({
       base: next.base,
-      style: next.design.style,
       dir: next.dir,
-      ...getDesignSystemParams(next.design),
+      preset: getPresetCode(next.design),
     });
+    if (next.design.pointer) query.set("pointer", "true");
     startTransition(() => {
       setState(next);
       router.push(`?${query}`, { scroll: false });
@@ -333,8 +333,13 @@ function trackVisualViewport(element: HTMLDivElement | null) {
     if (height >= previous || viewport.scale !== 1) return;
 
     const active = document.activeElement;
-    if (!(active instanceof HTMLElement) || !element.contains(active)) return;
-    const scroller = active.closest<HTMLElement>("[data-drawer-scroll]");
+    if (!(active instanceof HTMLElement)) return;
+    // A popup's field is portaled out of the drawer, but scrolling the drawer
+    // moves the popup's anchor, and the popup with it.
+    const scroller = element.contains(active)
+      ? active.closest<HTMLElement>("[data-drawer-scroll]")
+      : active.closest("[data-drawer-anchored]") &&
+        element.querySelector<HTMLElement>("[data-drawer-scroll]");
     if (!scroller) return;
 
     const field = active.getBoundingClientRect();
@@ -387,10 +392,9 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
           <Segmented
             label="Base"
             value={state.base}
-            options={BASES.map((base) => ({
-              value: base.name,
-              label: BASE_LABELS[base.name] ?? base.title,
-            }))}
+            options={BASES.toSorted(
+              (a, b) => BASE_ORDER.indexOf(a.name) - BASE_ORDER.indexOf(b.name),
+            ).map((base) => ({ value: base.name, label: base.title }))}
             onValueChange={(base) =>
               select({ ...state, base: base as BaseName })
             }
@@ -556,21 +560,25 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
       </Group>
 
       <Group title="Preset">
-        <PresetField
-          key={getPresetCode(design)}
-          design={design}
-          onPreset={(preset) =>
+        <PresetCode code={getPresetCode(design)} />
+        <PresetActions
+          onPreset={(preset) => {
+            if (preset === getPresetCode(design)) return;
             select({
               ...state,
               design: parseDesignSystem({
                 preset,
                 pointer: String(design.pointer),
               }),
-            })
+            });
+          }}
+          onShuffle={() =>
+            select({ ...state, design: getRandomDesignSystem(design.pointer) })
           }
         />
         <p className="text-xs leading-[1.45] text-muted-foreground">
-          Paste a code from shadcn/ui&apos;s create page to load its theme.
+          Copy the code to share your setup, or open one from shadcn/ui&apos;s
+          create page.
         </p>
       </Group>
     </div>
@@ -782,18 +790,8 @@ function Picker({
   );
 }
 
-function PresetField({
-  design,
-  onPreset,
-}: {
-  design: DesignSystem;
-  onPreset: (preset: string) => void;
-}) {
-  const code = getPresetCode(design);
-  const [value, setValue] = React.useState(code);
-  const [invalid, setInvalid] = React.useState(false);
+function PresetCode({ code }: { code: string }) {
   const [copied, setCopied] = React.useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (!copied) return;
@@ -801,56 +799,12 @@ function PresetField({
     return () => clearTimeout(timeout);
   }, [copied]);
 
-  function parse() {
-    // Also takes the `--preset` flag the create page's command uses.
-    return value
-      .trim()
-      .replace(/^--preset\s+/i, "")
-      .trim();
-  }
-
-  function submit() {
-    const preset = parse();
-    if (preset === code) return;
-    if (!isPresetCode(preset)) {
-      setInvalid(true);
-      return;
-    }
-    onPreset(preset);
-  }
-
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (
-          window.matchMedia("(pointer: coarse)").matches &&
-          isPresetCode(parse())
-        ) {
-          inputRef.current?.blur();
-          return;
-        }
-        submit();
-      }}
-      className="flex h-8.5 items-center gap-2 rounded-lg border border-border bg-card ps-2.5 pe-1 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive pointer-coarse:h-10"
-    >
-      <input
-        ref={inputRef}
-        aria-label="Preset code"
-        value={value}
-        aria-invalid={invalid || undefined}
-        spellCheck={false}
-        autoComplete="off"
-        autoCapitalize="none"
-        autoCorrect="off"
-        enterKeyHint="done"
-        onChange={(event) => {
-          setValue(event.target.value);
-          setInvalid(false);
-        }}
-        onBlur={submit}
-        className="h-full min-w-0 flex-1 bg-transparent font-mono text-[12.5px] outline-none pointer-coarse:text-base"
-      />
+    <div className="flex h-8.5 items-center gap-2 rounded-lg border border-border bg-card ps-2.5 pe-1 pointer-coarse:h-10">
+      <code className="min-w-0 flex-1 truncate font-mono text-[12.5px]">
+        <span className="text-muted-foreground">--preset </span>
+        {code}
+      </code>
       <button
         type="button"
         aria-label={copied ? "Copied" : "Copy preset code"}
@@ -860,7 +814,7 @@ function PresetField({
             .then(() => setCopied(true))
             .catch(() => {});
         }}
-        className="flex size-6.5 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="flex size-6.5 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:size-8"
       >
         {copied ? (
           <CheckIcon className="size-3.25" />
@@ -868,6 +822,120 @@ function PresetField({
           <CopyIcon className="size-3.25" />
         )}
       </button>
-    </form>
+    </div>
+  );
+}
+
+const PRESET_ACTION_CLASS_NAME =
+  "flex h-8.5 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-card text-[12.5px] font-medium outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:h-10 data-popup-open:border-muted-foreground data-popup-open:bg-muted [&_svg]:size-3.5 [&_svg]:text-muted-foreground data-popup-open:[&_svg]:text-foreground";
+
+function PresetActions({
+  onPreset,
+  onShuffle,
+}: {
+  onPreset: (preset: string) => void;
+  onShuffle: () => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
+  const [invalid, setInvalid] = React.useState(false);
+  const actionsRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const hintId = React.useId();
+
+  return (
+    <div ref={actionsRef} className="flex gap-2">
+      <Popover.Root
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          setValue("");
+          setInvalid(false);
+        }}
+      >
+        <Popover.Trigger className={PRESET_ACTION_CLASS_NAME}>
+          <ClipboardPasteIcon />
+          Open preset
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner
+            anchor={actionsRef}
+            data-drawer-anchored
+            align="start"
+            sideOffset={6}
+            className="site-chrome isolate z-50"
+          >
+            <Popover.Popup
+              initialFocus={inputRef}
+              className="flex w-(--anchor-width) origin-(--transform-origin) flex-col gap-2.5 rounded-[10px] border border-border bg-popover p-3 text-popover-foreground shadow-[0_1px_2px_rgb(0_0_0/4%),0_8px_24px_rgb(0_0_0/8%)] transition-[opacity,scale] duration-100 outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0"
+            >
+              <Popover.Title className="text-[13px] font-semibold">
+                Open a preset
+              </Popover.Title>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  // Also takes the `--preset` flag the create page's command uses.
+                  const preset = value.trim().replace(/^--preset\s+/i, "");
+                  if (!isPresetCode(preset)) {
+                    setInvalid(true);
+                    return;
+                  }
+                  onPreset(preset);
+                  setOpen(false);
+                }}
+                className="flex flex-col gap-2.5"
+              >
+                <input
+                  ref={inputRef}
+                  aria-label="Preset code"
+                  aria-describedby={hintId}
+                  aria-invalid={invalid || undefined}
+                  placeholder="b0 or --preset b0"
+                  value={value}
+                  spellCheck={false}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  enterKeyHint="go"
+                  onChange={(event) => {
+                    setValue(event.target.value);
+                    setInvalid(false);
+                  }}
+                  className="h-8.5 rounded-lg border border-border bg-card px-2.5 font-mono text-[12.5px] outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-3 focus:ring-ring/50 aria-invalid:border-destructive pointer-coarse:h-10 pointer-coarse:text-base"
+                />
+                <p
+                  id={hintId}
+                  className="text-xs leading-[1.45] text-muted-foreground"
+                >
+                  {invalid
+                    ? "That isn't a preset code. Copy one from ui.shadcn.com/create."
+                    : "Paste a code from ui.shadcn.com/create. It replaces your current settings."}
+                </p>
+                <div className="flex justify-end gap-2 pt-0.5">
+                  <Popover.Close className="h-7.5 rounded-[7px] border border-border bg-card px-3 text-[12.5px] font-medium outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:h-9">
+                    Cancel
+                  </Popover.Close>
+                  <button
+                    type="submit"
+                    className="h-7.5 rounded-[7px] bg-primary px-3.5 text-[12.5px] font-medium text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:h-9"
+                  >
+                    Load
+                  </button>
+                </div>
+              </form>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
+      <button
+        type="button"
+        onClick={onShuffle}
+        className={PRESET_ACTION_CLASS_NAME}
+      >
+        <ShuffleIcon />
+        Shuffle
+      </button>
+    </div>
   );
 }

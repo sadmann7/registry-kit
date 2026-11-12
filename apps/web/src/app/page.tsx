@@ -103,7 +103,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </div>
       </section>
 
-      <div className="border-t border-border lg:flex">
+      <div className="lg:flex lg:border-t lg:border-border">
         <aside
           aria-label="Customize the preview"
           className="hidden w-78 shrink-0 lg:block"
@@ -161,7 +161,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                   title="Hooks and utilities"
                   description="Shared logic for your components."
                 />
-                <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {extras.map((item) => (
                     <article
                       key={item.name}
@@ -169,7 +169,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       aria-labelledby={`${item.name}-title`}
                       className={cn(
                         CARD_CLASS_NAME,
-                        "flex scroll-mt-36 flex-col justify-between gap-4 p-5 sm:scroll-mt-24",
+                        "flex scroll-mt-36 flex-col justify-between gap-4 p-5 sm:scroll-mt-24 md:max-lg:last:odd:col-span-2 lg:last:nth-[3n+1]:col-span-3 lg:last:nth-[3n+2]:col-span-2",
                       )}
                     >
                       <div className="flex flex-col gap-1.5">

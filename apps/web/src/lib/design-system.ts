@@ -182,6 +182,30 @@ export function parseDesignSystem(params: SearchParams): DesignSystem {
   };
 }
 
+function pickRandom<T>(options: readonly T[]) {
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+// Draws the theme and chart color from the base color's own, which
+// `generateRandomPreset` doesn't, so the parser doesn't throw them out.
+export function getRandomDesignSystem(pointer: boolean): DesignSystem {
+  const baseColor = pickRandom(BASE_COLORS).name;
+  const themes = getThemes(baseColor);
+  return parseDesignSystem({
+    style: pickRandom(STYLES).name,
+    baseColor,
+    theme: pickRandom(themes).name,
+    chartColor: pickRandom(themes).name,
+    iconLibrary: pickRandom(ICON_LIBRARIES).name,
+    font: pickRandom(FONTS).name,
+    fontHeading: Math.random() < 0.5 ? "inherit" : pickRandom(FONTS).name,
+    radius: pickRandom(RADII).name,
+    menuColor: pickRandom(MENU_COLORS).name,
+    menuAccent: pickRandom(MENU_ACCENTS).name,
+    pointer: String(pointer),
+  });
+}
+
 export function getPresetCode(design: DesignSystem) {
   return encodePreset(design as Partial<PresetConfig>);
 }

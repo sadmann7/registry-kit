@@ -8,13 +8,13 @@ import { SiteHeader } from "@/components/site-header";
 import { SkipNav } from "@/components/skip-nav";
 import { fontMono, fontSans } from "@/lib/fonts";
 import { previewFontVariables } from "@/lib/preview-fonts";
-import { siteConfig, siteTitle } from "@/lib/site";
+import { siteConfig } from "@/lib/site";
 import { REGISTRIES } from "@/registry/__generated__/registries";
 import { DEFAULT_BASE } from "@/registry/config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(REGISTRIES[DEFAULT_BASE].homepage),
-  title: `${siteTitle} | An example registry for every base and style`,
+  title: `${siteConfig.name} | An example registry for every base and style`,
   description: siteConfig.description,
 };
 
