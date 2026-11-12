@@ -36,8 +36,13 @@ export function ThemeShowcase({
   dir: Direction;
 }) {
   return (
-    <div className="grid gap-3 sm:gap-4 lg:grid-cols-2 xl:grid-cols-3">
-      <ShowcaseCard dir={dir} title="Visitors" description="January to June">
+    <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <ShowcaseCard
+        dir={dir}
+        title="Visitors"
+        description="January to June"
+        className="md:col-span-2 xl:col-span-1"
+      >
         <BarChart />
       </ShowcaseCard>
       <ShowcaseCard
@@ -51,7 +56,6 @@ export function ThemeShowcase({
         dir={dir}
         title="Workspace"
         description="Menus follow your menu color and accent"
-        className="lg:col-span-2 xl:col-span-1"
       >
         <Menu menuColor={design.menuColor} />
         <div className="mt-auto flex gap-2 pt-4">
