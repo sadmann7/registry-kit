@@ -63,8 +63,6 @@ async function readSources(base: BaseName, registry: Registry) {
 // Packages every project has, which items don't list in `dependencies`.
 const HOST_PACKAGES = new Set(["react", "react-dom", "next"]);
 
-// The npm packages a source imports, like `@base-ui/react` for
-// `@base-ui/react/number-field`, including dynamic `import()`s.
 function getPackageImports(source: string) {
   const packages = new Set<string>();
   for (const [, specifier] of source.matchAll(
@@ -234,7 +232,6 @@ async function checkCompiled(
   return errors.flat();
 }
 
-// The synced shadcn/ui primitives of a base, like `ui/button`.
 async function readSynced(base: BaseName) {
   const lock: { files: string[] } = JSON.parse(
     await fs.readFile(path.join(REGISTRY_PATH, "shadcn.json"), "utf8"),

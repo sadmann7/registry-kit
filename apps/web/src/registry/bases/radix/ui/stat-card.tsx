@@ -95,8 +95,8 @@ function StatCardCaption({ className, ...props }: React.ComponentProps<"p">) {
   );
 }
 
-// Bars scaled to the largest value. The last bar is the current period. It's
-// decoration, so the value and caption carry the meaning.
+// The last bar is the current period. It's decoration, so the value and
+// caption carry the meaning.
 function StatCardSparkline({
   data,
   className,

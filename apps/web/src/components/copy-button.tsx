@@ -8,7 +8,6 @@ import * as React from "react";
 const ICON_CLASS_NAME =
   "absolute inset-0 size-3.5 transition-[opacity,scale,filter] duration-200 ease-snappy data-hidden:scale-50 data-hidden:opacity-0 data-hidden:blur-[2px] motion-reduce:scale-100 motion-reduce:blur-none";
 
-// The site's own copy button, styled to match the site, not the preview.
 export function CopyButton({
   value,
   label = "Copy",
