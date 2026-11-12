@@ -338,8 +338,13 @@ function trackVisualViewport(element: HTMLDivElement | null) {
     if (height >= previous || viewport.scale !== 1) return;
 
     const active = document.activeElement;
-    if (!(active instanceof HTMLElement) || !element.contains(active)) return;
-    const scroller = active.closest<HTMLElement>("[data-drawer-scroll]");
+    if (!(active instanceof HTMLElement)) return;
+    // A popup's field is portaled out of the drawer, but scrolling the drawer
+    // moves the popup's anchor, and the popup with it.
+    const scroller = element.contains(active)
+      ? active.closest<HTMLElement>("[data-drawer-scroll]")
+      : active.closest("[data-drawer-anchored]") &&
+        element.querySelector<HTMLElement>("[data-drawer-scroll]");
     if (!scroller) return;
 
     const field = active.getBoundingClientRect();
@@ -861,6 +866,7 @@ function PresetActions({
         <Popover.Portal>
           <Popover.Positioner
             anchor={actionsRef}
+            data-drawer-anchored
             align="start"
             sideOffset={6}
             className="site-chrome isolate z-50"
