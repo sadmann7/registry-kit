@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { generateRandomPreset, isPresetCode } from "shadcn/preset";
+import { isPresetCode } from "shadcn/preset";
 
 import {
   BASE_COLORS,
@@ -52,6 +52,7 @@ import {
   FONTS,
   getDesignSystemParams,
   getPresetCode,
+  getRandomDesignSystem,
   getThemes,
   ICON_LIBRARIES,
   parseDesignSystem,
@@ -562,14 +563,17 @@ function CustomizerFields({ customizer }: { customizer: Customizer }) {
       <Group title="Preset">
         <PresetCode code={getPresetCode(design)} />
         <PresetActions
-          onPreset={(preset) =>
+          onPreset={(preset) => {
             select({
               ...state,
               design: parseDesignSystem({
                 preset,
                 pointer: String(design.pointer),
               }),
-            })
+            });
+          }}
+          onShuffle={() =>
+            select({ ...state, design: getRandomDesignSystem(design.pointer) })
           }
         />
         <p className="text-xs leading-[1.45] text-muted-foreground">
@@ -825,7 +829,13 @@ function PresetCode({ code }: { code: string }) {
 const PRESET_ACTION_CLASS_NAME =
   "flex h-8.5 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border bg-card text-[12.5px] font-medium outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:h-10 data-popup-open:border-muted-foreground data-popup-open:bg-muted [&_svg]:size-3.5 [&_svg]:text-muted-foreground data-popup-open:[&_svg]:text-foreground";
 
-function PresetActions({ onPreset }: { onPreset: (preset: string) => void }) {
+function PresetActions({
+  onPreset,
+  onShuffle,
+}: {
+  onPreset: (preset: string) => void;
+  onShuffle: () => void;
+}) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
   const [invalid, setInvalid] = React.useState(false);
@@ -919,7 +929,7 @@ function PresetActions({ onPreset }: { onPreset: (preset: string) => void }) {
       </Popover.Root>
       <button
         type="button"
-        onClick={() => onPreset(generateRandomPreset())}
+        onClick={onShuffle}
         className={PRESET_ACTION_CLASS_NAME}
       >
         <ShuffleIcon />
