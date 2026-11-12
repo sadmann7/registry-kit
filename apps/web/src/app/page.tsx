@@ -169,7 +169,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
                       aria-labelledby={`${item.name}-title`}
                       className={cn(
                         CARD_CLASS_NAME,
-                        "flex scroll-mt-36 flex-col justify-between gap-4 p-5 sm:scroll-mt-24",
+                        "flex scroll-mt-36 flex-col justify-between gap-4 p-5 sm:scroll-mt-24 md:max-lg:last:odd:col-span-2 lg:last:nth-[3n+1]:col-span-3 lg:last:nth-[3n+2]:col-span-2",
                       )}
                     >
                       <div className="flex flex-col gap-1.5">
