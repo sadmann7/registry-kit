@@ -1,0 +1,1 @@
+registry-kit: One registry for every shadcn project. Components, hooks and utilities for shadcn/ui, with a preview of the base, style and theme customizer.
