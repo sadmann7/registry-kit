@@ -76,6 +76,6 @@
   }
 
   .cn-timeline-time {
-    @apply mb-1.5 font-mono text-xs text-muted-foreground tabular-nums;
+    @apply mb-1.5 font-mono text-xs text-muted-foreground tabular-nums [&:is(:lang(ar),:lang(fa),:lang(ur))]:font-sans;
   }
 }
