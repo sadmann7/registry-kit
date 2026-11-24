@@ -84,6 +84,6 @@
   }
 
   .cn-timeline-time {
-    @apply mb-1.5 text-[0.625rem] font-medium tracking-widest text-muted-foreground uppercase;
+    @apply mb-1.5 text-[0.625rem] font-medium tracking-widest text-muted-foreground uppercase [&:is(:lang(ar),:lang(fa),:lang(ur))]:tracking-normal;
   }
 }
